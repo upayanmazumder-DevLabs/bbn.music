@@ -36,7 +36,7 @@ appendBody(
                             position: absolute;
                             display: block;
                             inset: -0.5rem;
-                            --image: url('${backgroundImage}');
+                            --image: url("${backgroundImage}");
                             background:
                                 linear-gradient(180deg, rgba(0, 0, 0, 0.61) 0%, var(--bg-color) 77.08%, var(--bg-color) 100%),
                                 var(--image) no-repeat center center;
@@ -44,7 +44,7 @@ appendBody(
                             filter: blur(4.5px);
                             z-index: -1;
                         }
-                        :host([theme=light]) {
+                        :host([theme="light"]) {
                             background:
                                 linear-gradient(180deg, rgba(255, 255, 255, 0.61) 0%, #f3f5fa 77.08%, #f3f5fa 100%),
                                 var(--image) no-repeat center center;

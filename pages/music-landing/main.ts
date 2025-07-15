@@ -49,12 +49,12 @@ export const isMobileKeyFeatures = mediaQueryRef("(max-width: 820px)");
 
 document.adoptedStyleSheets.push(css`
     body {
-        --box-shadow-cta: 0 .824px 1.752px #db572124, 0 2.085px 4.43px #db572133, 0 4.253px 9.038px #db57213d, 0 8.76px 18.616px #db57214d, 0 24px 51px #db572170;
-        --box-shadow-cta-hover: 0 1.237px .69px #db572145, 0 3.127px 5.113px #db572157, 0 6.38px 15.547px #db57215c, 0 13.141px 37.63px #db572163, 0 36px 100px #db572182;;
+        --box-shadow-cta: 0 0.824px 1.752px #db572124, 0 2.085px 4.43px #db572133, 0 4.253px 9.038px #db57213d, 0 8.76px 18.616px #db57214d, 0 24px 51px #db572170;
+        --box-shadow-cta-hover: 0 1.237px 0.69px #db572145, 0 3.127px 5.113px #db572157, 0 6.38px 15.547px #db57215c, 0 13.141px 37.63px #db572163, 0 36px 100px #db572182;
         --background-cta: linear-gradient(139deg, #e39123 6.59%, #db5721 101.73%);
 
         --background-free-tier: linear-gradient(139deg, #e3912333 6.59%, #db572133 101.73%), #0a0a0a;
-        --badge-free-tier: linear-gradient(139deg,#d9881c73 6.59%,#c6451073 101.73%);
+        --badge-free-tier: linear-gradient(139deg, #d9881c73 6.59%, #c6451073 101.73%);
         --background-paid-tier: linear-gradient(139deg, #d9881c 6.59%, #c64510 101.73%);
         --badge-paid-tier: #00000040;
         --bg-color: ${Color.reverseNeutral.mix(new Color("black"), 50)};
@@ -116,7 +116,7 @@ appendBody(
                             position: absolute;
                             display: block;
                             inset: -0.5rem;
-                            --image: url('${backgroundImage}');
+                            --image: url("${backgroundImage}");
                             background:
                                 linear-gradient(180deg, rgba(0, 0, 0, 0.61) 0%, var(--bg-color) 77.08%, var(--bg-color) 100%),
                                 var(--image) no-repeat center center;
@@ -124,7 +124,7 @@ appendBody(
                             filter: blur(4.5px);
                             z-index: -1;
                         }
-                        :host([theme=light]) {
+                        :host([theme="light"]) {
                             background:
                                 linear-gradient(180deg, rgba(255, 255, 255, 0.61) 0%, #f3f5fa 77.08%, #f3f5fa 100%),
                                 var(--image) no-repeat center center;
@@ -322,24 +322,27 @@ appendBody(
                                         /* calc (width + gap) * number of icons * -1 */
                                         transform: translateX(calc((72px + 38px) * -8));
                                     }
-            
+
                                     100% {
                                         /* calc (width + gap) * (number of icons-0.5) * 2 * -1 */
-                                        transform: translateX(calc(((72px + 38px) * -8.5*2)));
+                                        transform: translateX(calc((72px + 38px) * -8.5 * 2));
                                     }
-                                }`)
+                                }
+                            `)
                             .addStyle(
                                 reversed
                                     ? css`
-                                :host {
-                                    animation-direction: reverse;
-                                }`
-                                    : css``,
+                                        :host {
+                                            animation-direction: reverse;
+                                        }
+                                    `
+                                    : css`
+                                    `,
                             )
                     ),
                 ).setGap("38px").addStyle(css`
                     :host {
-                        mask-image: linear-gradient(90deg, rgba(255, 255, 255, 0.00) 0%, #FFF 50%, rgba(255, 255, 255, 0.00) 100%);
+                        mask-image: linear-gradient(90deg, rgba(255, 255, 255, 0.00) 0%, #fff 50%, rgba(255, 255, 255, 0.00) 100%);
                         overflow: hidden;
                     }
                 `),
@@ -380,7 +383,7 @@ appendBody(
                                 .addStyle(css`
                                     :host {
                                         border-radius: var(--wg-radius-large);
-                                        background-color: #EF5C52;
+                                        background-color: #ef5c52;
                                         aspect-ratio: 1 / 1;
                                         padding: 10px;
                                     }
@@ -397,8 +400,8 @@ appendBody(
                                 .addStyle(css`
                                     :host {
                                         border-radius: var(--wg-radius-large);
-                                        color: #1B1B1B;
-                                        background-color: #97EF52;
+                                        color: #1b1b1b;
+                                        background-color: #97ef52;
                                         aspect-ratio: 1 / 1;
                                         padding: 10px;
                                     }
@@ -415,7 +418,7 @@ appendBody(
                                 .addStyle(css`
                                     :host {
                                         border-radius: var(--wg-radius-large);
-                                        background-color: #5552EF;
+                                        background-color: #5552ef;
                                         aspect-ratio: 1 / 1;
                                         padding: 10px;
                                     }

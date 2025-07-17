@@ -18,7 +18,7 @@ createPage(
             },
         }),
         label: "Wallets",
-        weight: 7,
+        weight: 11,
     },
     Content(
         wallets.map((wallets) => wallets === "loading" ? Label("Loading...") : wallets.map((wallet) => WalletEntry(wallet))),

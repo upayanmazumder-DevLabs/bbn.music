@@ -18,7 +18,7 @@ createPage(
             },
         }),
         label: "Chats",
-        weight: 4,
+        weight: 7,
     },
     Content(
         chats.map((chats) => chats === "loading" ? Label("Loading...") : chats.map((chat) => ChatEntry(chat))),

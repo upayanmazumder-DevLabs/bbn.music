@@ -21,7 +21,7 @@ createPage(
             },
         }),
         label: "Takedowns",
-        weight: 3,
+        weight: 6,
     },
     Content(
         loader.items.map((reviews) => reviews.map((review) => ReviewEntry(review, true))),

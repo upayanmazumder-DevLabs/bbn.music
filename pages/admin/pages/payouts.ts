@@ -20,7 +20,7 @@ createPage(
             },
         }),
         label: "Payouts",
-        weight: 5,
+        weight: 9,
     },
     Content(
         Entry(BasicEntry("Upload Payout file (.xlsx)")).onClick(() => upload("manual")),

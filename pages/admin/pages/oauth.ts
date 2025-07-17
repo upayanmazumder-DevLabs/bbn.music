@@ -18,7 +18,7 @@ export const oauthPage = createPage(
             },
         }),
         label: "OAuth",
-        weight: 6,
+        weight: 10,
     },
     Content(
         applications.map((applications) => applications === "loading" ? Label("Loading...") : applications.map((app) => OAuthEntry(app))),

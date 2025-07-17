@@ -21,7 +21,7 @@ createPage(
             },
         }),
         label: "Published",
-        weight: 3,
+        weight: 4,
     },
     Content(
         loader.items.map((reviews) => reviews.map((review) => ReviewEntry(review, true))),

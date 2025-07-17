@@ -18,7 +18,7 @@ createPage(
             },
         }),
         label: "Groups",
-        weight: 4,
+        weight: 8,
     },
     Content(
         groups.map((groups) => groups === "loading" ? Label("Loading...") : groups.map((group) => GroupEntry(group))),

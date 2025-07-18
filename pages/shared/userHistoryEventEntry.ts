@@ -64,7 +64,16 @@ export function userHistoryEventEntry(event: UserHistoryEvent) {
                         "Drop review ",
                         `${audit.action} by ${event.userId} `,
                     ),
-                ).setWidth("100%").setPadding("0.5rem 0");
+                ).setWidth("100%").setPadding("0.5rem 0").onClick(() => {
+                    sheetStack.addSheet(
+                        Grid(
+                            Label("Drop Review"),
+                            Label("Action: " + audit.action),
+                            Label("User: " + event.userId),
+                            Label("Reason: " + audit.reason),
+                        ),
+                    );
+                });
             case "drop-create":
                 return Entry(
                     BasicEntry(

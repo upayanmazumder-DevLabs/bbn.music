@@ -7,7 +7,7 @@ await RegisterAuthRefresh();
 
 const loader = createCachedLoader(createIndexPaginationLoader({
     limit: 30,
-    loader: (offset, limit) => API.getWalletsByAdmin({ query: { offset, limit } }).then(stupidErrorAlert),
+    loader: (offset, limit) => API.getWalletsByAdmin({ query: { _offset: offset, _limit: limit } }).then(stupidErrorAlert),
 }));
 
 createPage(

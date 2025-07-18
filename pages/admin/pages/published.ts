@@ -7,7 +7,7 @@ await RegisterAuthRefresh();
 
 const loader = createCachedLoader(createIndexPaginationLoader({
     limit: 30,
-    loader: (offset, limit) => API.getDropsByAdmin({ query: { type: "PUBLISHED", offset: offset, limit: limit, sort: "list" } }).then(stupidErrorAlert),
+    loader: (offset, limit) => API.getDropsByAdmin({ query: { type: "PUBLISHED", _offset: offset, _limit: limit, sort: "list" } }).then(stupidErrorAlert),
 }));
 
 createPage(

@@ -155,6 +155,10 @@ const templates = () =>
             `Issue with drop: ${creationState.title.value} [IMPORTANT - Your action required]`,
             `Hey ${userProfile.getValue()?.profile.username},\n\nI just reviewed your Drop ${creationState.title.value} with ID (${id.value}) and our Systems detected Copyright Issues with your Drop.\nCould you please send over proof that you own the rights to the Music?\nYou must own 100% of the legal rights to the music you are distributing.\nThis includes all types of samples or remixes.\nI have marked your Drop as rejected for now, until you send over the proof.\n\nBest regards,\n${activeUser.username.value}`,
         ],
+        "Beat license needed": [
+            `Issue with drop: ${creationState.title.value} [IMPORTANT - Your action required]`,
+            `Hey ${userProfile.getValue()?.profile.username},\n\nI just reviewed your Drop ${creationState.title.value} with ID (${id.value}) and noticed that we need a beat license for the music you are using.\nPlease supply the necessary licenses or proof that you produced the music yourself and resubmit your Drop for review.\n\nBest regards,\n${activeUser.username.value}`,
+        ],
         "Full Songwriter Name": [
             `Issue with drop: ${creationState.title.value} [IMPORTANT - Your action required]`,
             `Hey ${userProfile.getValue()?.profile.username},\n\nI just reviewed your Drop ${creationState.title.value} with ID (${id.value}) and noticed missing Metadata. \nYour Drop is missing the Songwriters Full Name.\nPlease correct the names in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${activeUser.username.value}`,

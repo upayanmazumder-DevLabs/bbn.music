@@ -1,11 +1,14 @@
 import { RegisterAuthRefresh } from "shared/helper.ts";
-import { asRef, Content, createPage, createRoute, Label } from "webgen/mod.ts";
-import { AdminWallet, API, stupidErrorAlert } from "../../../spec/mod.ts";
+import { Box, Content, createCachedLoader, createIndexPaginationLoader, createPage, createRoute, Label, TextButton } from "webgen/mod.ts";
+import { API, stupidErrorAlert } from "../../../spec/mod.ts";
 import { WalletEntry } from "../entries.ts";
 
 await RegisterAuthRefresh();
 
-const wallets = asRef<AdminWallet[] | "loading">("loading");
+const loader = createCachedLoader(createIndexPaginationLoader({
+    limit: 30,
+    loader: (offset, limit) => API.getWalletsByAdmin({ query: { offset, limit } }).then(stupidErrorAlert),
+}));
 
 createPage(
     {
@@ -13,7 +16,7 @@ createPage(
             path: "/admin?list=wallets",
             events: {
                 onLazyInit: async () => {
-                    wallets.setValue(await API.getWalletsByAdmin().then(stupidErrorAlert));
+                    await loader.next();
                 },
             },
         }),
@@ -21,6 +24,13 @@ createPage(
         weight: 11,
     },
     Content(
-        wallets.map((wallets) => wallets === "loading" ? Label("Loading...") : wallets.map((wallet) => WalletEntry(wallet))),
+        loader.items.map((wallets) => wallets.map((wallet) => WalletEntry(wallet))),
+        Box(loader.hasMore.map((hasMore) =>
+            hasMore
+                ? TextButton("Load More").onPromiseClick(async () => {
+                    await loader.next();
+                })
+                : Label("No more wallets")
+        )),
     ),
 );

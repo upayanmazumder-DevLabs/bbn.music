@@ -211,6 +211,14 @@ const templates = () =>
             `Issue with drop: ${creationState.title.value} [IMPORTANT - Your action required]`,
             `Hey ${userProfile.getValue()?.profile.username},\n\nI just reviewed your Drop ${creationState.title.value} with ID (${id.value}) and noticed that the Artwork is a single color.\nApple Music does not accept single color Artworks.\nPlease update the Artwork in the Metadata or let us know if you want to refrain from publishing on Apple Music and resubmit your Drop for review with your choice in the comment field.\n\nBest regards,\n${activeUser.username.value}`,
         ],
+        "Artwork contains copyrighted material": [
+            `Issue with drop: ${creationState.title.value} [IMPORTANT - Your action required]`,
+            `Hey ${userProfile.getValue()?.profile.username},\n\nI just reviewed your Drop ${creationState.title.value} with ID (${id.value}) and noticed that the Artwork contains copyrighted material.\nPlease remove the copyrighted material from the Artwork and resubmit your Drop for review.\n\nBest regards,\n${activeUser.username.value}`,
+        ],
+        "Artwork contains parentalal advisory without being marked as Explicit": [
+            `Issue with drop: ${creationState.title.value} [IMPORTANT - Your action required]`,
+            `Hey ${userProfile.getValue()?.profile.username},\n\nI just reviewed your Drop ${creationState.title.value} with ID (${id.value}) and noticed that the Artwork contains a parental advisory label but the Drop is not marked as Explicit.\nPlease update the Metadata and resubmit your Drop for review.\n\nBest regards,\n${activeUser.username.value}`,
+        ],
         "Takedown Declined": [`${creationState.title.value} Takedown Declined!`, `Hey ${userProfile.getValue()?.profile.username},\n\nI just reviewed your Takedown for the Drop ${creationState.title.value} with ID (${id.value}) and I am sorry to inform you that I have declined your request.\nPlease contact us if you have any questions.\n\nBest regards,\n${activeUser.username.value}`],
         "Accepted": [`${creationState.title.value} Accepted!`, `Hey ${userProfile.getValue()?.profile.username},\n\nI just reviewed your Drop ${creationState.title.value} with ID (${id.value}) and I am happy to inform you that it has been accepted.\nYour music will now be sent to the stores.\nIt could take up to 72h for all stores to show your Drop.\n\nBest regards,\n${activeUser.username.value}`],
         "Takedown Accepted": [`${creationState.title.value} Takedown Processed!`, `Hey ${userProfile.getValue()?.profile.username},\n\nI just processed your Takedown for the Drop ${creationState.title.value} with ID (${id.value}). The takedown has been sent to the stores.\nIt could take up to 72h for all stores to process the takedown.\n\nBest regards,\n${activeUser.username.value}`],

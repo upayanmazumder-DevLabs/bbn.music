@@ -8,7 +8,7 @@ import languages from "../../data/language.json" with { type: "json" };
 import { AdminDrop, API, Artist, ArtistRef, DropType, FullDrop, Share, Song, stupidErrorAlert, User, UserHistoryEvent, zArtistTypes, zDropType, zObjectId } from "../../spec/mod.ts";
 import { uploadArtwork } from "./data.ts";
 import { pageThree } from "./validator.ts";
-import { DropEntry } from "./views/list.ts";
+import { DropEntry, PillSuffix, TypeSuffix } from "./views/list.ts";
 import { EditArtistsDialog, ManageSongs } from "./views/table.ts";
 
 await RegisterAuthRefresh();
@@ -85,7 +85,7 @@ const mainRoute = createRoute({
                 userArtists.setValue(adminDrop?.artistList);
                 loader.set(createCachedLoader(createIndexPaginationLoader({
                     limit: 30,
-                    loader: (offset, limit) => API.getDropsByAdmin({ query: { user: drop.user!, offset: offset, limit: limit } }).then(stupidErrorAlert),
+                    loader: (offset, limit) => API.getDropsByAdmin({ query: { user: drop.user!, _offset: offset, _limit: limit } }).then(stupidErrorAlert),
                 })));
                 loader.get()?.next();
             }
@@ -291,7 +291,11 @@ appendBody(
                             }
                         }
                     }).setCssStyle("color", "gray"),
-                    Label("Edit Drop").setTextSize("3xl").setFontWeight("bold"),
+                    Grid(
+                        Label("Edit Drop").setTextSize("3xl").setFontWeight("bold"),
+                        Box(creationState.type.map((x) => x ? TypeSuffix(x, true) : PillSuffix("loading..."))),
+                        Empty(),
+                    ).setTemplateColumns("max-content auto auto").setGap(),
                     Grid(
                         Grid(
                             creationState.artworkData.map((data) =>

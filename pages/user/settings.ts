@@ -1,6 +1,6 @@
 import { activeUser, ErrorMessage, IsLoggedIn, logOut, RegisterAuthRefresh, sheetStack, showProfilePicture } from "shared/helper.ts";
 import { appendBody, asRefRecord, Color, Content, DialogContainer, EmailInput, Empty, FullWidthSection, Grid, PasswordInput, PrimaryButton, TextInput, WebGenTheme } from "webgen/mod.ts";
-import { z } from "zod/mod.ts";
+import { z } from "zod";
 import "../../assets/css/main.css";
 import { DynaNavigation } from "../../components/nav.ts";
 import { API, stupidErrorAlert } from "../../spec/mod.ts";

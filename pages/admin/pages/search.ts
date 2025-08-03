@@ -77,7 +77,7 @@ export const walletSheet = (wallet: WriteSignal<Wallet>) => {
     return Grid(
         SheetHeader("Wallet", sheetStack),
         Grid(
-            DropDown(Object.values(zAccountType.Values), selectedAccountType, "AccountType"),
+            DropDown(Object.values(zAccountType.enum), selectedAccountType, "AccountType"),
             TextInput(selectedCut, "Cut", "change"),
             PrimaryButton("Add Transaction").onClick(() => sheetStack.addSheet(addTransactionSheet(wallet))),
         ).setEvenColumns(3).setGap(),

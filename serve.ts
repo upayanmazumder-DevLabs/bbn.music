@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/x/esbuild_serve@1.5.0/mod.ts";
-import { createClient, defaultPlugins } from "npm:@hey-api/openapi-ts@0.66.5";
+import { walkSync } from "jsr:@std/fs@1.0.5";
+import { createClient } from "npm:@hey-api/openapi-ts@0.80.1";
 
 let input = "https://bbn.music/openapi";
 await fetch("http://localhost:8443/openapi").then(() => input = "http://localhost:8443/openapi").catch(() => {});
@@ -8,35 +9,33 @@ await createClient({
     input,
     output: {
         path: "spec/gen",
+        indexFile: false,
         format: false,
     },
     plugins: [
-        ...defaultPlugins,
-        "@hey-api/client-fetch",
         "zod",
         {
             name: "@hey-api/sdk",
-            validator: true,
+            //should be true
+            validator: false,
         },
     ],
 });
-function fixImports(path: string) {
-    Deno.writeTextFileSync(
-        path,
-        Deno.readTextFileSync(path)
-            .replaceAll(".gen';", ".gen.ts';")
-            .replaceAll("'zod';", "'zod/mod.ts';"),
-    );
+
+for (const { path } of walkSync("spec/gen", { exts: ["ts"] })) {
+    const contents = Deno.readTextFileSync(path)
+        .replaceAll(/(import|export) ([\s\S]+?)from '.\/(.*?)';/gs, "$1 $2from './$3.ts';")
+        .replaceAll("from '../core", "from '../../core/core")
+        .replaceAll("export { createClient } from './client/fetch/index.ts';", "export { createClient } from './client.ts';")
+        .replaceAll("createConfig } from './client.ts'", "createConfig } from './client/fetch/index.ts'");
+    Deno.writeTextFileSync(path, contents);
 }
-["spec/gen/sdk.gen.ts", "spec/gen/zod.gen.ts"].forEach(fixImports);
-Deno.writeTextFileSync("spec/gen/types.gen.ts", Deno.readTextFileSync("spec/gen/types.gen.ts").replaceAll("baseUrl: ", 'baseUrl: "";//'));
-Deno.removeSync("spec/gen/index.ts");
 new Deno.Command("deno", {
     args: [
-        "fmt",
-        "spec/gen/sdk.gen.ts",
-        "spec/gen/zod.gen.ts",
-        "spec/gen/types.gen.ts",
+        "lint",
+        "--unstable-sloppy-imports",
+        "--fix",
+        "spec/gen",
     ],
 }).spawn();
 

@@ -15,10 +15,10 @@ export type AdminDrop = {
     secondaryGenre?: string;
     compositionCopyright?: string;
     soundRecordingCopyright?: string;
-    artwork?: ObjectId;
-    songs?: Array<ObjectId>;
+    artwork?: string;
+    songs?: Array<string>;
     comments?: string;
-    _id?: ObjectId;
+    _id?: string;
     user?: string;
     type?: DropType;
 } & {
@@ -26,232 +26,58 @@ export type AdminDrop = {
     priority: number;
 };
 
-export type Drop = {
-    gtin?: string;
-    title: string;
-    artists: Array<ArtistRef>;
-    release: string;
-    language: string;
-    primaryGenre: string;
-    secondaryGenre: string;
-    compositionCopyright: string;
-    soundRecordingCopyright: string;
-    artwork?: ObjectId;
-    songs: Array<ObjectId>;
-    comments?: string;
-    _id: ObjectId;
-    user: ObjectId;
-    type: DropType;
-};
-
 export type ArtistRef = {
-    _id: ObjectId;
-    type: "PRIMARY" | "FEATURING";
+    _id: string;
+    type: 'PRIMARY' | 'FEATURING';
 } | {
     name: string;
-    type: "PRODUCER" | "SONGWRITER";
+    type: 'PRODUCER' | 'SONGWRITER';
 };
+
+export type DropType = 'TAKEDOWN_REQUESTED' | 'PUBLISHED' | 'PUBLISHING' | 'PRIVATE' | 'UNDER_REVIEW' | 'UNSUBMITTED' | 'REVIEW_DECLINED';
+
+export type AccountType = 'DEFAULT' | 'SUBSCRIBED' | 'VIP';
 
 export type ObjectId = string;
 
-export type DropType = "TAKEDOWN_REQUESTED" | "PUBLISHED" | "PUBLISHING" | "PRIVATE" | "UNDER_REVIEW" | "UNSUBMITTED" | "REVIEW_DECLINED";
-
-export type AccountType = "DEFAULT" | "SUBSCRIBED" | "VIP";
-
-export type SingleAdminDrop = {
-    gtin?: string;
-    title?: string;
-    artists?: Array<ArtistRef>;
-    release?: string;
-    language?: string;
-    primaryGenre?: string;
-    secondaryGenre?: string;
-    compositionCopyright?: string;
-    soundRecordingCopyright?: string;
-    artwork?: ObjectId;
-    songs?: Array<
-        Song & {
-            filename: string;
-        }
-    >;
-    comments?: string;
-    _id?: ObjectId;
-    user?: ObjectId;
-    type?: DropType;
-    userInfo?: {
-        _id: ObjectId;
-        authentication?: Array<
-            {
-                type: "webAuthn";
-                id: string;
-                authenticatorAttachement: "cross-platform" | "platform";
-                publicKey: string;
-            } | {
-                type: "oauth";
-                provider: string;
-                id: string;
-            } | {
-                type: "password";
-                salt: string;
-                hash: string;
-            }
-        >;
-        profile: {
-            email: string;
-            phone?: string;
-            username: string;
-            avatar?: ObjectId | string;
-            verified: {
-                email: boolean;
-                phone?: boolean;
-            };
-        };
-        permissions: Array<string>;
-        groups: Array<ObjectId2>;
-    };
-    events?: Array<{
-        _id: ObjectId2;
-        userId: ObjectId2;
-        storeToken?: string;
-        type: "auth" | "refresh-auth" | "action";
-        ip?: string;
-        source?: {
-            type: "browser" | "mobile";
-            method?: {
-                type: "webAuthn";
-                id: string;
-                authenticatorAttachement: "cross-platform" | "platform";
-                publicKey: string;
-            } | {
-                type: "oauth";
-                provider: string;
-            } | {
-                type: "password";
-            };
-            platform?: string;
-            platformVersion?: string;
-            legacyUserAgent?: string;
-        };
-        meta?: Audit;
-    }>;
-    artistList?: Array<Artist>;
-};
-
-export type Song = {
-    _id: ObjectId;
-    user: ObjectId;
-    isrc?: string;
-    title: string;
-    artists: Array<ArtistRef>;
-    primaryGenre: string;
-    secondaryGenre: string;
-    year: number;
-    country?: string;
-    language: string;
-    explicit: boolean;
-    instrumental: boolean;
-    file: ObjectId;
-};
-
-export type User = {
-    _id: unknown;
-    authentication?: Array<
-        {
-            type: "webAuthn";
-            id: string;
-            authenticatorAttachement: "cross-platform" | "platform";
-            publicKey: string;
-        } | {
-            type: "oauth";
-            provider: string;
-            id: string;
-        } | {
-            type: "password";
-            salt: string;
-            hash: string;
-        }
-    >;
-    profile: {
-        email: string;
-        phone?: string;
-        username: string;
-        avatar?: unknown;
-        verified: {
-            email: boolean;
-            phone?: boolean;
-        };
-    };
-    permissions: Array<string>;
-    groups: Array<ObjectId2>;
-};
-
-export type ObjectId2 = string;
-
-export type UserHistoryEvent = {
-    _id: ObjectId2;
-    userId: ObjectId2;
-    storeToken?: string;
-    type: "auth" | "refresh-auth" | "action";
-    ip?: string;
-    source?: {
-        type: "browser" | "mobile";
-        method?: {
-            type: "webAuthn";
-            id: string;
-            authenticatorAttachement: "cross-platform" | "platform";
-            publicKey: string;
-        } | {
-            type: "oauth";
-            provider: string;
-        } | {
-            type: "password";
-        };
-        platform?: string;
-        platformVersion?: string;
-        legacyUserAgent?: string;
-    };
-    meta?: {
-        [key: string]: unknown;
-    };
-};
-
 export type Audit = {
-    action: "reset-password";
+    action: 'reset-password';
 } | {
-    action: "drop-review";
+    action: 'drop-review';
     dropId: string;
+    reason?: string;
 } | {
-    action: "drop-type-change";
+    action: 'drop-type-change';
     dropId: string;
     type: DropType;
     data?: FullDrop;
 } | {
-    action: "drop-create";
+    action: 'drop-create';
     dropId: string;
 } | {
-    action: "oauth-validate";
+    action: 'oauth-validate';
     appId: string;
     scopes: Array<string>;
 } | {
-    action: "oauth-authorize";
+    action: 'oauth-authorize';
     appId: string;
     scopes: Array<string>;
 } | {
-    action: "web-authn-sign-in";
+    action: 'web-authn-sign-in';
 } | {
-    action: "web-authn-sign-up";
+    action: 'web-authn-sign-up';
 } | {
-    action: "password-sign-in";
+    action: 'password-sign-in';
 } | {
-    action: "password-sign-up";
+    action: 'password-sign-up';
 } | {
-    action: "oauth-sign-in";
+    action: 'oauth-sign-in';
     provider: string;
 } | {
-    action: "oauth-sign-up";
+    action: 'oauth-sign-up';
     provider: string;
 } | {
-    action: "shazam-results";
+    action: 'shazam-results';
     dropId: string;
     songId?: string;
     data: ShazamResults;
@@ -267,12 +93,28 @@ export type FullDrop = {
     secondaryGenre: string;
     compositionCopyright: string;
     soundRecordingCopyright: string;
-    artwork?: ObjectId;
+    artwork?: string;
     songs: Array<Song>;
     comments?: string;
-    _id: ObjectId;
-    user: ObjectId;
+    _id: string;
+    user: string;
     type: DropType;
+};
+
+export type Song = {
+    _id: string;
+    user: string;
+    isrc?: string;
+    title: string;
+    artists: Array<ArtistRef>;
+    primaryGenre: string;
+    secondaryGenre: string;
+    year: number;
+    country?: string;
+    language: string;
+    explicit: boolean;
+    instrumental: boolean;
+    file: string;
 };
 
 export type ShazamResults = Array<{
@@ -286,16 +128,16 @@ export type ShazamResults = Array<{
 }>;
 
 export type Artist = {
-    _id: ObjectId;
+    _id: string;
     name: string;
-    users: Array<ObjectId>;
-    avatar?: ObjectId;
+    users: Array<string>;
+    avatar?: string;
     spotify?: string;
     apple?: string;
 };
 
 export type AdminWallet = {
-    _id: ObjectId;
+    _id: string;
     transactions: Array<{
         amount: number;
         timestamp: string;
@@ -304,7 +146,7 @@ export type AdminWallet = {
         counterParty: string;
     }>;
     cut: number;
-    user: ObjectId;
+    user: string;
     userName?: string;
     email?: string;
     balance?: {
@@ -322,8 +164,91 @@ export type AdminWallet = {
     };
 };
 
+export type PaymentType = 'RESTRAINED' | 'UNRESTRAINED';
+
+export type Group = {
+    displayName: string;
+    _id: string;
+    permission: Array<string>;
+};
+
+export type SearchReturn = ({
+    _index: 'drops';
+    _source: {
+        gtin?: string;
+        title?: string;
+        artists?: Array<ArtistRef>;
+        release?: string;
+        language?: string;
+        primaryGenre?: string;
+        secondaryGenre?: string;
+        compositionCopyright?: string;
+        soundRecordingCopyright?: string;
+        artwork?: string;
+        songs?: Array<string>;
+        comments?: string;
+        _id?: string;
+        user?: string;
+        type?: DropType;
+    };
+} | {
+    _index: 'songs';
+    _source: {
+        _id?: string;
+        user?: string;
+        isrc?: string;
+        title?: string;
+        artists?: Array<ArtistRef>;
+        primaryGenre?: string;
+        secondaryGenre?: string;
+        year?: number;
+        country?: string;
+        language?: string;
+        explicit?: boolean;
+        instrumental?: boolean;
+        file?: string;
+    };
+} | {
+    _index: 'users';
+    _source: {
+        _id: string;
+        authentication?: Array<{
+            type: 'webAuthn';
+            id: string;
+            authenticatorAttachement: 'cross-platform' | 'platform';
+            publicKey: string;
+        } | {
+            type: 'oauth';
+            provider: string;
+            id: string;
+        } | {
+            type: 'password';
+            salt: string;
+            hash: string;
+        }>;
+        profile: {
+            email: string;
+            phone?: string;
+            username: string;
+            avatar?: string;
+            verified: {
+                email: boolean;
+                phone?: boolean;
+            };
+        };
+        permissions: Array<string>;
+        groups: Array<ObjectId>;
+    };
+} | {
+    _index: 'wallets';
+    _source: Wallet;
+}) & {
+    _id: string;
+    _score: number;
+};
+
 export type Wallet = {
-    _id: ObjectId;
+    _id: string;
     transactions: Array<{
         amount: number;
         timestamp: string;
@@ -332,7 +257,7 @@ export type Wallet = {
         counterParty: string;
     }>;
     cut: number;
-    user: ObjectId;
+    user: string;
     userName?: string;
     email?: string;
     balance?: {
@@ -343,124 +268,9 @@ export type Wallet = {
     accountType: AccountType;
 };
 
-export type PaymentType = "RESTRAINED" | "UNRESTRAINED";
-
-export type Group = {
-    displayName: string;
-    _id: ObjectId;
-    permission: Array<string>;
-};
-
-export type SearchReturn =
-    & ({
-        _index: "drops";
-        _source: {
-            gtin?: string;
-            title?: string;
-            artists?: Array<ArtistRef>;
-            release?: string;
-            language?: string;
-            primaryGenre?: string;
-            secondaryGenre?: string;
-            compositionCopyright?: string;
-            soundRecordingCopyright?: string;
-            artwork?: ObjectId;
-            songs?: Array<ObjectId>;
-            comments?: string;
-            _id?: ObjectId;
-            user?: ObjectId;
-            type?: DropType;
-        };
-    } | {
-        _index: "songs";
-        _source: {
-            _id?: ObjectId;
-            user?: ObjectId;
-            isrc?: string;
-            title?: string;
-            artists?: Array<ArtistRef>;
-            primaryGenre?: string;
-            secondaryGenre?: string;
-            year?: number;
-            country?: string;
-            language?: string;
-            explicit?: boolean;
-            instrumental?: boolean;
-            file?: ObjectId;
-        };
-    } | {
-        _index: "users";
-        _source: {
-            _id: ObjectId;
-            authentication?: Array<
-                {
-                    type: "webAuthn";
-                    id: string;
-                    authenticatorAttachement: "cross-platform" | "platform";
-                    publicKey: string;
-                } | {
-                    type: "oauth";
-                    provider: string;
-                    id: string;
-                } | {
-                    type: "password";
-                    salt: string;
-                    hash: string;
-                }
-            >;
-            profile: {
-                email: string;
-                phone?: string;
-                username: string;
-                avatar?: ObjectId | string;
-                verified: {
-                    email: boolean;
-                    phone?: boolean;
-                };
-            };
-            permissions: Array<string>;
-            groups: Array<ObjectId2>;
-        };
-    } | {
-        _index: "wallets";
-        _source: Wallet;
-    })
-    & {
-        _id: string;
-        _score: number;
-    };
-
-export type UpdateDrop = {
-    gtin?: string;
-    title?: string;
-    artists?: Array<ArtistRef>;
-    release?: string;
-    language?: string;
-    primaryGenre?: string;
-    secondaryGenre?: string;
-    compositionCopyright?: string;
-    soundRecordingCopyright?: string;
-    artwork?: string;
-    songs?: Array<{
-        _id: ObjectId;
-        isrc?: string;
-        title: string;
-        artists: Array<ArtistRef>;
-        primaryGenre: string;
-        secondaryGenre: string;
-        year: number;
-        country?: string;
-        language: string;
-        explicit: boolean;
-        instrumental: boolean;
-    }>;
-    comments?: string;
-    type?: DropType;
-};
-
 export type Share = {
-    _id: ObjectId;
-    drop: ObjectId;
+    _id: string;
+    drop: string;
     slug: string;
     services: {
         [key: string]: string;
@@ -468,12 +278,12 @@ export type Share = {
 };
 
 export type OAuthApp = {
-    _id: ObjectId;
+    _id: string;
     name: string;
     redirect: Array<string>;
     secret: string;
-    icon: ObjectId;
-    users?: Array<ObjectId>;
+    icon: string;
+    users?: Array<string>;
 };
 
 export type PayoutResponse = {
@@ -489,13 +299,13 @@ export type PayoutResponse = {
     moneythisperiod: string;
     period: string;
     streams: number;
-    _id: ObjectId2;
+    _id: ObjectId;
 };
 
-export type ArtistTypes = "PRIMARY" | "FEATURING" | "SONGWRITER" | "PRODUCER";
+export type ArtistTypes = 'PRIMARY' | 'FEATURING' | 'SONGWRITER' | 'PRODUCER';
 
 export type File = {
-    _id: ObjectId;
+    _id: string;
     length: number;
     chunkSize: number;
     uploadDate: string;
@@ -505,23 +315,12 @@ export type File = {
     };
 };
 
-export type ReviewResponse = "APPROVED" | "DECLINE_COPYRIGHT" | "DECLINE_MALICIOUS_ACTIVITY";
+export type ReviewResponse = 'APPROVED' | 'DECLINE_COPYRIGHT' | 'DECLINE_MALICIOUS_ACTIVITY';
 
-export type OAuthScopes = "profile" | "email" | "phone";
-
-export type RequestPayoutResponse = {
-    type: "createAccount";
-    url: string;
-} | {
-    type: "needDetails";
-    missingDetails: Array<string>;
-    url: string;
-} | {
-    type: "success";
-};
+export type OAuthScopes = 'profile' | 'email' | 'phone';
 
 export type WaEvent = {
-    _id: ObjectId;
+    _id: string;
     changes: {
         messaging_product: string;
         metadata: {
@@ -550,7 +349,7 @@ export type GetDropsByAdminData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/admin/drops";
+    url: '/api/@bbn/admin/drops';
 };
 
 export type GetDropsByAdminResponses = {
@@ -568,14 +367,100 @@ export type GetIdByDropsByAdminData = {
         id: string;
     };
     query?: never;
-    url: "/api/@bbn/admin/drops/{id}";
+    url: '/api/@bbn/admin/drops/{id}';
 };
 
 export type GetIdByDropsByAdminResponses = {
     /**
      * Successful operation
      */
-    200: SingleAdminDrop;
+    200: {
+        gtin?: string;
+        title?: string;
+        artists?: Array<ArtistRef>;
+        release?: string;
+        language?: string;
+        primaryGenre?: string;
+        secondaryGenre?: string;
+        compositionCopyright?: string;
+        soundRecordingCopyright?: string;
+        artwork?: string;
+        songs?: Array<{
+            _id: string;
+            user: string;
+            isrc?: string;
+            title: string;
+            artists: Array<ArtistRef>;
+            primaryGenre: string;
+            secondaryGenre: string;
+            year: number;
+            country?: string;
+            language: string;
+            explicit: boolean;
+            instrumental: boolean;
+            file: string;
+            filename: string;
+        }>;
+        comments?: string;
+        _id?: string;
+        user?: string;
+        type?: DropType;
+        userInfo?: {
+            _id: string;
+            authentication?: Array<{
+                type: 'webAuthn';
+                id: string;
+                authenticatorAttachement: 'cross-platform' | 'platform';
+                publicKey: string;
+            } | {
+                type: 'oauth';
+                provider: string;
+                id: string;
+            } | {
+                type: 'password';
+                salt: string;
+                hash: string;
+            }>;
+            profile: {
+                email: string;
+                phone?: string;
+                username: string;
+                avatar?: string;
+                verified: {
+                    email: boolean;
+                    phone?: boolean;
+                };
+            };
+            permissions: Array<string>;
+            groups: Array<ObjectId>;
+        };
+        events?: Array<{
+            _id: ObjectId;
+            userId: ObjectId;
+            storeToken?: string;
+            type: 'auth' | 'refresh-auth' | 'action';
+            ip?: string;
+            source?: {
+                type: 'browser' | 'mobile';
+                method?: {
+                    type: 'webAuthn';
+                    id: string;
+                    authenticatorAttachement: 'cross-platform' | 'platform';
+                    publicKey: string;
+                } | {
+                    type: 'oauth';
+                    provider: string;
+                } | {
+                    type: 'password';
+                };
+                platform?: string;
+                platformVersion?: string;
+                legacyUserAgent?: string;
+            };
+            meta?: Audit;
+        }>;
+        artistList?: Array<Artist>;
+    };
 };
 
 export type GetIdByDropsByAdminResponse = GetIdByDropsByAdminResponses[keyof GetIdByDropsByAdminResponses];
@@ -586,7 +471,7 @@ export type GetDownloadByFileByFilesByAdminData = {
         fileId: string;
     };
     query?: never;
-    url: "/api/@bbn/admin/files/{fileId}/download";
+    url: '/api/@bbn/admin/files/{fileId}/download';
 };
 
 export type GetDownloadByFileByFilesByAdminResponses = {
@@ -604,14 +489,14 @@ export type DeleteIdByFilesByAdminData = {
         id: string;
     };
     query?: never;
-    url: "/api/@bbn/admin/files/{id}";
+    url: '/api/@bbn/admin/files/{id}';
 };
 
 export type GetGroupsByAdminData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/admin/groups";
+    url: '/api/@bbn/admin/groups';
 };
 
 export type GetGroupsByAdminResponses = {
@@ -627,7 +512,7 @@ export type GetPayoutsByAdminData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/admin/payouts";
+    url: '/api/@bbn/admin/payouts';
 };
 
 export type GetPayoutsByAdminResponses = {
@@ -643,7 +528,7 @@ export type GetUploadByPayoutsByAdminData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/admin/payouts/upload";
+    url: '/api/@bbn/admin/payouts/upload';
 };
 
 export type GetQueryBySearchByAdminData = {
@@ -652,7 +537,7 @@ export type GetQueryBySearchByAdminData = {
         query: string;
     };
     query?: never;
-    url: "/api/@bbn/admin/search/{query}";
+    url: '/api/@bbn/admin/search/{query}';
 };
 
 export type GetQueryBySearchByAdminResponses = {
@@ -670,14 +555,14 @@ export type PostSyncMappingByAdminData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/admin/sync_mapping";
+    url: '/api/@bbn/admin/sync_mapping';
 };
 
 export type GetWalletsByAdminData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/admin/wallets";
+    url: '/api/@bbn/admin/wallets';
 };
 
 export type GetWalletsByAdminResponses = {
@@ -695,7 +580,7 @@ export type GetIdByWalletsByAdminData = {
         id: string;
     };
     query?: never;
-    url: "/api/@bbn/admin/wallets/{id}";
+    url: '/api/@bbn/admin/wallets/{id}';
 };
 
 export type GetIdByWalletsByAdminResponses = {
@@ -709,7 +594,7 @@ export type GetIdByWalletsByAdminResponse = GetIdByWalletsByAdminResponses[keyof
 
 export type PatchIdByWalletsByAdminData = {
     body?: {
-        _id?: ObjectId;
+        _id?: string;
         transactions?: Array<{
             amount: number;
             timestamp: string;
@@ -718,7 +603,7 @@ export type PatchIdByWalletsByAdminData = {
             counterParty: string;
         }>;
         cut?: string;
-        user?: ObjectId;
+        user?: string;
         userName?: string;
         email?: string;
         balance?: {
@@ -732,7 +617,7 @@ export type PatchIdByWalletsByAdminData = {
         id: string;
     };
     query?: never;
-    url: "/api/@bbn/admin/wallets/{id}";
+    url: '/api/@bbn/admin/wallets/{id}';
 };
 
 export type PostEmailByAuthData = {
@@ -741,7 +626,7 @@ export type PostEmailByAuthData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/auth/email";
+    url: '/api/@bbn/auth/email';
 };
 
 export type GetTokenByFromUserInteractionByAuthData = {
@@ -752,7 +637,7 @@ export type GetTokenByFromUserInteractionByAuthData = {
         token: string;
     };
     query?: never;
-    url: "/api/@bbn/auth/from-user-interaction/{token}";
+    url: '/api/@bbn/auth/from-user-interaction/{token}';
 };
 
 export type PostCodeByProviderByOauthByAuthData = {
@@ -764,7 +649,7 @@ export type PostCodeByProviderByOauthByAuthData = {
         code: string;
     };
     query?: never;
-    url: "/api/@bbn/auth/oauth/{provider}/{code}";
+    url: '/api/@bbn/auth/oauth/{provider}/{code}';
 };
 
 export type GetProviderByRedirectByAuthData = {
@@ -775,7 +660,7 @@ export type GetProviderByRedirectByAuthData = {
         provider: string;
     };
     query?: never;
-    url: "/api/@bbn/auth/redirect/{provider}";
+    url: '/api/@bbn/auth/redirect/{provider}';
 };
 
 export type PostRefreshAccessTokenByAuthData = {
@@ -784,7 +669,7 @@ export type PostRefreshAccessTokenByAuthData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/auth/refresh-access-token";
+    url: '/api/@bbn/auth/refresh-access-token';
 };
 
 export type PostRegisterByAuthData = {
@@ -793,7 +678,7 @@ export type PostRegisterByAuthData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/auth/register";
+    url: '/api/@bbn/auth/register';
 };
 
 export type PostResetPasswordByAuthData = {
@@ -802,12 +687,12 @@ export type PostResetPasswordByAuthData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/auth/reset-password";
+    url: '/api/@bbn/auth/reset-password';
 };
 
 export type PostBugTrackData = {
     body?: {
-        type: "web-frontend";
+        type: 'web-frontend';
         error: string;
         errorStack: string;
         platform?: string;
@@ -819,7 +704,7 @@ export type PostBugTrackData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/bug-track/";
+    url: '/api/@bbn/bug-track/';
 };
 
 export type GetWebhookByStatuspageByIntegrationData = {
@@ -828,7 +713,7 @@ export type GetWebhookByStatuspageByIntegrationData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/integration/statuspage/webhook";
+    url: '/api/@bbn/integration/statuspage/webhook';
 };
 
 export type PostWebhookByStatuspageByIntegrationData = {
@@ -837,7 +722,7 @@ export type PostWebhookByStatuspageByIntegrationData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/integration/statuspage/webhook";
+    url: '/api/@bbn/integration/statuspage/webhook';
 };
 
 export type PostMusicData = {
@@ -846,7 +731,7 @@ export type PostMusicData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/music/";
+    url: '/api/@bbn/music/';
 };
 
 export type GetArtworkByDropByMusicData = {
@@ -857,7 +742,7 @@ export type GetArtworkByDropByMusicData = {
         dropId: string;
     };
     query?: never;
-    url: "/api/@bbn/music/{dropId}/artwork";
+    url: '/api/@bbn/music/{dropId}/artwork';
 };
 
 export type GetFullArtworkByDropByMusicData = {
@@ -868,7 +753,7 @@ export type GetFullArtworkByDropByMusicData = {
         dropId: string;
     };
     query?: never;
-    url: "/api/@bbn/music/{dropId}/fullArtwork";
+    url: '/api/@bbn/music/{dropId}/fullArtwork';
 };
 
 export type PostReviewByDropByMusicData = {
@@ -879,7 +764,7 @@ export type PostReviewByDropByMusicData = {
         dropId: string;
     };
     query?: never;
-    url: "/api/@bbn/music/{dropId}/review";
+    url: '/api/@bbn/music/{dropId}/review';
 };
 
 export type GetServicesByDropByMusicData = {
@@ -890,7 +775,7 @@ export type GetServicesByDropByMusicData = {
         dropId: string;
     };
     query?: never;
-    url: "/api/@bbn/music/{dropId}/services";
+    url: '/api/@bbn/music/{dropId}/services';
 };
 
 export type PostTypeByTypeByDropByMusicData = {
@@ -902,14 +787,14 @@ export type PostTypeByTypeByDropByMusicData = {
         type: string;
     };
     query?: never;
-    url: "/api/@bbn/music/{dropId}/type/{type}";
+    url: '/api/@bbn/music/{dropId}/type/{type}';
 };
 
 export type GetArtistsByMusicData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/music/artists";
+    url: '/api/@bbn/music/artists';
 };
 
 export type GetArtistsByMusicResponses = {
@@ -929,7 +814,7 @@ export type PostArtistsByMusicData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/music/artists";
+    url: '/api/@bbn/music/artists';
 };
 
 export type PostArtistsByMusicResponses = {
@@ -937,7 +822,7 @@ export type PostArtistsByMusicResponses = {
      * Successful operation
      */
     200: {
-        id: ObjectId;
+        id: string;
     };
 };
 
@@ -947,7 +832,7 @@ export type GetDropsByMusicData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/music/drops";
+    url: '/api/@bbn/music/drops';
 };
 
 export type GetDropsByMusicResponses = {
@@ -964,11 +849,11 @@ export type GetDropsByMusicResponses = {
         secondaryGenre?: string;
         compositionCopyright?: string;
         soundRecordingCopyright?: string;
-        artwork?: ObjectId;
-        songs?: Array<ObjectId>;
+        artwork?: string;
+        songs?: Array<string>;
         comments?: string;
-        _id?: ObjectId;
-        user?: ObjectId;
+        _id?: string;
+        user?: string;
         type?: DropType;
     }>;
 };
@@ -984,14 +869,28 @@ export type PostDropByDropsByMusicData = {
         dropId: string;
     };
     query?: never;
-    url: "/api/@bbn/music/drops/{dropId}";
+    url: '/api/@bbn/music/drops/{dropId}';
 };
 
 export type PostDropByDropsByMusicResponses = {
     /**
      * Successful operation
      */
-    200: Song;
+    200: {
+        _id: string;
+        user: string;
+        isrc?: string;
+        title: string;
+        artists: Array<ArtistRef>;
+        primaryGenre: string;
+        secondaryGenre: string;
+        year: number;
+        country?: string;
+        language: string;
+        explicit: boolean;
+        instrumental: boolean;
+        file: string;
+    };
 };
 
 export type PostDropByDropsByMusicResponse = PostDropByDropsByMusicResponses[keyof PostDropByDropsByMusicResponses];
@@ -1002,7 +901,7 @@ export type GetDownloadByDropByDropsByMusicData = {
         dropId: string;
     };
     query?: never;
-    url: "/api/@bbn/music/drops/{dropId}/download";
+    url: '/api/@bbn/music/drops/{dropId}/download';
 };
 
 export type GetDownloadByDropByDropsByMusicResponses = {
@@ -1020,7 +919,7 @@ export type GetUploadByDropByDropsByMusicData = {
         dropId: string;
     };
     query?: never;
-    url: "/api/@bbn/music/drops/{dropId}/upload";
+    url: '/api/@bbn/music/drops/{dropId}/upload';
 };
 
 export type GetIdByDropsByMusicData = {
@@ -1029,7 +928,7 @@ export type GetIdByDropsByMusicData = {
         id: string;
     };
     query?: never;
-    url: "/api/@bbn/music/drops/{id}";
+    url: '/api/@bbn/music/drops/{id}';
 };
 
 export type GetIdByDropsByMusicResponses = {
@@ -1046,11 +945,11 @@ export type GetIdByDropsByMusicResponses = {
         secondaryGenre?: string;
         compositionCopyright?: string;
         soundRecordingCopyright?: string;
-        artwork?: ObjectId;
+        artwork?: string;
         songs?: Array<Song>;
         comments?: string;
-        _id?: ObjectId;
-        user?: ObjectId;
+        _id?: string;
+        user?: string;
         type?: DropType;
     };
 };
@@ -1058,12 +957,38 @@ export type GetIdByDropsByMusicResponses = {
 export type GetIdByDropsByMusicResponse = GetIdByDropsByMusicResponses[keyof GetIdByDropsByMusicResponses];
 
 export type PatchIdByDropsByMusicData = {
-    body?: UpdateDrop;
+    body?: {
+        gtin?: string;
+        title?: string;
+        artists?: Array<ArtistRef>;
+        release?: string;
+        language?: string;
+        primaryGenre?: string;
+        secondaryGenre?: string;
+        compositionCopyright?: string;
+        soundRecordingCopyright?: string;
+        artwork?: string;
+        songs?: Array<{
+            _id: string;
+            isrc?: string;
+            title: string;
+            artists: Array<ArtistRef>;
+            primaryGenre: string;
+            secondaryGenre: string;
+            year: number;
+            country?: string;
+            language: string;
+            explicit: boolean;
+            instrumental: boolean;
+        }>;
+        comments?: string;
+        type?: DropType;
+    };
     path: {
         id: string;
     };
     query?: never;
-    url: "/api/@bbn/music/drops/{id}";
+    url: '/api/@bbn/music/drops/{id}';
 };
 
 export type PostShareByDropsByMusicData = {
@@ -1072,7 +997,7 @@ export type PostShareByDropsByMusicData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/music/drops/share";
+    url: '/api/@bbn/music/drops/share';
 };
 
 export type PostShareByDropsByMusicResponses = {
@@ -1080,7 +1005,7 @@ export type PostShareByDropsByMusicResponses = {
      * Successful operation
      */
     200: {
-        drop: ObjectId;
+        drop: string;
         slug: string;
         services: {
             [key: string]: string;
@@ -1096,7 +1021,7 @@ export type DeleteIdByShareByDropsByMusicData = {
         id: string;
     };
     query?: never;
-    url: "/api/@bbn/music/drops/share/{id}";
+    url: '/api/@bbn/music/drops/share/{id}';
 };
 
 export type GetIdByShareByDropsByMusicData = {
@@ -1105,7 +1030,7 @@ export type GetIdByShareByDropsByMusicData = {
         id: string;
     };
     query?: never;
-    url: "/api/@bbn/music/drops/share/{id}";
+    url: '/api/@bbn/music/drops/share/{id}';
 };
 
 export type GetIdByShareByDropsByMusicResponses = {
@@ -1121,7 +1046,7 @@ export type GetFulldropByMusicData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/music/fulldrop";
+    url: '/api/@bbn/music/fulldrop';
 };
 
 export type GetFulldropByMusicResponses = {
@@ -1140,7 +1065,7 @@ export type GetIdByProviderByPublishByMusicData = {
         id: string;
     };
     query?: never;
-    url: "/api/@bbn/music/publish/{provider}/{id}";
+    url: '/api/@bbn/music/publish/{provider}/{id}';
 };
 
 export type GetIdByProviderByPublishByMusicResponses = {
@@ -1160,7 +1085,7 @@ export type GetSlugByShareByMusicData = {
         slug: string;
     };
     query?: never;
-    url: "/api/@bbn/music/share/{slug}";
+    url: '/api/@bbn/music/share/{slug}';
 };
 
 export type GetArtworkBySlugByShareByMusicData = {
@@ -1171,7 +1096,7 @@ export type GetArtworkBySlugByShareByMusicData = {
         slug: string;
     };
     query?: never;
-    url: "/api/@bbn/music/share/{slug}/artwork";
+    url: '/api/@bbn/music/share/{slug}/artwork';
 };
 
 export type GetIdByShazamByMusicData = {
@@ -1180,7 +1105,7 @@ export type GetIdByShazamByMusicData = {
         id: string;
     };
     query?: never;
-    url: "/api/@bbn/music/shazam/{id}";
+    url: '/api/@bbn/music/shazam/{id}';
 };
 
 export type GetIdByShazamByMusicResponses = {
@@ -1196,7 +1121,7 @@ export type GetSongsByMusicData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/music/songs";
+    url: '/api/@bbn/music/songs';
 };
 
 export type GetSongsByMusicResponses = {
@@ -1220,11 +1145,11 @@ export type PostSongsByMusicData = {
         language: string;
         explicit: boolean;
         instrumental: boolean;
-        file: ObjectId;
+        file: string;
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/music/songs";
+    url: '/api/@bbn/music/songs';
 };
 
 export type PostSongsByMusicResponses = {
@@ -1232,7 +1157,7 @@ export type PostSongsByMusicResponses = {
      * Successful operation
      */
     200: {
-        id: ObjectId;
+        id: string;
     };
 };
 
@@ -1244,14 +1169,28 @@ export type GetIdBySongsByMusicData = {
         id: string;
     };
     query?: never;
-    url: "/api/@bbn/music/songs/{id}";
+    url: '/api/@bbn/music/songs/{id}';
 };
 
 export type GetIdBySongsByMusicResponses = {
     /**
      * Successful operation
      */
-    200: Song;
+    200: {
+        _id: string;
+        user: string;
+        isrc?: string;
+        title: string;
+        artists: Array<ArtistRef>;
+        primaryGenre: string;
+        secondaryGenre: string;
+        year: number;
+        country?: string;
+        language: string;
+        explicit: boolean;
+        instrumental: boolean;
+        file: string;
+    };
 };
 
 export type GetIdBySongsByMusicResponse = GetIdBySongsByMusicResponses[keyof GetIdBySongsByMusicResponses];
@@ -1262,7 +1201,7 @@ export type GetDownloadBySongBySongsByMusicData = {
         songId: string;
     };
     query?: never;
-    url: "/api/@bbn/music/songs/{songId}/download";
+    url: '/api/@bbn/music/songs/{songId}/download';
 };
 
 export type GetDownloadBySongBySongsByMusicResponses = {
@@ -1278,14 +1217,14 @@ export type GetUploadBySongsByMusicData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/music/songs/upload";
+    url: '/api/@bbn/music/songs/upload';
 };
 
 export type GetApplicationsByOauthData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/oauth/applications";
+    url: '/api/@bbn/oauth/applications';
 };
 
 export type GetApplicationsByOauthResponses = {
@@ -1301,11 +1240,11 @@ export type PostApplicationsByOauthData = {
     body?: {
         name: string;
         redirect: Array<string>;
-        icon: ObjectId;
+        icon: string;
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/oauth/applications";
+    url: '/api/@bbn/oauth/applications';
 };
 
 export type PostApplicationsByOauthResponses = {
@@ -1321,7 +1260,7 @@ export type GetDownloadByClientByApplicationsByOauthData = {
         clientId: string;
     };
     query?: never;
-    url: "/api/@bbn/oauth/applications/{clientId}/download";
+    url: '/api/@bbn/oauth/applications/{clientId}/download';
 };
 
 export type GetDownloadByClientByApplicationsByOauthResponses = {
@@ -1339,27 +1278,27 @@ export type DeleteIdByApplicationsByOauthData = {
         id: string;
     };
     query?: never;
-    url: "/api/@bbn/oauth/applications/{id}";
+    url: '/api/@bbn/oauth/applications/{id}';
 };
 
 export type PatchIdByApplicationsByOauthData = {
     body?: {
         name: string;
         redirect: Array<string>;
-        icon: ObjectId;
+        icon: string;
     };
     path: {
         id: string;
     };
     query?: never;
-    url: "/api/@bbn/oauth/applications/{id}";
+    url: '/api/@bbn/oauth/applications/{id}';
 };
 
 export type GetUploadByApplicationsByOauthData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/oauth/applications/upload";
+    url: '/api/@bbn/oauth/applications/upload';
 };
 
 export type PostAuthorizeByOauthData = {
@@ -1368,7 +1307,7 @@ export type PostAuthorizeByOauthData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/oauth/authorize";
+    url: '/api/@bbn/oauth/authorize';
 };
 
 export type PostTokenByOauthData = {
@@ -1377,14 +1316,14 @@ export type PostTokenByOauthData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/oauth/token";
+    url: '/api/@bbn/oauth/token';
 };
 
 export type GetUserinfoByOauthData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/oauth/userinfo";
+    url: '/api/@bbn/oauth/userinfo';
 };
 
 export type GetUserinfoByOauthResponses = {
@@ -1407,14 +1346,14 @@ export type PostValidateByOauthData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/oauth/validate";
+    url: '/api/@bbn/oauth/validate';
 };
 
 export type GetPayoutsByPaymentData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/payment/payouts";
+    url: '/api/@bbn/payment/payouts';
 };
 
 export type GetPayoutsByPaymentResponses = {
@@ -1432,14 +1371,28 @@ export type GetIdByPayoutsByPaymentData = {
         id: string;
     };
     query?: never;
-    url: "/api/@bbn/payment/payouts/{id}";
+    url: '/api/@bbn/payment/payouts/{id}';
 };
 
 export type GetIdByPayoutsByPaymentResponses = {
     /**
      * Successful operation
      */
-    200: PayoutResponse;
+    200: {
+        entries: Array<{
+            isrc: string;
+            data: Array<{
+                store: string;
+                territory: string;
+                quantity: number;
+                revenue: number;
+            }>;
+        }>;
+        moneythisperiod: string;
+        period: string;
+        streams: number;
+        _id: ObjectId;
+    };
 };
 
 export type GetIdByPayoutsByPaymentResponse = GetIdByPayoutsByPaymentResponses[keyof GetIdByPayoutsByPaymentResponses];
@@ -1454,7 +1407,7 @@ export type PutPlaceholderByTasksData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/tasks/placeholder";
+    url: '/api/@bbn/tasks/placeholder';
 };
 
 export type PutPlaceholderByTasksResponses = {
@@ -1462,7 +1415,7 @@ export type PutPlaceholderByTasksResponses = {
      * Successful operation
      */
     200: {
-        [key: string]: unknown;
+        [key: string]: never;
     };
 };
 
@@ -1476,7 +1429,7 @@ export type GetPictureByUserByUserData = {
         userId: string;
     };
     query?: never;
-    url: "/api/@bbn/user/{userId}/picture";
+    url: '/api/@bbn/user/{userId}/picture';
 };
 
 export type PostResendVerifyEmailByMailByUserData = {
@@ -1485,7 +1438,7 @@ export type PostResendVerifyEmailByMailByUserData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/user/mail/resend-verify-email";
+    url: '/api/@bbn/user/mail/resend-verify-email';
 };
 
 export type PostTokenByValidateByMailByUserData = {
@@ -1496,7 +1449,7 @@ export type PostTokenByValidateByMailByUserData = {
         token: string;
     };
     query?: never;
-    url: "/api/@bbn/user/mail/validate/{token}";
+    url: '/api/@bbn/user/mail/validate/{token}';
 };
 
 export type PostTokenByValidateByPhoneByUserData = {
@@ -1507,14 +1460,14 @@ export type PostTokenByValidateByPhoneByUserData = {
         token: string;
     };
     query?: never;
-    url: "/api/@bbn/user/phone/validate/{token}";
+    url: '/api/@bbn/user/phone/validate/{token}';
 };
 
 export type GetUploadByAvatarBySetMeByUserData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/user/set-me/avatar/upload";
+    url: '/api/@bbn/user/set-me/avatar/upload';
 };
 
 export type PutUserByUserData = {
@@ -1526,7 +1479,7 @@ export type PutUserByUserData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/user/user";
+    url: '/api/@bbn/user/user';
 };
 
 export type PutUserByUserResponses = {
@@ -1534,7 +1487,7 @@ export type PutUserByUserResponses = {
      * Successful operation
      */
     200: {
-        [key: string]: unknown;
+        [key: string]: never;
     };
 };
 
@@ -1552,21 +1505,40 @@ export type PatchIdByUsersByUserData = {
         id: string;
     };
     query?: never;
-    url: "/api/@bbn/user/users/{id}";
+    url: '/api/@bbn/user/users/{id}';
 };
 
 export type GetWalletData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/wallet/";
+    url: '/api/@bbn/wallet/';
 };
 
 export type GetWalletResponses = {
     /**
      * Successful operation
      */
-    200: Wallet;
+    200: {
+        _id: string;
+        transactions: Array<{
+            amount: number;
+            timestamp: string;
+            type: PaymentType;
+            description: string;
+            counterParty: string;
+        }>;
+        cut: number;
+        user: string;
+        userName?: string;
+        email?: string;
+        balance?: {
+            restrained: number;
+            unrestrained: number;
+        };
+        stripeAccountId?: string;
+        accountType: AccountType;
+    };
 };
 
 export type GetWalletResponse = GetWalletResponses[keyof GetWalletResponses];
@@ -1577,14 +1549,23 @@ export type PutWalletData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/wallet/";
+    url: '/api/@bbn/wallet/';
 };
 
 export type PutWalletResponses = {
     /**
      * Successful operation
      */
-    200: RequestPayoutResponse;
+    200: {
+        type: 'createAccount';
+        url: string;
+    } | {
+        type: 'needDetails';
+        missingDetails: Array<string>;
+        url: string;
+    } | {
+        type: 'success';
+    };
 };
 
 export type PutWalletResponse = PutWalletResponses[keyof PutWalletResponses];
@@ -1593,7 +1574,7 @@ export type GetChatsByWhatsappData = {
     body?: never;
     path?: never;
     query?: never;
-    url: "/api/@bbn/whatsapp/chats";
+    url: '/api/@bbn/whatsapp/chats';
 };
 
 export type GetChatsByWhatsappResponses = {
@@ -1616,7 +1597,7 @@ export type GetIdByChatsByWhatsappData = {
         id: string;
     };
     query?: never;
-    url: "/api/@bbn/whatsapp/chats/{id}";
+    url: '/api/@bbn/whatsapp/chats/{id}';
 };
 
 export type GetIdByChatsByWhatsappResponses = {
@@ -1634,7 +1615,7 @@ export type GetEventByWhatsappData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/whatsapp/event";
+    url: '/api/@bbn/whatsapp/event';
 };
 
 export type PostEventByWhatsappData = {
@@ -1643,9 +1624,9 @@ export type PostEventByWhatsappData = {
     };
     path?: never;
     query?: never;
-    url: "/api/@bbn/whatsapp/event";
+    url: '/api/@bbn/whatsapp/event';
 };
 
 export type ClientOptions = {
-    baseUrl: ""; //'https://example.one/api' | (string & {});
+    baseUrl: 'https://example.one/api' | (string & {});
 };

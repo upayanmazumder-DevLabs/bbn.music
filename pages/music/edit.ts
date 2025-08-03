@@ -394,7 +394,7 @@ appendBody(
                                 SecondaryButton("Change Droptype").onClick(() => {
                                     sheetStack.addSheet(
                                         Grid(
-                                            DropDown(Object.values(zDropType.Values), creationState.type, "Change Type"),
+                                            DropDown(Object.values(zDropType.enum), creationState.type, "Change Type"),
                                         ).setGap().setMargin("0rem 0rem 0rem 0rem"),
                                     );
                                 }),

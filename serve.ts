@@ -29,6 +29,7 @@ for (const { path } of walkSync("spec/gen", { exts: ["ts"] })) {
         .replaceAll("requestValidator: async (data) => {", "requestValidator: async (data: any) => {")
         .replaceAll("responseValidator: async (data) => {", "responseValidator: async (data: any) => {")
         .replaceAll(" Client } from './client.ts';", " Client } from './client/fetch/index.ts';")
+        .replaceAll("query: z.optional(z.never())", "query: z.optional(z.any())")
         .replaceAll("createConfig } from './client.ts'", "createConfig } from './client/fetch/index.ts'");
     Deno.writeTextFileSync(path, contents);
 }

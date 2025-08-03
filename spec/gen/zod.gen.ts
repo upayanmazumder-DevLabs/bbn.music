@@ -653,7 +653,7 @@ export const zWaEvent = z.object({
 export const zGetDropsByAdminData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -666,7 +666,7 @@ export const zGetIdByDropsByAdminData = z.object({
     path: z.object({
         id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -679,7 +679,7 @@ export const zGetDownloadByFileByFilesByAdminData = z.object({
     path: z.object({
         fileId: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -692,13 +692,13 @@ export const zDeleteIdByFilesByAdminData = z.object({
     path: z.object({
         id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetGroupsByAdminData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -709,7 +709,7 @@ export const zGetGroupsByAdminResponse = z.array(zGroup);
 export const zGetPayoutsByAdminData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -720,7 +720,7 @@ export const zGetPayoutsByAdminResponse = z.array(zPayoutList);
 export const zGetUploadByPayoutsByAdminData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetQueryBySearchByAdminData = z.object({
@@ -728,7 +728,7 @@ export const zGetQueryBySearchByAdminData = z.object({
     path: z.object({
         query: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -739,13 +739,13 @@ export const zGetQueryBySearchByAdminResponse = z.array(zSearchReturn);
 export const zPostSyncMappingByAdminData = z.object({
     body: z.optional(z.object({})),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetWalletsByAdminData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -758,7 +758,7 @@ export const zGetIdByWalletsByAdminData = z.object({
     path: z.object({
         id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -790,13 +790,13 @@ export const zPatchIdByWalletsByAdminData = z.object({
     path: z.object({
         id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostEmailByAuthData = z.object({
     body: z.optional(z.object({})),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetTokenByFromUserInteractionByAuthData = z.object({
@@ -804,7 +804,7 @@ export const zGetTokenByFromUserInteractionByAuthData = z.object({
     path: z.object({
         token: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostCodeByProviderByOauthByAuthData = z.object({
@@ -813,7 +813,7 @@ export const zPostCodeByProviderByOauthByAuthData = z.object({
         provider: z.string(),
         code: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetProviderByRedirectByAuthData = z.object({
@@ -821,25 +821,25 @@ export const zGetProviderByRedirectByAuthData = z.object({
     path: z.object({
         provider: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostRefreshAccessTokenByAuthData = z.object({
     body: z.optional(z.object({})),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostRegisterByAuthData = z.object({
     body: z.optional(z.object({})),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostResetPasswordByAuthData = z.object({
     body: z.optional(z.object({})),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostBugTrackData = z.object({
@@ -855,25 +855,25 @@ export const zPostBugTrackData = z.object({
         location: z.string()
     })),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetWebhookByStatuspageByIntegrationData = z.object({
     body: z.optional(z.object({})),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostWebhookByStatuspageByIntegrationData = z.object({
     body: z.optional(z.object({})),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostMusicData = z.object({
     body: z.optional(z.object({})),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetArtworkByDropByMusicData = z.object({
@@ -881,7 +881,7 @@ export const zGetArtworkByDropByMusicData = z.object({
     path: z.object({
         dropId: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetFullArtworkByDropByMusicData = z.object({
@@ -889,7 +889,7 @@ export const zGetFullArtworkByDropByMusicData = z.object({
     path: z.object({
         dropId: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostReviewByDropByMusicData = z.object({
@@ -897,7 +897,7 @@ export const zPostReviewByDropByMusicData = z.object({
     path: z.object({
         dropId: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetServicesByDropByMusicData = z.object({
@@ -905,7 +905,7 @@ export const zGetServicesByDropByMusicData = z.object({
     path: z.object({
         dropId: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostTypeByTypeByDropByMusicData = z.object({
@@ -914,13 +914,13 @@ export const zPostTypeByTypeByDropByMusicData = z.object({
         dropId: z.string(),
         type: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetArtistsByMusicData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -935,7 +935,7 @@ export const zPostArtistsByMusicData = z.object({
         apple: z.optional(z.string())
     })),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -948,7 +948,7 @@ export const zPostArtistsByMusicResponse = z.object({
 export const zGetDropsByMusicData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -980,7 +980,7 @@ export const zPostDropByDropsByMusicData = z.object({
     path: z.object({
         dropId: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -993,7 +993,7 @@ export const zGetDownloadByDropByDropsByMusicData = z.object({
     path: z.object({
         dropId: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1006,7 +1006,7 @@ export const zGetUploadByDropByDropsByMusicData = z.object({
     path: z.object({
         dropId: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetIdByDropsByMusicData = z.object({
@@ -1014,7 +1014,7 @@ export const zGetIdByDropsByMusicData = z.object({
     path: z.object({
         id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1043,7 +1043,7 @@ export const zPatchIdByDropsByMusicData = z.object({
     path: z.object({
         id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostShareByDropsByMusicData = z.object({
@@ -1051,7 +1051,7 @@ export const zPostShareByDropsByMusicData = z.object({
         id: z.string()
     })),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1068,7 +1068,7 @@ export const zDeleteIdByShareByDropsByMusicData = z.object({
     path: z.object({
         id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetIdByShareByDropsByMusicData = z.object({
@@ -1076,7 +1076,7 @@ export const zGetIdByShareByDropsByMusicData = z.object({
     path: z.object({
         id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1090,7 +1090,7 @@ export const zGetIdByShareByDropsByMusicResponse = z.union([
 export const zGetFulldropByMusicData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1104,7 +1104,7 @@ export const zGetIdByProviderByPublishByMusicData = z.object({
         provider: z.string(),
         id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1117,7 +1117,7 @@ export const zGetSlugByShareByMusicData = z.object({
     path: z.object({
         slug: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetArtworkBySlugByShareByMusicData = z.object({
@@ -1125,7 +1125,7 @@ export const zGetArtworkBySlugByShareByMusicData = z.object({
     path: z.object({
         slug: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetIdByShazamByMusicData = z.object({
@@ -1133,7 +1133,7 @@ export const zGetIdByShazamByMusicData = z.object({
     path: z.object({
         id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1144,7 +1144,7 @@ export const zGetIdByShazamByMusicResponse = z.null();
 export const zGetSongsByMusicData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1167,7 +1167,7 @@ export const zPostSongsByMusicData = z.object({
         file: zObjectId
     })),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1182,7 +1182,7 @@ export const zGetIdBySongsByMusicData = z.object({
     path: z.object({
         id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1195,7 +1195,7 @@ export const zGetDownloadBySongBySongsByMusicData = z.object({
     path: z.object({
         songId: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1206,13 +1206,13 @@ export const zGetDownloadBySongBySongsByMusicResponse = z.string();
 export const zGetUploadBySongsByMusicData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetApplicationsByOauthData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1227,7 +1227,7 @@ export const zPostApplicationsByOauthData = z.object({
         icon: zObjectId
     })),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetDownloadByClientByApplicationsByOauthData = z.object({
@@ -1235,7 +1235,7 @@ export const zGetDownloadByClientByApplicationsByOauthData = z.object({
     path: z.object({
         clientId: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1248,7 +1248,7 @@ export const zDeleteIdByApplicationsByOauthData = z.object({
     path: z.object({
         id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPatchIdByApplicationsByOauthData = z.object({
@@ -1260,31 +1260,31 @@ export const zPatchIdByApplicationsByOauthData = z.object({
     path: z.object({
         id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetUploadByApplicationsByOauthData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostAuthorizeByOauthData = z.object({
     body: z.optional(z.object({})),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostTokenByOauthData = z.object({
     body: z.optional(z.object({})),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetUserinfoByOauthData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1300,13 +1300,13 @@ export const zGetUserinfoByOauthResponse = z.object({
 export const zPostValidateByOauthData = z.object({
     body: z.optional(z.object({})),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetPayoutsByPaymentData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1319,7 +1319,7 @@ export const zGetIdByPayoutsByPaymentData = z.object({
     path: z.object({
         id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1336,7 +1336,7 @@ export const zPutPlaceholderByTasksData = z.object({
         audit: zAudit
     })),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1349,13 +1349,13 @@ export const zGetPictureByUserByUserData = z.object({
     path: z.object({
         userId: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostResendVerifyEmailByMailByUserData = z.object({
     body: z.optional(z.object({})),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostTokenByValidateByMailByUserData = z.object({
@@ -1363,7 +1363,7 @@ export const zPostTokenByValidateByMailByUserData = z.object({
     path: z.object({
         token: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostTokenByValidateByPhoneByUserData = z.object({
@@ -1371,13 +1371,13 @@ export const zPostTokenByValidateByPhoneByUserData = z.object({
     path: z.object({
         token: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetUploadByAvatarBySetMeByUserData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPutUserByUserData = z.object({
@@ -1388,7 +1388,7 @@ export const zPutUserByUserData = z.object({
         password: z.optional(z.string().min(8))
     })),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1407,13 +1407,13 @@ export const zPatchIdByUsersByUserData = z.object({
     path: z.object({
         id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zGetWalletData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1426,7 +1426,7 @@ export const zPutWalletData = z.object({
         amount: z.number()
     })),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1437,7 +1437,7 @@ export const zPutWalletResponse = zRequestPayoutResponse;
 export const zGetChatsByWhatsappData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1455,7 +1455,7 @@ export const zGetIdByChatsByWhatsappData = z.object({
     path: z.object({
         id: z.string()
     }),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 /**
@@ -1466,11 +1466,11 @@ export const zGetIdByChatsByWhatsappResponse = z.array(zWaEvent);
 export const zGetEventByWhatsappData = z.object({
     body: z.optional(z.object({})),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });
 
 export const zPostEventByWhatsappData = z.object({
     body: z.optional(z.object({})),
     path: z.optional(z.never()),
-    query: z.optional(z.never())
+    query: z.optional(z.any())
 });

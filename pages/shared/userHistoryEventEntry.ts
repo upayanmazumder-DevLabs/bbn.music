@@ -69,7 +69,7 @@ export function userHistoryEventEntry(event: UserHistoryEvent) {
                                 Label("Drop Review"),
                                 Label("Action: " + audit.action),
                                 Label("User: " + event.userId),
-                                Label("Reason: " + audit.reason),
+                                Label("Reason: " + audit.reason?.replaceAll("<br>", "\n")),
                             ),
                         );
                     }),

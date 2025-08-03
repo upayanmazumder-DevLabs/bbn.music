@@ -1,11 +1,11 @@
-export type { Auth } from '../../core/core/auth';
-export type { QuerySerializerOptions } from '../../core/core/bodySerializer';
+export type { Auth } from '../../core/core/auth.ts';
+export type { QuerySerializerOptions } from '../../core/core/bodySerializer.ts';
 export {
   formDataBodySerializer,
   jsonBodySerializer,
   urlSearchParamsBodySerializer,
-} from '../../core/core/bodySerializer';
-export { buildClientParams } from '../../core/core/params';
+} from '../../core/core/bodySerializer.ts';
+export { buildClientParams } from '../../core/core/params.ts';
 export { createClient } from './client.ts';
 export type {
   Client,

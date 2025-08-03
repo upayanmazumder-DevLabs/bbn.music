@@ -1,8 +1,8 @@
-import type { Auth } from '../../core/core/auth';
+import type { Auth } from '../../core/core/auth.ts';
 import type {
   Client as CoreClient,
   Config as CoreConfig,
-} from '../../core/core/types';
+} from '../../core/core/types.ts';
 import type { Middleware } from './utils.ts';
 
 export type ResponseStyle = 'data' | 'fields';

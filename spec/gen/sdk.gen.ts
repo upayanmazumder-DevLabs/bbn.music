@@ -19,8 +19,8 @@ export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends 
     meta?: Record<string, unknown>;
 };
 
-export const getDropsByAdmin = <ThrowOnError extends boolean = false>(options?: Options<GetDropsByAdminData, ThrowOnError>) => {
-    return (options?.client ?? _heyApiClient).get<GetDropsByAdminResponses, unknown, ThrowOnError>({
+export const getDropsByAdmin = <ThrowOnError extends boolean = false>(options: Options<GetDropsByAdminData, ThrowOnError>) => {
+    return (options.client ?? _heyApiClient).get<GetDropsByAdminResponses, unknown, ThrowOnError>({
         requestValidator: async (data: any) => {
             return await zGetDropsByAdminData.parseAsync(data);
         },

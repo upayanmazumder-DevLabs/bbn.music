@@ -7,11 +7,9 @@ export const zPayoutList = z.object({
     sum: z.number()
 });
 
-export const zObjectId = z.string();
-
 export const zArtistRef = z.union([
     z.object({
-        _id: zObjectId,
+        _id: z.string(),
         type: z.union([
             z.literal('PRIMARY'),
             z.literal('FEATURING')
@@ -46,16 +44,16 @@ export const zAdminDrop = z.object({
     gtin: z.optional(z.string()),
     title: z.optional(z.string()),
     artists: z.optional(z.array(zArtistRef)),
-    release: z.optional(z.iso.date()),
+    release: z.optional(z.iso.date().regex(/^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$/)),
     language: z.optional(z.string()),
     primaryGenre: z.optional(z.string()),
     secondaryGenre: z.optional(z.string()),
     compositionCopyright: z.optional(z.string()),
     soundRecordingCopyright: z.optional(z.string()),
-    artwork: z.optional(zObjectId),
-    songs: z.optional(z.array(zObjectId)),
+    artwork: z.optional(z.string()),
+    songs: z.optional(z.array(z.string())),
     comments: z.optional(z.string()),
-    _id: z.optional(zObjectId),
+    _id: z.optional(z.string()),
     user: z.optional(z.string()),
     type: z.optional(zDropType)
 }).and(z.object({
@@ -63,27 +61,11 @@ export const zAdminDrop = z.object({
     priority: z.number()
 }));
 
-export const zDrop = z.object({
-    gtin: z.optional(z.string()),
-    title: z.string(),
-    artists: z.array(zArtistRef),
-    release: z.iso.date(),
-    language: z.string(),
-    primaryGenre: z.string(),
-    secondaryGenre: z.string(),
-    compositionCopyright: z.string(),
-    soundRecordingCopyright: z.string(),
-    artwork: z.optional(zObjectId),
-    songs: z.array(zObjectId),
-    comments: z.optional(z.string()),
-    _id: zObjectId,
-    user: zObjectId,
-    type: zDropType
-});
+export const zObjectId = z.string();
 
 export const zSong = z.object({
-    _id: zObjectId,
-    user: zObjectId,
+    _id: z.string(),
+    user: z.string(),
     isrc: z.optional(z.string()),
     title: z.string(),
     artists: z.array(zArtistRef),
@@ -94,26 +76,24 @@ export const zSong = z.object({
     language: z.string(),
     explicit: z.boolean(),
     instrumental: z.boolean(),
-    file: zObjectId
+    file: z.string()
 });
-
-export const zObjectId2 = z.string();
 
 export const zFullDrop = z.object({
     gtin: z.optional(z.string()),
     title: z.string(),
     artists: z.array(zArtistRef),
-    release: z.iso.date(),
+    release: z.iso.date().regex(/^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$/),
     language: z.string(),
     primaryGenre: z.string(),
     secondaryGenre: z.string(),
     compositionCopyright: z.string(),
     soundRecordingCopyright: z.string(),
-    artwork: z.optional(zObjectId),
+    artwork: z.optional(z.string()),
     songs: z.array(zSong),
     comments: z.optional(z.string()),
-    _id: zObjectId,
-    user: zObjectId,
+    _id: z.string(),
+    user: z.string(),
     type: zDropType
 });
 
@@ -185,34 +165,311 @@ export const zAudit = z.union([
 ]);
 
 export const zArtist = z.object({
-    _id: zObjectId,
+    _id: z.string(),
     name: z.string(),
-    users: z.array(zObjectId),
-    avatar: z.optional(zObjectId),
+    users: z.array(z.string()),
+    avatar: z.optional(z.string()),
     spotify: z.optional(z.string()),
     apple: z.optional(z.string())
 });
 
-export const zSingleAdminDrop = z.object({
+export const zPaymentType = z.enum([
+    'RESTRAINED',
+    'UNRESTRAINED'
+]);
+
+export const zAdminWallet = z.object({
+    _id: z.string(),
+    transactions: z.array(z.object({
+        amount: z.number(),
+        timestamp: z.string(),
+        type: zPaymentType,
+        description: z.string(),
+        counterParty: z.string()
+    })),
+    cut: z.number(),
+    user: z.string(),
+    userName: z.optional(z.string()),
+    email: z.optional(z.string()),
+    balance: z.optional(z.object({
+        restrained: z.number(),
+        unrestrained: z.number()
+    })),
+    stripeAccountId: z.optional(z.string()),
+    accountType: zAccountType
+}).and(z.object({
+    email: z.email().regex(/^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/),
+    userName: z.string(),
+    balance: z.object({
+        restrained: z.number(),
+        unrestrained: z.number()
+    })
+}));
+
+export const zGroup = z.object({
+    displayName: z.string(),
+    _id: z.string(),
+    permission: z.array(z.string())
+});
+
+export const zWallet = z.object({
+    _id: z.string(),
+    transactions: z.array(z.object({
+        amount: z.number(),
+        timestamp: z.string(),
+        type: zPaymentType,
+        description: z.string(),
+        counterParty: z.string()
+    })),
+    cut: z.number(),
+    user: z.string(),
+    userName: z.optional(z.string()),
+    email: z.optional(z.string()),
+    balance: z.optional(z.object({
+        restrained: z.number(),
+        unrestrained: z.number()
+    })),
+    stripeAccountId: z.optional(z.string()),
+    accountType: zAccountType
+});
+
+export const zSearchReturn = z.intersection(z.union([
+    z.object({
+        _index: z.literal('drops'),
+        _source: z.object({
+            gtin: z.optional(z.string()),
+            title: z.optional(z.string()),
+            artists: z.optional(z.array(zArtistRef)),
+            release: z.optional(z.iso.date().regex(/^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$/)),
+            language: z.optional(z.string()),
+            primaryGenre: z.optional(z.string()),
+            secondaryGenre: z.optional(z.string()),
+            compositionCopyright: z.optional(z.string()),
+            soundRecordingCopyright: z.optional(z.string()),
+            artwork: z.optional(z.string()),
+            songs: z.optional(z.array(z.string())),
+            comments: z.optional(z.string()),
+            _id: z.optional(z.string()),
+            user: z.optional(z.string()),
+            type: z.optional(zDropType)
+        })
+    }),
+    z.object({
+        _index: z.literal('songs'),
+        _source: z.object({
+            _id: z.optional(z.string()),
+            user: z.optional(z.string()),
+            isrc: z.optional(z.string()),
+            title: z.optional(z.string()),
+            artists: z.optional(z.array(zArtistRef)),
+            primaryGenre: z.optional(z.string()),
+            secondaryGenre: z.optional(z.string()),
+            year: z.optional(z.number()),
+            country: z.optional(z.string()),
+            language: z.optional(z.string()),
+            explicit: z.optional(z.boolean()),
+            instrumental: z.optional(z.boolean()),
+            file: z.optional(z.string())
+        })
+    }),
+    z.object({
+        _index: z.literal('users'),
+        _source: z.object({
+            _id: z.string(),
+            authentication: z.optional(z.array(z.union([
+                z.object({
+                    type: z.literal('webAuthn'),
+                    id: z.string(),
+                    authenticatorAttachement: z.enum([
+                        'cross-platform',
+                        'platform'
+                    ]),
+                    publicKey: z.string()
+                }),
+                z.object({
+                    type: z.literal('oauth'),
+                    provider: z.string(),
+                    id: z.string()
+                }),
+                z.object({
+                    type: z.literal('password'),
+                    salt: z.string(),
+                    hash: z.string()
+                })
+            ]))),
+            profile: z.object({
+                email: z.string(),
+                phone: z.optional(z.string()),
+                username: z.string(),
+                avatar: z.optional(z.string()),
+                verified: z.object({
+                    email: z.boolean(),
+                    phone: z.optional(z.boolean())
+                })
+            }),
+            permissions: z.array(z.string()),
+            groups: z.array(zObjectId)
+        })
+    }),
+    z.object({
+        _index: z.literal('wallets'),
+        _source: zWallet
+    })
+]), z.object({
+    _id: z.string(),
+    _score: z.number()
+}));
+
+export const zShare = z.object({
+    _id: z.string(),
+    drop: z.string(),
+    slug: z.string(),
+    services: z.object({})
+});
+
+export const zOAuthApp = z.object({
+    _id: z.string(),
+    name: z.string(),
+    redirect: z.array(z.url()),
+    secret: z.string(),
+    icon: z.string(),
+    users: z.optional(z.array(z.string()))
+});
+
+export const zPayoutResponse = z.object({
+    entries: z.array(z.object({
+        isrc: z.string(),
+        data: z.array(z.object({
+            store: z.string(),
+            territory: z.string(),
+            quantity: z.number(),
+            revenue: z.number()
+        }))
+    })),
+    moneythisperiod: z.string(),
+    period: z.string(),
+    streams: z.number(),
+    _id: zObjectId
+});
+
+export const zArtistTypes = z.enum([
+    'PRIMARY',
+    'FEATURING',
+    'SONGWRITER',
+    'PRODUCER'
+]);
+
+export const zFile = z.object({
+    _id: z.string(),
+    length: z.number(),
+    chunkSize: z.number(),
+    uploadDate: z.string(),
+    filename: z.string(),
+    metadata: z.object({
+        type: z.string()
+    })
+});
+
+export const zReviewResponse = z.enum([
+    'APPROVED',
+    'DECLINE_COPYRIGHT',
+    'DECLINE_MALICIOUS_ACTIVITY'
+]);
+
+export const zOAuthScopes = z.enum([
+    'profile',
+    'email',
+    'phone'
+]);
+
+export const zWaEvent = z.object({
+    _id: z.string(),
+    changes: z.object({
+        messaging_product: z.string(),
+        metadata: z.object({
+            display_phone_number: z.string(),
+            phone_number_id: z.string()
+        }),
+        contacts: z.array(z.object({
+            profile: z.object({
+                name: z.string()
+            }),
+            wa_id: z.string()
+        })),
+        messages: z.array(z.object({
+            from: z.string(),
+            id: z.string(),
+            timestamp: z.string(),
+            text: z.object({
+                body: z.string()
+            }),
+            type: z.string()
+        }))
+    })
+});
+
+export const zGetDropsByAdminData = z.object({
+    body: z.optional(z.never()),
+    path: z.optional(z.never()),
+    query: z.object({
+        _lastId: z.optional(z.string()),
+        _offset: z.optional(z.number()),
+        _limit: z.optional(z.number()),
+        type: z.string(),
+        user: z.string(),
+        sort: z.optional(z.string())
+    })
+});
+
+/**
+ * Successful operation
+ */
+export const zGetDropsByAdminResponse = z.array(zAdminDrop);
+
+export const zGetIdByDropsByAdminData = z.object({
+    body: z.optional(z.never()),
+    path: z.object({
+        id: z.string()
+    }),
+    query: z.optional(z.any())
+});
+
+/**
+ * Successful operation
+ */
+export const zGetIdByDropsByAdminResponse = z.object({
     gtin: z.optional(z.string()),
     title: z.optional(z.string()),
     artists: z.optional(z.array(zArtistRef)),
-    release: z.optional(z.iso.date()),
+    release: z.optional(z.iso.date().regex(/^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$/)),
     language: z.optional(z.string()),
     primaryGenre: z.optional(z.string()),
     secondaryGenre: z.optional(z.string()),
     compositionCopyright: z.optional(z.string()),
     soundRecordingCopyright: z.optional(z.string()),
-    artwork: z.optional(zObjectId),
-    songs: z.optional(z.array(zSong.and(z.object({
+    artwork: z.optional(z.string()),
+    songs: z.optional(z.array(z.object({
+        _id: z.string(),
+        user: z.string(),
+        isrc: z.optional(z.string()),
+        title: z.string(),
+        artists: z.array(zArtistRef),
+        primaryGenre: z.string(),
+        secondaryGenre: z.string(),
+        year: z.number(),
+        country: z.optional(z.string()),
+        language: z.string(),
+        explicit: z.boolean(),
+        instrumental: z.boolean(),
+        file: z.string(),
         filename: z.string()
-    })))),
+    }))),
     comments: z.optional(z.string()),
-    _id: z.optional(zObjectId),
-    user: z.optional(zObjectId),
+    _id: z.optional(z.string()),
+    user: z.optional(z.string()),
     type: z.optional(zDropType),
     userInfo: z.optional(z.object({
-        _id: zObjectId,
+        _id: z.string(),
         authentication: z.optional(z.array(z.union([
             z.object({
                 type: z.literal('webAuthn'),
@@ -238,21 +495,18 @@ export const zSingleAdminDrop = z.object({
             email: z.string(),
             phone: z.optional(z.string()),
             username: z.string(),
-            avatar: z.optional(z.union([
-                zObjectId,
-                z.string()
-            ])),
+            avatar: z.optional(z.string()),
             verified: z.object({
                 email: z.boolean(),
                 phone: z.optional(z.boolean())
             })
         }),
         permissions: z.array(z.string()),
-        groups: z.array(zObjectId2)
+        groups: z.array(zObjectId)
     })),
     events: z.optional(z.array(z.object({
-        _id: zObjectId2,
-        userId: zObjectId2,
+        _id: zObjectId,
+        userId: zObjectId,
         storeToken: z.optional(z.string()),
         type: z.enum([
             'auth',
@@ -292,388 +546,6 @@ export const zSingleAdminDrop = z.object({
     artistList: z.optional(z.array(zArtist))
 });
 
-export const zUser = z.object({
-    _id: z.unknown(),
-    authentication: z.optional(z.array(z.union([
-        z.object({
-            type: z.literal('webAuthn'),
-            id: z.string(),
-            authenticatorAttachement: z.enum([
-                'cross-platform',
-                'platform'
-            ]),
-            publicKey: z.string()
-        }),
-        z.object({
-            type: z.literal('oauth'),
-            provider: z.string(),
-            id: z.string()
-        }),
-        z.object({
-            type: z.literal('password'),
-            salt: z.string(),
-            hash: z.string()
-        })
-    ]))),
-    profile: z.object({
-        email: z.string(),
-        phone: z.optional(z.string()),
-        username: z.string(),
-        avatar: z.optional(z.unknown()),
-        verified: z.object({
-            email: z.boolean(),
-            phone: z.optional(z.boolean())
-        })
-    }),
-    permissions: z.array(z.string()),
-    groups: z.array(zObjectId2)
-});
-
-export const zUserHistoryEvent = z.object({
-    _id: zObjectId2,
-    userId: zObjectId2,
-    storeToken: z.optional(z.string()),
-    type: z.enum([
-        'auth',
-        'refresh-auth',
-        'action'
-    ]),
-    ip: z.optional(z.string()),
-    source: z.optional(z.object({
-        type: z.enum([
-            'browser',
-            'mobile'
-        ]),
-        method: z.optional(z.union([
-            z.object({
-                type: z.literal('webAuthn'),
-                id: z.string(),
-                authenticatorAttachement: z.enum([
-                    'cross-platform',
-                    'platform'
-                ]),
-                publicKey: z.string()
-            }),
-            z.object({
-                type: z.literal('oauth'),
-                provider: z.string()
-            }),
-            z.object({
-                type: z.literal('password')
-            })
-        ])),
-        platform: z.optional(z.string()),
-        platformVersion: z.optional(z.string()),
-        legacyUserAgent: z.optional(z.string())
-    })),
-    meta: z.optional(z.object({}))
-});
-
-export const zPaymentType = z.enum([
-    'RESTRAINED',
-    'UNRESTRAINED'
-]);
-
-export const zAdminWallet = z.object({
-    _id: zObjectId,
-    transactions: z.array(z.object({
-        amount: z.number(),
-        timestamp: z.string(),
-        type: zPaymentType,
-        description: z.string(),
-        counterParty: z.string()
-    })),
-    cut: z.number(),
-    user: zObjectId,
-    userName: z.optional(z.string()),
-    email: z.optional(z.string()),
-    balance: z.optional(z.object({
-        restrained: z.number(),
-        unrestrained: z.number()
-    })),
-    stripeAccountId: z.optional(z.string()),
-    accountType: zAccountType
-}).and(z.object({
-    email: z.email(),
-    userName: z.string(),
-    balance: z.object({
-        restrained: z.number(),
-        unrestrained: z.number()
-    })
-}));
-
-export const zWallet = z.object({
-    _id: zObjectId,
-    transactions: z.array(z.object({
-        amount: z.number(),
-        timestamp: z.string(),
-        type: zPaymentType,
-        description: z.string(),
-        counterParty: z.string()
-    })),
-    cut: z.number(),
-    user: zObjectId,
-    userName: z.optional(z.string()),
-    email: z.optional(z.string()),
-    balance: z.optional(z.object({
-        restrained: z.number(),
-        unrestrained: z.number()
-    })),
-    stripeAccountId: z.optional(z.string()),
-    accountType: zAccountType
-});
-
-export const zGroup = z.object({
-    displayName: z.string(),
-    _id: zObjectId,
-    permission: z.array(z.string())
-});
-
-export const zSearchReturn = z.intersection(z.union([
-    z.object({
-        _index: z.literal('drops'),
-        _source: z.object({
-            gtin: z.optional(z.string()),
-            title: z.optional(z.string()),
-            artists: z.optional(z.array(zArtistRef)),
-            release: z.optional(z.iso.date()),
-            language: z.optional(z.string()),
-            primaryGenre: z.optional(z.string()),
-            secondaryGenre: z.optional(z.string()),
-            compositionCopyright: z.optional(z.string()),
-            soundRecordingCopyright: z.optional(z.string()),
-            artwork: z.optional(zObjectId),
-            songs: z.optional(z.array(zObjectId)),
-            comments: z.optional(z.string()),
-            _id: z.optional(zObjectId),
-            user: z.optional(zObjectId),
-            type: z.optional(zDropType)
-        })
-    }),
-    z.object({
-        _index: z.literal('songs'),
-        _source: z.object({
-            _id: z.optional(zObjectId),
-            user: z.optional(zObjectId),
-            isrc: z.optional(z.string()),
-            title: z.optional(z.string()),
-            artists: z.optional(z.array(zArtistRef)),
-            primaryGenre: z.optional(z.string()),
-            secondaryGenre: z.optional(z.string()),
-            year: z.optional(z.number()),
-            country: z.optional(z.string()),
-            language: z.optional(z.string()),
-            explicit: z.optional(z.boolean()),
-            instrumental: z.optional(z.boolean()),
-            file: z.optional(zObjectId)
-        })
-    }),
-    z.object({
-        _index: z.literal('users'),
-        _source: z.object({
-            _id: zObjectId,
-            authentication: z.optional(z.array(z.union([
-                z.object({
-                    type: z.literal('webAuthn'),
-                    id: z.string(),
-                    authenticatorAttachement: z.enum([
-                        'cross-platform',
-                        'platform'
-                    ]),
-                    publicKey: z.string()
-                }),
-                z.object({
-                    type: z.literal('oauth'),
-                    provider: z.string(),
-                    id: z.string()
-                }),
-                z.object({
-                    type: z.literal('password'),
-                    salt: z.string(),
-                    hash: z.string()
-                })
-            ]))),
-            profile: z.object({
-                email: z.string(),
-                phone: z.optional(z.string()),
-                username: z.string(),
-                avatar: z.optional(z.union([
-                    zObjectId,
-                    z.string()
-                ])),
-                verified: z.object({
-                    email: z.boolean(),
-                    phone: z.optional(z.boolean())
-                })
-            }),
-            permissions: z.array(z.string()),
-            groups: z.array(zObjectId2)
-        })
-    }),
-    z.object({
-        _index: z.literal('wallets'),
-        _source: zWallet
-    })
-]), z.object({
-    _id: z.string(),
-    _score: z.number()
-}));
-
-export const zUpdateDrop = z.object({
-    gtin: z.optional(z.string()),
-    title: z.optional(z.string()),
-    artists: z.optional(z.array(zArtistRef)),
-    release: z.optional(z.iso.date()),
-    language: z.optional(z.string()),
-    primaryGenre: z.optional(z.string()),
-    secondaryGenre: z.optional(z.string()),
-    compositionCopyright: z.optional(z.string()),
-    soundRecordingCopyright: z.optional(z.string()),
-    artwork: z.optional(z.string()),
-    songs: z.optional(z.array(z.object({
-        _id: zObjectId,
-        isrc: z.optional(z.string()),
-        title: z.string(),
-        artists: z.array(zArtistRef),
-        primaryGenre: z.string(),
-        secondaryGenre: z.string(),
-        year: z.number(),
-        country: z.optional(z.string()),
-        language: z.string(),
-        explicit: z.boolean(),
-        instrumental: z.boolean()
-    }))),
-    comments: z.optional(z.string()),
-    type: z.optional(zDropType)
-});
-
-export const zShare = z.object({
-    _id: zObjectId,
-    drop: zObjectId,
-    slug: z.string(),
-    services: z.object({})
-});
-
-export const zOAuthApp = z.object({
-    _id: zObjectId,
-    name: z.string(),
-    redirect: z.array(z.url()),
-    secret: z.string(),
-    icon: zObjectId,
-    users: z.optional(z.array(zObjectId))
-});
-
-export const zPayoutResponse = z.object({
-    entries: z.array(z.object({
-        isrc: z.string(),
-        data: z.array(z.object({
-            store: z.string(),
-            territory: z.string(),
-            quantity: z.number(),
-            revenue: z.number()
-        }))
-    })),
-    moneythisperiod: z.string(),
-    period: z.string(),
-    streams: z.number(),
-    _id: zObjectId2
-});
-
-export const zArtistTypes = z.enum([
-    'PRIMARY',
-    'FEATURING',
-    'SONGWRITER',
-    'PRODUCER'
-]);
-
-export const zFile = z.object({
-    _id: zObjectId,
-    length: z.number(),
-    chunkSize: z.number(),
-    uploadDate: z.string(),
-    filename: z.string(),
-    metadata: z.object({
-        type: z.string()
-    })
-});
-
-export const zReviewResponse = z.enum([
-    'APPROVED',
-    'DECLINE_COPYRIGHT',
-    'DECLINE_MALICIOUS_ACTIVITY'
-]);
-
-export const zOAuthScopes = z.enum([
-    'profile',
-    'email',
-    'phone'
-]);
-
-export const zRequestPayoutResponse = z.union([
-    z.object({
-        type: z.literal('createAccount'),
-        url: z.string()
-    }),
-    z.object({
-        type: z.literal('needDetails'),
-        missingDetails: z.array(z.string()),
-        url: z.string()
-    }),
-    z.object({
-        type: z.literal('success')
-    })
-]);
-
-export const zWaEvent = z.object({
-    _id: zObjectId,
-    changes: z.object({
-        messaging_product: z.string(),
-        metadata: z.object({
-            display_phone_number: z.string(),
-            phone_number_id: z.string()
-        }),
-        contacts: z.array(z.object({
-            profile: z.object({
-                name: z.string()
-            }),
-            wa_id: z.string()
-        })),
-        messages: z.array(z.object({
-            from: z.string(),
-            id: z.string(),
-            timestamp: z.string(),
-            text: z.object({
-                body: z.string()
-            }),
-            type: z.string()
-        }))
-    })
-});
-
-export const zGetDropsByAdminData = z.object({
-    body: z.optional(z.never()),
-    path: z.optional(z.never()),
-    query: z.optional(z.any())
-});
-
-/**
- * Successful operation
- */
-export const zGetDropsByAdminResponse = z.array(zAdminDrop);
-
-export const zGetIdByDropsByAdminData = z.object({
-    body: z.optional(z.never()),
-    path: z.object({
-        id: z.string()
-    }),
-    query: z.optional(z.any())
-});
-
-/**
- * Successful operation
- */
-export const zGetIdByDropsByAdminResponse = zSingleAdminDrop;
-
 export const zGetDownloadByFileByFilesByAdminData = z.object({
     body: z.optional(z.never()),
     path: z.object({
@@ -698,7 +570,11 @@ export const zDeleteIdByFilesByAdminData = z.object({
 export const zGetGroupsByAdminData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.any())
+    query: z.optional(z.object({
+        _lastId: z.optional(z.string()),
+        _offset: z.optional(z.number()),
+        _limit: z.optional(z.number())
+    }))
 });
 
 /**
@@ -709,7 +585,11 @@ export const zGetGroupsByAdminResponse = z.array(zGroup);
 export const zGetPayoutsByAdminData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.any())
+    query: z.optional(z.object({
+        _lastId: z.optional(z.string()),
+        _offset: z.optional(z.number()),
+        _limit: z.optional(z.number())
+    }))
 });
 
 /**
@@ -728,7 +608,11 @@ export const zGetQueryBySearchByAdminData = z.object({
     path: z.object({
         query: z.string()
     }),
-    query: z.optional(z.any())
+    query: z.optional(z.object({
+        _lastId: z.optional(z.string()),
+        _offset: z.optional(z.number()),
+        _limit: z.optional(z.number())
+    }))
 });
 
 /**
@@ -745,7 +629,11 @@ export const zPostSyncMappingByAdminData = z.object({
 export const zGetWalletsByAdminData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.any())
+    query: z.optional(z.object({
+        _lastId: z.optional(z.string()),
+        _offset: z.optional(z.number()),
+        _limit: z.optional(z.number())
+    }))
 });
 
 /**
@@ -768,7 +656,7 @@ export const zGetIdByWalletsByAdminResponse = zAdminWallet;
 
 export const zPatchIdByWalletsByAdminData = z.object({
     body: z.optional(z.object({
-        _id: z.optional(zObjectId),
+        _id: z.optional(z.string()),
         transactions: z.optional(z.array(z.object({
             amount: z.number(),
             timestamp: z.string(),
@@ -777,7 +665,7 @@ export const zPatchIdByWalletsByAdminData = z.object({
             counterParty: z.string()
         }))),
         cut: z.optional(z.string()),
-        user: z.optional(zObjectId),
+        user: z.optional(z.string()),
         userName: z.optional(z.string()),
         email: z.optional(z.string()),
         balance: z.optional(z.object({
@@ -920,7 +808,11 @@ export const zPostTypeByTypeByDropByMusicData = z.object({
 export const zGetArtistsByMusicData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.any())
+    query: z.optional(z.object({
+        _lastId: z.optional(z.string()),
+        _offset: z.optional(z.number()),
+        _limit: z.optional(z.number())
+    }))
 });
 
 /**
@@ -942,13 +834,17 @@ export const zPostArtistsByMusicData = z.object({
  * Successful operation
  */
 export const zPostArtistsByMusicResponse = z.object({
-    id: zObjectId
+    id: z.string()
 });
 
 export const zGetDropsByMusicData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.any())
+    query: z.optional(z.object({
+        _lastId: z.optional(z.string()),
+        _offset: z.optional(z.number()),
+        _limit: z.optional(z.number())
+    }))
 });
 
 /**
@@ -958,17 +854,17 @@ export const zGetDropsByMusicResponse = z.array(z.object({
     gtin: z.optional(z.string()),
     title: z.optional(z.string()),
     artists: z.optional(z.array(zArtistRef)),
-    release: z.optional(z.iso.date()),
+    release: z.optional(z.iso.date().regex(/^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$/)),
     language: z.optional(z.string()),
     primaryGenre: z.optional(z.string()),
     secondaryGenre: z.optional(z.string()),
     compositionCopyright: z.optional(z.string()),
     soundRecordingCopyright: z.optional(z.string()),
-    artwork: z.optional(zObjectId),
-    songs: z.optional(z.array(zObjectId)),
+    artwork: z.optional(z.string()),
+    songs: z.optional(z.array(z.string())),
     comments: z.optional(z.string()),
-    _id: z.optional(zObjectId),
-    user: z.optional(zObjectId),
+    _id: z.optional(z.string()),
+    user: z.optional(z.string()),
     type: z.optional(zDropType)
 }));
 
@@ -986,7 +882,21 @@ export const zPostDropByDropsByMusicData = z.object({
 /**
  * Successful operation
  */
-export const zPostDropByDropsByMusicResponse = zSong;
+export const zPostDropByDropsByMusicResponse = z.object({
+    _id: z.string(),
+    user: z.string(),
+    isrc: z.optional(z.string()),
+    title: z.string(),
+    artists: z.array(zArtistRef),
+    primaryGenre: z.string(),
+    secondaryGenre: z.string(),
+    year: z.number(),
+    country: z.optional(z.string()),
+    language: z.string(),
+    explicit: z.boolean(),
+    instrumental: z.boolean(),
+    file: z.string()
+});
 
 export const zGetDownloadByDropByDropsByMusicData = z.object({
     body: z.optional(z.never()),
@@ -1024,22 +934,48 @@ export const zGetIdByDropsByMusicResponse = z.object({
     gtin: z.optional(z.string()),
     title: z.optional(z.string()),
     artists: z.optional(z.array(zArtistRef)),
-    release: z.optional(z.iso.date()),
+    release: z.optional(z.iso.date().regex(/^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$/)),
     language: z.optional(z.string()),
     primaryGenre: z.optional(z.string()),
     secondaryGenre: z.optional(z.string()),
     compositionCopyright: z.optional(z.string()),
     soundRecordingCopyright: z.optional(z.string()),
-    artwork: z.optional(zObjectId),
+    artwork: z.optional(z.string()),
     songs: z.optional(z.array(zSong)),
     comments: z.optional(z.string()),
-    _id: z.optional(zObjectId),
-    user: z.optional(zObjectId),
+    _id: z.optional(z.string()),
+    user: z.optional(z.string()),
     type: z.optional(zDropType)
 });
 
 export const zPatchIdByDropsByMusicData = z.object({
-    body: z.optional(zUpdateDrop),
+    body: z.optional(z.object({
+        gtin: z.optional(z.string()),
+        title: z.optional(z.string()),
+        artists: z.optional(z.array(zArtistRef)),
+        release: z.optional(z.iso.date().regex(/^(?:(?:\d\d[2468][048]|\d\d[13579][26]|\d\d0[48]|[02468][048]00|[13579][26]00)-02-29|\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\d|30)|(?:02)-(?:0[1-9]|1\d|2[0-8])))$/)),
+        language: z.optional(z.string()),
+        primaryGenre: z.optional(z.string()),
+        secondaryGenre: z.optional(z.string()),
+        compositionCopyright: z.optional(z.string()),
+        soundRecordingCopyright: z.optional(z.string()),
+        artwork: z.optional(z.string()),
+        songs: z.optional(z.array(z.object({
+            _id: z.string(),
+            isrc: z.optional(z.string()),
+            title: z.string(),
+            artists: z.array(zArtistRef),
+            primaryGenre: z.string(),
+            secondaryGenre: z.string(),
+            year: z.number(),
+            country: z.optional(z.string()),
+            language: z.string(),
+            explicit: z.boolean(),
+            instrumental: z.boolean()
+        }))),
+        comments: z.optional(z.string()),
+        type: z.optional(zDropType)
+    })),
     path: z.object({
         id: z.string()
     }),
@@ -1058,7 +994,7 @@ export const zPostShareByDropsByMusicData = z.object({
  * Successful operation
  */
 export const zPostShareByDropsByMusicResponse = z.object({
-    drop: zObjectId,
+    drop: z.string(),
     slug: z.string(),
     services: z.object({})
 });
@@ -1090,7 +1026,11 @@ export const zGetIdByShareByDropsByMusicResponse = z.union([
 export const zGetFulldropByMusicData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.any())
+    query: z.optional(z.object({
+        _lastId: z.optional(z.string()),
+        _offset: z.optional(z.number()),
+        _limit: z.optional(z.number())
+    }))
 });
 
 /**
@@ -1144,7 +1084,11 @@ export const zGetIdByShazamByMusicResponse = z.null();
 export const zGetSongsByMusicData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.any())
+    query: z.optional(z.object({
+        _lastId: z.optional(z.string()),
+        _offset: z.optional(z.number()),
+        _limit: z.optional(z.number())
+    }))
 });
 
 /**
@@ -1164,7 +1108,7 @@ export const zPostSongsByMusicData = z.object({
         language: z.string(),
         explicit: z.boolean(),
         instrumental: z.boolean(),
-        file: zObjectId
+        file: z.string()
     })),
     path: z.optional(z.never()),
     query: z.optional(z.any())
@@ -1174,7 +1118,7 @@ export const zPostSongsByMusicData = z.object({
  * Successful operation
  */
 export const zPostSongsByMusicResponse = z.object({
-    id: zObjectId
+    id: z.string()
 });
 
 export const zGetIdBySongsByMusicData = z.object({
@@ -1188,7 +1132,21 @@ export const zGetIdBySongsByMusicData = z.object({
 /**
  * Successful operation
  */
-export const zGetIdBySongsByMusicResponse = zSong;
+export const zGetIdBySongsByMusicResponse = z.object({
+    _id: z.string(),
+    user: z.string(),
+    isrc: z.optional(z.string()),
+    title: z.string(),
+    artists: z.array(zArtistRef),
+    primaryGenre: z.string(),
+    secondaryGenre: z.string(),
+    year: z.number(),
+    country: z.optional(z.string()),
+    language: z.string(),
+    explicit: z.boolean(),
+    instrumental: z.boolean(),
+    file: z.string()
+});
 
 export const zGetDownloadBySongBySongsByMusicData = z.object({
     body: z.optional(z.never()),
@@ -1212,7 +1170,11 @@ export const zGetUploadBySongsByMusicData = z.object({
 export const zGetApplicationsByOauthData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.any())
+    query: z.optional(z.object({
+        _lastId: z.optional(z.string()),
+        _offset: z.optional(z.number()),
+        _limit: z.optional(z.number())
+    }))
 });
 
 /**
@@ -1224,7 +1186,7 @@ export const zPostApplicationsByOauthData = z.object({
     body: z.optional(z.object({
         name: z.string(),
         redirect: z.array(z.url()),
-        icon: zObjectId
+        icon: z.string()
     })),
     path: z.optional(z.never()),
     query: z.optional(z.any())
@@ -1255,7 +1217,7 @@ export const zPatchIdByApplicationsByOauthData = z.object({
     body: z.optional(z.object({
         name: z.string(),
         redirect: z.array(z.url()),
-        icon: zObjectId
+        icon: z.string()
     })),
     path: z.object({
         id: z.string()
@@ -1306,7 +1268,11 @@ export const zPostValidateByOauthData = z.object({
 export const zGetPayoutsByPaymentData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.any())
+    query: z.optional(z.object({
+        _lastId: z.optional(z.string()),
+        _offset: z.optional(z.number()),
+        _limit: z.optional(z.number())
+    }))
 });
 
 /**
@@ -1325,7 +1291,21 @@ export const zGetIdByPayoutsByPaymentData = z.object({
 /**
  * Successful operation
  */
-export const zGetIdByPayoutsByPaymentResponse = zPayoutResponse;
+export const zGetIdByPayoutsByPaymentResponse = z.object({
+    entries: z.array(z.object({
+        isrc: z.string(),
+        data: z.array(z.object({
+            store: z.string(),
+            territory: z.string(),
+            quantity: z.number(),
+            revenue: z.number()
+        }))
+    })),
+    moneythisperiod: z.string(),
+    period: z.string(),
+    streams: z.number(),
+    _id: zObjectId
+});
 
 export const zPutPlaceholderByTasksData = z.object({
     body: z.optional(z.object({
@@ -1383,7 +1363,7 @@ export const zGetUploadByAvatarBySetMeByUserData = z.object({
 export const zPutUserByUserData = z.object({
     body: z.optional(z.object({
         name: z.optional(z.string().min(2)),
-        email: z.optional(z.email()),
+        email: z.optional(z.email().regex(/^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/)),
         phone: z.optional(z.string()),
         password: z.optional(z.string().min(8))
     })),
@@ -1399,7 +1379,7 @@ export const zPutUserByUserResponse = z.object({});
 export const zPatchIdByUsersByUserData = z.object({
     body: z.optional(z.object({
         id: z.string(),
-        email: z.optional(z.email()),
+        email: z.optional(z.email().regex(/^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/)),
         name: z.string(),
         password: z.optional(z.string().min(8)),
         groups: z.array(z.string())
@@ -1419,7 +1399,26 @@ export const zGetWalletData = z.object({
 /**
  * Successful operation
  */
-export const zGetWalletResponse = zWallet;
+export const zGetWalletResponse = z.object({
+    _id: z.string(),
+    transactions: z.array(z.object({
+        amount: z.number(),
+        timestamp: z.string(),
+        type: zPaymentType,
+        description: z.string(),
+        counterParty: z.string()
+    })),
+    cut: z.number(),
+    user: z.string(),
+    userName: z.optional(z.string()),
+    email: z.optional(z.string()),
+    balance: z.optional(z.object({
+        restrained: z.number(),
+        unrestrained: z.number()
+    })),
+    stripeAccountId: z.optional(z.string()),
+    accountType: zAccountType
+});
 
 export const zPutWalletData = z.object({
     body: z.optional(z.object({
@@ -1432,12 +1431,29 @@ export const zPutWalletData = z.object({
 /**
  * Successful operation
  */
-export const zPutWalletResponse = zRequestPayoutResponse;
+export const zPutWalletResponse = z.union([
+    z.object({
+        type: z.literal('createAccount'),
+        url: z.string()
+    }),
+    z.object({
+        type: z.literal('needDetails'),
+        missingDetails: z.array(z.string()),
+        url: z.string()
+    }),
+    z.object({
+        type: z.literal('success')
+    })
+]);
 
 export const zGetChatsByWhatsappData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.optional(z.any())
+    query: z.optional(z.object({
+        _lastId: z.optional(z.string()),
+        _offset: z.optional(z.number()),
+        _limit: z.optional(z.number())
+    }))
 });
 
 /**

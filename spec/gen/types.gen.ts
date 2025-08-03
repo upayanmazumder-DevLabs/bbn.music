@@ -348,12 +348,12 @@ export type WaEvent = {
 export type GetDropsByAdminData = {
     body?: never;
     path?: never;
-    query: {
+    query?: {
         _lastId?: string;
         _offset?: number;
         _limit?: number;
-        type: string;
-        user: string;
+        type?: string;
+        user?: string;
         sort?: string;
     };
     url: '/api/@bbn/admin/drops';

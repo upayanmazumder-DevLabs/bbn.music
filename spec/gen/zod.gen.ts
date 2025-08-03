@@ -411,14 +411,14 @@ export const zWaEvent = z.object({
 export const zGetDropsByAdminData = z.object({
     body: z.optional(z.never()),
     path: z.optional(z.never()),
-    query: z.object({
+    query: z.optional(z.object({
         _lastId: z.optional(z.string()),
         _offset: z.optional(z.number()),
         _limit: z.optional(z.number()),
-        type: z.string(),
-        user: z.string(),
+        type: z.optional(z.string()),
+        user: z.optional(z.string()),
         sort: z.optional(z.string())
-    })
+    }))
 });
 
 /**

@@ -1,7 +1,7 @@
 import { BasicEntry } from "shared/components.ts";
 import { ProfileData, RegisterAuthRefresh, sheetStack, showProfilePicture } from "shared/helper.ts";
 import { placeholder } from "shared/mod.ts";
-import { asRef, Box, Content, createPage, createRoute, DateInput, DropDown, Empty, Entry, Grid, Label, PrimaryButton, SheetHeader, Spinner, TextInput, WriteSignal } from "webgen/mod.ts";
+import { asRef, Box, Content, createCachedLoader, createIndexPaginationLoader, createPage, createRoute, DateInput, DropDown, Empty, Entry, Grid, Label, PrimaryButton, SheetHeader, Spinner, TextButton, TextInput, WriteSignal } from "webgen/mod.ts";
 import { API, PaymentType, SearchReturn, stupidErrorAlert, User, Wallet, zAccountType } from "../../../spec/mod.ts";
 import { WalletView } from "../../wallet/component.ts";
 import { ReviewEntry } from "../entries.ts";
@@ -27,7 +27,11 @@ searchString.listen(async (val) => {
 });
 
 const userSheet = async (user: User) => {
-    const drops = await API.getDropsByAdmin({ query: { user: user._id } }).then(stupidErrorAlert);
+    const loader = createCachedLoader(createIndexPaginationLoader({
+        limit: 30,
+        loader: (offset, limit) => API.getDropsByAdmin({ query: { user: user._id, _offset: offset, _limit: limit } }).then(stupidErrorAlert),
+    }));
+    loader.next();
     const wallet = await API.getIdByWalletsByAdmin({ path: { id: user._id } }).then(stupidErrorAlert);
     return Grid(
         SheetHeader("User", sheetStack),
@@ -51,7 +55,14 @@ const userSheet = async (user: User) => {
         ).setTemplateColumns("auto 1fr 1fr").setGap(),
         Grid(
             Label("Drops").setTextSize("2xl").setFontWeight("bold"),
-            ...drops.map((drop) => ReviewEntry(drop, true, true)),
+            Box(loader.items.map((reviews) => reviews.map((review) => ReviewEntry(review, true)))),
+            Box(loader.hasMore.map((hasMore) =>
+                hasMore
+                    ? TextButton("Load More").onPromiseClick(async () => {
+                        await loader.next();
+                    })
+                    : Label("No more publishing")
+            )),
         ),
     ).setGap();
 };

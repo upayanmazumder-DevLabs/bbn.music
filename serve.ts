@@ -1,6 +1,6 @@
-import { serve } from "https://deno.land/x/esbuild_serve@1.5.0/mod.ts";
-import { walkSync } from "jsr:@std/fs@1.0.5";
-import { createClient } from "npm:@hey-api/openapi-ts@0.80.1";
+import { serve } from "esbuild_serve";
+import { walkSync } from "@std/fs";
+import { createClient } from "@hey-api/openapi-ts";
 
 let input = "https://bbn.music/openapi";
 await fetch("http://localhost:8443/openapi").then(() => input = "http://localhost:8443/openapi").catch(() => {});

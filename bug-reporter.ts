@@ -1,5 +1,5 @@
 // @deno-types="https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/master/types/platform/index.d.ts"
-import browser from "https://unpkg.com/platform@1.3.6/platform.js";
+import browser from "browser";
 import { API } from "./spec/mod.ts";
 
 globalThis.onunhandledrejection = (e) => {

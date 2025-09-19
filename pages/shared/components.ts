@@ -1,7 +1,7 @@
-import type { ChartConfiguration, ChartConfigurationCustomTypesPerDataset, ChartType, DefaultDataPoint } from "https://esm.sh/chart.js@4.4.6/auto";
+import type { ChartConfiguration, ChartConfigurationCustomTypesPerDataset, ChartType, DefaultDataPoint } from "chart-js";
 import { Box, Component, Empty, Grid, Label, lazy } from "webgen/mod.ts";
 
-const lazyChart = lazy(() => import("https://esm.sh/chart.js@4.4.6/auto"));
+const lazyChart = lazy(() => import("chart-js"));
 
 export const Chart = <TType extends ChartType = ChartType, TData = DefaultDataPoint<TType>, TLabel = unknown>(config: ChartConfiguration<TType, TData, TLabel> | ChartConfigurationCustomTypesPerDataset<TType, TData, TLabel>) => {
     const canvas = document.createElement("canvas");

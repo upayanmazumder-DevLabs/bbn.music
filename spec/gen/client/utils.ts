@@ -1,14 +1,14 @@
-import { getAuthToken } from '../../core/core/auth.ts';
+import { getAuthToken } from '../core/auth.ts';
 import type {
   QuerySerializer,
   QuerySerializerOptions,
-} from '../../core/core/bodySerializer.ts';
-import { jsonBodySerializer } from '../../core/core/bodySerializer.ts';
+} from '../core/bodySerializer.ts';
+import { jsonBodySerializer } from '../core/bodySerializer.ts';
 import {
   serializeArrayParam,
   serializeObjectParam,
   serializePrimitiveParam,
-} from '../../core/core/pathSerializer.ts';
+} from '../core/pathSerializer.ts';
 import type { Client, ClientOptions, Config, RequestOptions } from './types.ts';
 
 interface PathSerializer {

@@ -24,13 +24,12 @@ await createClient({
 for (const { path } of walkSync("spec/gen", { exts: ["ts"] })) {
     const contents = Deno.readTextFileSync(path)
         .replaceAll(/(import|export) ([\s\S]+?)from '\.(.*?)';/gs, "$1 $2from '.$3.ts';")
-        .replaceAll("from '../core", "from '../../core/core")
-        .replaceAll("export { createClient } from './client/fetch/index.ts';", "export { createClient } from './client.ts';")
+        .replaceAll("export { createClient } from './client/index.ts';", "export { createClient } from './client.ts';")
         .replaceAll("requestValidator: async (data) => {", "requestValidator: async (data: any) => {")
         .replaceAll("responseValidator: async (data) => {", "responseValidator: async (data: any) => {")
-        .replaceAll(" Client } from './client.ts';", " Client } from './client/fetch/index.ts';")
+        .replaceAll(" Client } from './client.ts';", " Client } from './client/index.ts';")
         .replaceAll("query: z.optional(z.never())", "query: z.optional(z.any())")
-        .replaceAll("createConfig } from './client.ts'", "createConfig } from './client/fetch/index.ts'");
+        .replaceAll("createConfig } from './client.ts'", "createConfig } from './client/index.ts'");
     Deno.writeTextFileSync(path, contents);
 }
 new Deno.Command("deno", {

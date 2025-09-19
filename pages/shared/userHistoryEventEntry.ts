@@ -1,7 +1,11 @@
 import { Empty, Entry, Grid, Label, PrimaryButton } from "webgen/mod.ts";
-import { UserHistoryEvent, zAudit } from "../../spec/mod.ts";
+import { ObjectId, UserHistoryEvent, zAudit } from "../../spec/mod.ts";
 import { BasicEntry } from "./mod.ts";
 import { sheetStack } from "./helper.ts";
+
+function dateFromObjectId(objectId: ObjectId) {
+	return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
+};
 
 export function userHistoryEventEntry(event: UserHistoryEvent) {
     if (event.type === "action") {
@@ -55,7 +59,7 @@ export function userHistoryEventEntry(event: UserHistoryEvent) {
                 return Entry(
                     BasicEntry(
                         "Drop type changed",
-                        `from ${audit.data?.type ?? "unknown"} to ${audit.type} by ${event.userId}`,
+                        `from ${audit.data?.type ?? "unknown"} to ${audit.type} by ${event.userId} at ${dateFromObjectId(event._id).toLocaleString()}`,
                     ),
                 ).setWidth("100%").setPadding("0.5rem 0");
             case "drop-review":

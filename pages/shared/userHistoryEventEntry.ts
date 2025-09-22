@@ -1,11 +1,11 @@
 import { Empty, Entry, Grid, Label, PrimaryButton } from "webgen/mod.ts";
 import { ObjectId, UserHistoryEvent, zAudit } from "../../spec/mod.ts";
-import { BasicEntry } from "./mod.ts";
 import { sheetStack } from "./helper.ts";
+import { BasicEntry } from "./mod.ts";
 
 function dateFromObjectId(objectId: ObjectId) {
-	return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
-};
+    return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
+}
 
 export function userHistoryEventEntry(event: UserHistoryEvent) {
     if (event.type === "action") {
@@ -66,7 +66,7 @@ export function userHistoryEventEntry(event: UserHistoryEvent) {
                 return Entry(
                     BasicEntry(
                         "Drop review ",
-                        `${audit.action} by ${event.userId} `,
+                        `${audit.action} by ${event.userId} at ${dateFromObjectId(event._id).toLocaleString()}`,
                     ).onClick(() => {
                         sheetStack.addSheet(
                             Grid(
@@ -82,7 +82,7 @@ export function userHistoryEventEntry(event: UserHistoryEvent) {
                 return Entry(
                     BasicEntry(
                         "Drop created",
-                        `by ${event.userId}`,
+                        `by ${event.userId} at ${dateFromObjectId(event._id).toLocaleString()}`,
                     ),
                 ).setWidth("100%").setPadding("0.5rem 0");
             default:

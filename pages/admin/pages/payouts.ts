@@ -23,7 +23,7 @@ createPage(
         weight: 9,
     },
     Content(
-        Entry(BasicEntry("Upload Payout file (.xlsx)")).onClick(() => upload("manual")),
+        Entry(BasicEntry("Upload Payout file (.csv)")).onClick(() => upload("manual")),
         Entry(BasicEntry("Sync Mapping with internal Backend")).onPromiseClick(async () => {
             await API.postSyncMappingByAdmin();
         }),

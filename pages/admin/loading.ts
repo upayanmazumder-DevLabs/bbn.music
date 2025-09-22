@@ -4,7 +4,7 @@ import { createFilePicker } from "webgen/mod.ts";
 import { APITools } from "../../spec/mod.ts";
 
 const urls = {
-    "manual": ["admin/payouts/upload", ".xlsx"],
+    "manual": ["admin/payouts/upload", "text/csv"],
     "oauth": ["oauth/applications/upload", "image/*"],
 };
 export function upload(type: keyof typeof urls): Promise<string> {

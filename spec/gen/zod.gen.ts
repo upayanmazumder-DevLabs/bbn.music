@@ -243,7 +243,8 @@ export const zWallet = z.object({
         unrestrained: z.number()
     })),
     stripeAccountId: z.optional(z.string()),
-    accountType: zAccountType
+    accountType: zAccountType,
+    copyrightEditable: z.boolean().default(false)
 });
 
 export const zShazamResults = z.array(z.object({
@@ -556,7 +557,8 @@ export const zAdminWallet = z.object({
         unrestrained: z.number()
     })),
     stripeAccountId: z.optional(z.string()),
-    accountType: zAccountType
+    accountType: zAccountType,
+    copyrightEditable: z.boolean().default(false)
 }).and(z.object({
     email: z.email().regex(/^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/),
     userName: z.string(),
@@ -951,7 +953,8 @@ export const zPatchIdByWalletsByAdminData = z.object({
             unrestrained: z.number()
         })),
         stripeAccountId: z.optional(z.string()),
-        accountType: z.optional(zAccountType)
+        accountType: z.optional(zAccountType),
+        copyrightEditable: z.optional(z.boolean()).default(false)
     })),
     path: z.object({
         id: z.string()
@@ -1224,7 +1227,9 @@ export const zGetIdByDropsByMusicResponse = z.object({
     _id: z.optional(z.string()),
     user: z.optional(z.string()),
     type: z.optional(zDropType)
-});
+}).and(z.object({
+    copyrightEditable: z.optional(z.boolean())
+}));
 
 export const zPatchIdByDropsByMusicData = z.object({
     body: z.optional(z.object({
@@ -1695,7 +1700,8 @@ export const zGetWalletResponse = z.object({
         unrestrained: z.number()
     })),
     stripeAccountId: z.optional(z.string()),
-    accountType: zAccountType
+    accountType: zAccountType,
+    copyrightEditable: z.boolean().default(false)
 });
 
 export const zPutWalletData = z.object({

@@ -190,6 +190,7 @@ export type Wallet = {
     };
     stripeAccountId?: string;
     accountType: AccountType;
+    copyrightEditable: boolean;
 };
 
 export type ShazamResults = Array<{
@@ -460,6 +461,7 @@ export type AdminWallet = {
     };
     stripeAccountId?: string;
     accountType: AccountType;
+    copyrightEditable: boolean;
 } & {
     email: string;
     userName: string;
@@ -867,6 +869,7 @@ export type PatchIdByWalletsByAdminData = {
         };
         stripeAccountId?: string;
         accountType?: AccountType;
+        copyrightEditable?: boolean;
     };
     path: {
         id: string;
@@ -1214,6 +1217,8 @@ export type GetIdByDropsByMusicResponses = {
         _id?: string;
         user?: string;
         type?: DropType;
+    } & {
+        copyrightEditable?: boolean;
     };
 };
 
@@ -1817,6 +1822,7 @@ export type GetWalletResponses = {
         };
         stripeAccountId?: string;
         accountType: AccountType;
+        copyrightEditable: boolean;
     };
 };
 

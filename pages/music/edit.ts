@@ -39,6 +39,8 @@ const creationState = asRefRecord({
     type: <DropType | undefined> undefined,
 });
 
+const disableCopyright = asRef(<boolean> true);
+
 const share = asRef(<undefined | Share> undefined);
 
 const events = asRef(<UserHistoryEvent[]> []);
@@ -74,6 +76,13 @@ const mainRoute = createRoute({
             creationState.type.setValue(drop.type);
 
             disabled.setValue(drop.type !== "PRIVATE" && drop.type !== "UNSUBMITTED");
+
+            if (isAdmin) {
+                disableCopyright.setValue(disabled.get() || false);
+            } else {
+                // @ts-ignore it exists
+                disableCopyright.setValue(disabled.get() || !(drop.copyrightEditable ?? false));
+            }
 
             try {
                 API.getIdByShareByDropsByMusic({ path: { id: id.value } }).then((req) => stupidErrorAlert(req, false)).then((val) => val ? share.setValue(val) : undefined);
@@ -331,8 +340,8 @@ appendBody(
                                 DropDown(getSecondary(genres, creationState.primaryGenre), creationState.secondaryGenre, "Secondary Genre").setDisabled(disabled),
                             ).setEvenColumns(isMobile.map((val) => val ? 1 : 2)).setGap(),
                             Grid(
-                                TextInput(creationState.compositionCopyright, "Composition Copyright").setDisabled(true),
-                                TextInput(creationState.soundRecordingCopyright, "Sound Recording Copyright").setDisabled(true),
+                                TextInput(creationState.compositionCopyright, "Composition Copyright").setDisabled(disableCopyright),
+                                TextInput(creationState.soundRecordingCopyright, "Sound Recording Copyright").setDisabled(disableCopyright),
                                 TextInput(creationState.gtin, "UPC/EAN").setDisabled(disabled),
                             ).setEvenColumns(isMobile.map((val) => val ? 1 : 3)).setGap(),
                         ).setGap(),
@@ -408,6 +417,7 @@ appendBody(
                                 }),
                                 SecondaryButton("Reenable Edit").onClick(() => {
                                     disabled.setValue(false);
+                                    disableCopyright.setValue(false);
                                 }),
                                 PrimaryButton("Accept").onClick((e) => {
                                     if (!(e as PointerEvent).shiftKey) {

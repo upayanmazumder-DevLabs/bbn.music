@@ -1,7 +1,7 @@
 import { BasicEntry } from "shared/components.ts";
 import { ProfileData, RegisterAuthRefresh, sheetStack, showProfilePicture } from "shared/helper.ts";
 import { placeholder } from "shared/mod.ts";
-import { asRef, Box, Content, createCachedLoader, createIndexPaginationLoader, createPage, createRoute, DateInput, DropDown, Empty, Entry, Grid, Label, PrimaryButton, SheetHeader, Spinner, TextButton, TextInput, WriteSignal } from "webgen/mod.ts";
+import { asRef, Box, Checkbox, Content, createCachedLoader, createIndexPaginationLoader, createPage, createRoute, DateInput, DropDown, Empty, Entry, Grid, Label, PrimaryButton, SheetHeader, Spinner, TextButton, TextInput, WriteSignal } from "webgen/mod.ts";
 import { API, PaymentType, SearchReturn, stupidErrorAlert, User, Wallet, zAccountType } from "../../../spec/mod.ts";
 import { WalletView } from "../../wallet/component.ts";
 import { ReviewEntry } from "../entries.ts";
@@ -85,13 +85,26 @@ export const walletSheet = (wallet: WriteSignal<Wallet>) => {
         await API.patchIdByWalletsByAdmin({ path: { id: wallet.getValue()._id }, body: { cut: val } }).then(stupidErrorAlert);
         wallet.setValue({ ...wallet.getValue(), cut: Number(val) });
     });
+    const copyrightEditable = asRef(wallet.getValue().copyrightEditable ?? false);
+    copyrightEditable.listen(async (val, oldVal) => {
+        if (oldVal === undefined) {
+            return;
+        }
+        await API.patchIdByWalletsByAdmin({ path: { id: wallet.getValue()._id }, body: { copyrightEditable: val } }).then(stupidErrorAlert);
+        wallet.setValue({ ...wallet.getValue(), copyrightEditable: val });
+    });
+
     return Grid(
         SheetHeader("Wallet", sheetStack),
         Grid(
             DropDown(Object.values(zAccountType.enum), selectedAccountType, "AccountType"),
             TextInput(selectedCut, "Cut", "change"),
             PrimaryButton("Add Transaction").onClick(() => sheetStack.addSheet(addTransactionSheet(wallet))),
-        ).setEvenColumns(3).setGap(),
+            Box(
+                Checkbox(copyrightEditable),
+                Label("Copyright Editable"),
+            ),
+        ).setEvenColumns(4).setGap(),
         wallet.map((wallet) => WalletView(wallet)).value,
     );
 };

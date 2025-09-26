@@ -43,6 +43,7 @@ export const creationState = asRefRecord({
     comments: <string | undefined> undefined,
     page: 0,
     validationState: <string | undefined> undefined,
+    disableCopyright: <boolean>true,
 });
 API.getIdByDropsByMusic({ path: { id: dropId } }).then(stupidErrorAlert)
     .then(async (drop) => {
@@ -59,14 +60,15 @@ API.getIdByDropsByMusic({ path: { id: dropId } }).then(stupidErrorAlert)
         creationState.artworkData.setValue(drop.artwork ? await API.getArtworkByDropByMusic({ path: { dropId } }).then((x) => URL.createObjectURL(x.data)) : templateArtwork);
         creationState.songs.setValue(drop.songs ?? []);
         creationState.comments.setValue(drop.comments);
+        creationState.disableCopyright.setValue(!(drop.copyrightEditable ?? false))
     })
     .then(() => creationState.page.setValue(1));
 
 const additionalDropInformation = Grid(
     SheetHeader("Additional Information", sheetStack),
     TextInput(creationState.gtin, "UPC/EAN"),
-    TextInput(creationState.compositionCopyright, "Composition Copyright").setDisabled(true),
-    TextInput(creationState.soundRecordingCopyright, "Sound Recording Copyright").setDisabled(true),
+    TextInput(creationState.compositionCopyright, "Composition Copyright").setDisabled(creationState.disableCopyright),
+    TextInput(creationState.soundRecordingCopyright, "Sound Recording Copyright").setDisabled(creationState.disableCopyright),
     PrimaryButton("Save").onClick(() => sheetStack.removeOne()),
 ).setGap();
 

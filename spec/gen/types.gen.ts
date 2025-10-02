@@ -280,6 +280,20 @@ export type Transcript = {
     _id: string;
 };
 
+export type Message = {
+    _id: string;
+    user?: string;
+    type: 'outbound' | 'inbound';
+    platform: ('whatsapp' | 'email') | 'rcs';
+    profile: {
+        name?: string;
+        phone?: string;
+        email?: string;
+    };
+    content: string;
+    meta?: string;
+};
+
 export type WaEvent = {
     _id: string;
     changes: {

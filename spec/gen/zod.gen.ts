@@ -161,8 +161,8 @@ export const zDrop = z.object({
     language: z.string(),
     primaryGenre: z.string(),
     secondaryGenre: z.string(),
-    compositionCopyright: z.string(),
-    soundRecordingCopyright: z.string(),
+    compositionCopyright: z.string().default('bbn.music'),
+    soundRecordingCopyright: z.string().default('bbn.music'),
     artwork: z.optional(z.string()),
     songs: z.array(z.string()),
     comments: z.optional(z.string()),
@@ -179,8 +179,8 @@ export const zFullDrop = z.object({
     language: z.string(),
     primaryGenre: z.string(),
     secondaryGenre: z.string(),
-    compositionCopyright: z.string(),
-    soundRecordingCopyright: z.string(),
+    compositionCopyright: z.string().default('bbn.music'),
+    soundRecordingCopyright: z.string().default('bbn.music'),
     artwork: z.optional(z.string()),
     songs: z.array(zSong),
     comments: z.optional(z.string()),
@@ -352,6 +352,29 @@ export const zTranscript = z.object({
     _id: z.string()
 });
 
+export const zMessage = z.object({
+    _id: z.string(),
+    user: z.optional(z.string()),
+    type: z.union([
+        z.literal('outbound'),
+        z.literal('inbound')
+    ]),
+    platform: z.union([
+        z.union([
+            z.literal('whatsapp'),
+            z.literal('email')
+        ]),
+        z.literal('rcs')
+    ]),
+    profile: z.object({
+        name: z.optional(z.string()),
+        phone: z.optional(z.string()),
+        email: z.optional(z.string())
+    }),
+    content: z.string(),
+    meta: z.optional(z.string())
+});
+
 export const zWaEvent = z.object({
     _id: z.string(),
     changes: z.object({
@@ -417,8 +440,8 @@ export const zAdminDrop = z.object({
     language: z.optional(z.string()),
     primaryGenre: z.optional(z.string()),
     secondaryGenre: z.optional(z.string()),
-    compositionCopyright: z.optional(z.string()),
-    soundRecordingCopyright: z.optional(z.string()),
+    compositionCopyright: z.optional(z.string()).default('bbn.music'),
+    soundRecordingCopyright: z.optional(z.string()).default('bbn.music'),
     artwork: z.optional(z.string()),
     songs: z.optional(z.array(z.string())),
     comments: z.optional(z.string()),
@@ -438,8 +461,8 @@ export const zSingleAdminDrop = z.object({
     language: z.optional(z.string()),
     primaryGenre: z.optional(z.string()),
     secondaryGenre: z.optional(z.string()),
-    compositionCopyright: z.optional(z.string()),
-    soundRecordingCopyright: z.optional(z.string()),
+    compositionCopyright: z.optional(z.string()).default('bbn.music'),
+    soundRecordingCopyright: z.optional(z.string()).default('bbn.music'),
     artwork: z.optional(z.string()),
     songs: z.optional(z.array(z.object({
         _id: z.string(),
@@ -579,8 +602,8 @@ export const zSearchReturn = z.intersection(z.union([
             language: z.optional(z.string()),
             primaryGenre: z.optional(z.string()),
             secondaryGenre: z.optional(z.string()),
-            compositionCopyright: z.optional(z.string()),
-            soundRecordingCopyright: z.optional(z.string()),
+            compositionCopyright: z.optional(z.string()).default('bbn.music'),
+            soundRecordingCopyright: z.optional(z.string()).default('bbn.music'),
             artwork: z.optional(z.string()),
             songs: z.optional(z.array(z.string())),
             comments: z.optional(z.string()),
@@ -668,8 +691,8 @@ export const zUpdateDrop = z.object({
     language: z.optional(z.string()),
     primaryGenre: z.optional(z.string()),
     secondaryGenre: z.optional(z.string()),
-    compositionCopyright: z.optional(z.string()),
-    soundRecordingCopyright: z.optional(z.string()),
+    compositionCopyright: z.optional(z.string()).default('bbn.music'),
+    soundRecordingCopyright: z.optional(z.string()).default('bbn.music'),
     artwork: z.optional(z.unknown()),
     songs: z.optional(z.array(z.object({
         _id: z.string(),
@@ -725,8 +748,8 @@ export const zGetIdByDropsByAdminResponse = z.object({
     language: z.optional(z.string()),
     primaryGenre: z.optional(z.string()),
     secondaryGenre: z.optional(z.string()),
-    compositionCopyright: z.optional(z.string()),
-    soundRecordingCopyright: z.optional(z.string()),
+    compositionCopyright: z.optional(z.string()).default('bbn.music'),
+    soundRecordingCopyright: z.optional(z.string()).default('bbn.music'),
     artwork: z.optional(z.string()),
     songs: z.optional(z.array(z.object({
         _id: z.string(),
@@ -1139,8 +1162,8 @@ export const zGetDropsByMusicResponse = z.array(z.object({
     language: z.optional(z.string()),
     primaryGenre: z.optional(z.string()),
     secondaryGenre: z.optional(z.string()),
-    compositionCopyright: z.optional(z.string()),
-    soundRecordingCopyright: z.optional(z.string()),
+    compositionCopyright: z.optional(z.string()).default('bbn.music'),
+    soundRecordingCopyright: z.optional(z.string()).default('bbn.music'),
     artwork: z.optional(z.string()),
     songs: z.optional(z.array(z.string())),
     comments: z.optional(z.string()),
@@ -1219,8 +1242,8 @@ export const zGetIdByDropsByMusicResponse = z.object({
     language: z.optional(z.string()),
     primaryGenre: z.optional(z.string()),
     secondaryGenre: z.optional(z.string()),
-    compositionCopyright: z.optional(z.string()),
-    soundRecordingCopyright: z.optional(z.string()),
+    compositionCopyright: z.optional(z.string()).default('bbn.music'),
+    soundRecordingCopyright: z.optional(z.string()).default('bbn.music'),
     artwork: z.optional(z.string()),
     songs: z.optional(z.array(zSong)),
     comments: z.optional(z.string()),
@@ -1240,8 +1263,8 @@ export const zPatchIdByDropsByMusicData = z.object({
         language: z.optional(z.string()),
         primaryGenre: z.optional(z.string()),
         secondaryGenre: z.optional(z.string()),
-        compositionCopyright: z.optional(z.string()),
-        soundRecordingCopyright: z.optional(z.string()),
+        compositionCopyright: z.optional(z.string()).default('bbn.music'),
+        soundRecordingCopyright: z.optional(z.string()).default('bbn.music'),
         artwork: z.optional(z.string()),
         songs: z.optional(z.array(z.object({
             _id: z.string(),

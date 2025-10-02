@@ -1,6 +1,6 @@
 import { placeholder } from "shared/list.ts";
 import { Chart } from "shared/mod.ts";
-import { asRef, Box, Content, createPage, createRoute, Entry, Grid, isMobile, Label, Spinner } from "webgen/mod.ts";
+import { asRef, Box, Content, createPage, createRoute, Empty, Entry, Grid, isMobile, Label, Spinner } from "webgen/mod.ts";
 import { API, PayoutResponse, stupidErrorAlert } from "../../../spec/mod.ts";
 
 const data = asRef<"loading" | PayoutResponse[]>("loading");
@@ -34,7 +34,6 @@ export const payoutsPage = createPage(
                                     labels: items.map((row) => row.period.split(" to ")[0].split("Period ")[1].split("-").slice(0, 2).join("-")).reverse(),
                                     datasets: [
                                         {
-                                            // label: "Revenue by Month (GBP)",
                                             data: items.map((row) => row.moneythisperiod.replace("£ ", "")).reverse(),
                                         },
                                     ],
@@ -67,7 +66,6 @@ export const payoutsPage = createPage(
                                     labels: items.map((row) => row.period.split(" to ")[0].split("Period ")[1].split("-").slice(0, 2).join("-")).reverse(),
                                     datasets: [
                                         {
-                                            label: "Streams by Month",
                                             data: items.map((row) => row.streams).reverse(),
                                         },
                                     ],
@@ -95,7 +93,7 @@ export const payoutsPage = createPage(
                                 },
                             }),
                         ).setEvenColumns(isMobile.map((x) => x ? 1 : 2)),
-                        Box(items.map((item) =>
+                        Box(Empty(), ...items.map((item) =>
                             Entry(
                                 Grid(
                                     Label(item.period).setTextSize("3xl").setFontWeight("bold"),

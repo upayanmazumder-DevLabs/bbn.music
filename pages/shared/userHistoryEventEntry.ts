@@ -1,5 +1,6 @@
 import { Empty, Entry, Grid, Label, PrimaryButton } from "webgen/mod.ts";
 import { ObjectId, UserHistoryEvent, zAudit } from "../../spec/mod.ts";
+import { Diff } from "./diff.ts";
 import { sheetStack } from "./helper.ts";
 import { BasicEntry } from "./mod.ts";
 
@@ -7,7 +8,7 @@ function dateFromObjectId(objectId: ObjectId) {
     return new Date(parseInt(objectId.substring(0, 8), 16) * 1000);
 }
 
-export function userHistoryEventEntry(event: UserHistoryEvent) {
+export function userHistoryEventEntry(event: UserHistoryEvent, index: number, array: UserHistoryEvent[]) {
     if (event.type === "action") {
         const audit = zAudit.parse(event.meta);
         switch (audit.action) {
@@ -60,7 +61,16 @@ export function userHistoryEventEntry(event: UserHistoryEvent) {
                     BasicEntry(
                         "Drop type changed",
                         `from ${audit.data?.type ?? "unknown"} to ${audit.type} by ${event.userId} at ${dateFromObjectId(event._id).toLocaleString()}`,
-                    ),
+                    ).onClick(() => {
+                        const lastAudit = array.filter((_, i) => i < index).reverse().find((it) => it.type === "action" && zAudit.safeParse(it.meta).success && zAudit.parse(it.meta).action === "drop-type-change");
+                        const lastChange = lastAudit ? zAudit.parse(lastAudit.meta) : undefined;
+                        const lastData = lastChange?.action === "drop-type-change" && lastChange.data ? lastChange.data : {};
+                        sheetStack.addSheet(
+                            Grid(
+                                (audit.data !== undefined) ? Diff(JSON.stringify(lastData, null, 2), JSON.stringify(audit.data, null, 2)) : Label("No previous data available"),
+                            ),
+                        );
+                    }),
                 ).setWidth("100%").setPadding("0.5rem 0");
             case "drop-review":
                 return Entry(

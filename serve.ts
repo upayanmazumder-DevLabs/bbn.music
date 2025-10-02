@@ -1,6 +1,6 @@
-import { serve } from "esbuild_serve";
-import { walkSync } from "@std/fs";
 import { createClient } from "@hey-api/openapi-ts";
+import { walkSync } from "@std/fs";
+import { serve } from "esbuild_serve";
 
 let input = "https://bbn.music/openapi";
 await fetch("http://localhost:8443/openapi").then(() => input = "http://localhost:8443/openapi").catch(() => {});

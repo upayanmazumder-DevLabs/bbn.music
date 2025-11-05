@@ -21,7 +21,7 @@ appendBody(
                     Label("Internet:"),
                     Label("bbn.music"),
                     Label("Address:"),
-                    Label("BBN Music Gmbh\nRosa-Luxemburg-Str. 37\n14482 Potsdam\nGermany"),
+                    Label("BBN Music GmbH\nRosa-Luxemburg-Str. 37\n14482 Potsdam\nGermany"),
                     Label("Commercial register:"),
                     Label("Potsdam Local Court\nHRB 39134 P"),
                     Label("EUID"),

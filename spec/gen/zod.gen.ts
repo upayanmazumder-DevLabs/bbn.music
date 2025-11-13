@@ -244,7 +244,7 @@ export const zWallet = z.object({
     })),
     stripeAccountId: z.optional(z.string()),
     accountType: zAccountType,
-    copyrightEditable: z.boolean().default(false)
+    copyrightEditable: z.boolean()
 });
 
 export const zShazamResults = z.array(z.object({
@@ -581,7 +581,7 @@ export const zAdminWallet = z.object({
     })),
     stripeAccountId: z.optional(z.string()),
     accountType: zAccountType,
-    copyrightEditable: z.boolean().default(false)
+    copyrightEditable: z.boolean()
 }).and(z.object({
     email: z.email().regex(/^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/),
     userName: z.string(),
@@ -977,7 +977,7 @@ export const zPatchIdByWalletsByAdminData = z.object({
         })),
         stripeAccountId: z.optional(z.string()),
         accountType: z.optional(zAccountType),
-        copyrightEditable: z.optional(z.boolean()).default(false)
+        copyrightEditable: z.optional(z.boolean())
     })),
     path: z.object({
         id: z.string()
@@ -1724,7 +1724,7 @@ export const zGetWalletResponse = z.object({
     })),
     stripeAccountId: z.optional(z.string()),
     accountType: zAccountType,
-    copyrightEditable: z.boolean().default(false)
+    copyrightEditable: z.boolean()
 });
 
 export const zPutWalletData = z.object({

@@ -411,9 +411,19 @@ appendBody(
                                     const data = await API.getIdByShazamByMusic({ path: { id: id.value } }).then(stupidErrorAlert);
                                     alert("Result: " + JSON.stringify(data));
                                 }),
-                                SecondaryButton("Publish").onPromiseClick(async () => {
-                                    const data = await API.getIdByProviderByPublishByMusic({ path: { id: id.value, provider: "ampsuite" } });
-                                    alert("Result: " + JSON.stringify(data));
+                                SecondaryButton("Publish").onClick(() => {
+                                    const selectedProvider = asRef("musixmatch");
+                                    sheetStack.addSheet(
+                                        Grid(
+                                            Label("Which provider do you want to publish to?"),
+                                            DropDown([ "ampsuite", "musixmatch", "symphonic" ], selectedProvider),
+                                            PrimaryButton("Publish Now").onPromiseClick(async () => {
+                                                const data = await API.getIdByProviderByPublishByMusic({ path: { id: id.value, provider: selectedProvider.value } }).then(stupidErrorAlert);
+                                                alert("Result: " + JSON.stringify(data));
+                                                sheetStack.removeOne();
+                                            }),
+                                        )
+                                    );
                                 }),
                                 SecondaryButton("Reenable Edit").onClick(() => {
                                     disabled.setValue(false);

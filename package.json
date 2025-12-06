@@ -30,6 +30,7 @@
     "dependencies": {
         "flowbite-svelte-icons": "^3.0.1",
         "libphonenumber-js": "^1.12.31",
+        "posthog-js": "^1.302.2",
         "zod": "^4.1.13"
     }
 }

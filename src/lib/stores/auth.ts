@@ -8,6 +8,7 @@ import {
 	postCodeByProviderByOauthByAuth,
 } from '$lib/api/sdk.gen';
 import type { User as ApiUser } from '$lib/api/types.gen';
+import { resetUser } from '$lib/analytics/posthog';
 
 // Decode base64 unicode (like the old webgen code)
 function b64DecodeUnicode(value: string): string {
@@ -437,6 +438,9 @@ function createAuthStore() {
 				localStorage.removeItem('access-token');
 				localStorage.removeItem('refresh-token');
 			}
+
+			// Reset PostHog user
+			resetUser();
 
 			// Reset store
 			set({

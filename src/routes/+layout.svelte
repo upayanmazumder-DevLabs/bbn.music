@@ -10,6 +10,7 @@
 	import { page } from '$app/stores';
 	import { initApiClient, getAuthHeaders } from '$lib/api';
 	import { postResendVerifyEmailByMailByUser, getPictureByUserByUser } from '$lib/api/sdk.gen';
+	import { initPostHog, trackPageView, identifyUser } from '$lib/analytics/posthog';
 
 	const { children } = $props();
 	let hidden = $state(true);
@@ -58,6 +59,18 @@
 			loadAvatar();
 		} else {
 			avatarUrl = null;
+		}
+	});
+
+	// Identify user in PostHog when authenticated
+	$effect(() => {
+		if ($auth.user?.id) {
+			identifyUser({
+				id: $auth.user.id,
+				email: $auth.user.profile.email,
+				username: $auth.user.profile.username,
+				isAdmin: $auth.user.isAdmin,
+			});
 		}
 	});
 
@@ -119,6 +132,10 @@
 		// Initialize API client with any localStorage overrides
 		initApiClient();
 
+		// Initialize PostHog analytics
+		initPostHog();
+		trackPageView(window.location.href);
+
 		if (checkAuth(window.location.pathname)) {
 			authChecked = true;
 		}
@@ -126,6 +143,9 @@
 
 	afterNavigate(({ to }) => {
 		if (to?.url.pathname) {
+			// Track page view on navigation
+			trackPageView(to.url.href);
+
 			authChecked = false;
 			if (checkAuth(to.url.pathname)) {
 				authChecked = true;

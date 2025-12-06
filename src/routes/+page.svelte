@@ -90,7 +90,7 @@
 				without limits. Join us and let the world hear your music.
 			</p>
 			<Button
-				href="/drops/new"
+				href="/music"
 				size="lg"
 				class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold px-8 py-4 text-lg shadow-xl hover:shadow-2xl transition-all"
 			>
@@ -108,7 +108,7 @@
 		<div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
 			<!-- Free Plan -->
 			<div
-				class="rounded-2xl p-8 bg-white dark:bg-gradient-to-br dark:from-orange-900/20 dark:to-orange-800/10 border border-gray-200 dark:border-orange-500/20 shadow-lg dark:shadow-none"
+				class="rounded-2xl p-8 bg-gradient-to-br from-white to-white dark:from-orange-900/20 dark:to-orange-800/10 border border-gray-200 dark:border-orange-500/20 shadow-lg dark:shadow-none"
 			>
 				<span
 					class="inline-block px-3 py-1 rounded-md bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold text-sm mb-6"
@@ -133,7 +133,7 @@
 				</ul>
 
 				<Button
-					href="/drops/new"
+					href="/music"
 					class="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 text-lg"
 				>
 					Drop Now!
@@ -207,12 +207,12 @@
 	<!-- Why bbn.music -->
 	<section>
 		<div
-			class="rounded-2xl p-8 md:p-12 bg-white dark:bg-gradient-to-br dark:from-orange-900/20 dark:to-orange-800/10 border border-gray-200 dark:border-orange-500/20 shadow-lg dark:shadow-none"
+			class="rounded-2xl p-8 md:p-12 bg-gradient-to-br from-white to-white dark:from-orange-900/20 dark:to-orange-800/10 border border-gray-200 dark:border-orange-500/20 shadow-lg dark:shadow-none"
 		>
 			<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
 				<h2 class="text-3xl font-bold text-gray-900 dark:text-white">Why bbn.music?</h2>
 				<Button
-					href="/drops/new"
+					href="/music"
 					class="w-fit bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-full px-6"
 				>
 					Drop your Music

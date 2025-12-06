@@ -10,7 +10,7 @@ We are happy for external submissions, so PRs are welcome!
 
 ### Setup
 
-1. Install deno from <https://deno.com>
+1. Install Bun from <https://bun.com>
 2. deno task start
 3. Set overrides to prod server
 

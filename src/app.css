@@ -1,0 +1,61 @@
+@import "tailwindcss";
+
+/* Custom styles for modern music app */
+:root {
+	--gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	--gradient-dark: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+}
+
+body {
+	background: #0f0f0f;
+}
+
+/* Glassmorphism effect */
+.glass {
+	background: rgba(255, 255, 255, 0.05);
+	backdrop-filter: blur(10px);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Modern card hover effect */
+.card-hover {
+	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.card-hover:hover {
+	transform: translateY(-4px);
+	box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Gradient text */
+.gradient-text {
+	background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+	-webkit-background-clip: text;
+	-webkit-text-fill-color: transparent;
+	background-clip: text;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+	width: 8px;
+	height: 8px;
+}
+::-webkit-scrollbar-track {
+	background: rgba(255, 255, 255, 0.05);
+}
+::-webkit-scrollbar-thumb {
+	background: rgba(255, 255, 255, 0.1);
+	border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+	background: rgba(255, 255, 255, 0.2);
+}
+
+/* Button animations */
+.btn-glow {
+	box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+	transition: all 0.3s ease;
+}
+.btn-glow:hover {
+	box-shadow: 0 0 30px rgba(102, 126, 234, 0.6);
+	transform: translateY(-2px);
+}

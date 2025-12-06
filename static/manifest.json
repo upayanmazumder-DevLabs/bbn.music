@@ -1,0 +1,43 @@
+{
+  "name": "bbn.music",
+  "short_name": "bbn.music",
+  "description": "Music distribution platform for artists",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#f97316",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    }
+  ],
+  "categories": ["music", "business"],
+  "shortcuts": [
+    {
+      "name": "My Drops",
+      "short_name": "Drops",
+      "description": "View your music drops",
+      "url": "/drops"
+    },
+    {
+      "name": "Artists",
+      "short_name": "Artists",
+      "description": "Manage your artists",
+      "url": "/artists"
+    },
+    {
+      "name": "Wallet",
+      "short_name": "Wallet",
+      "description": "View your wallet",
+      "url": "/wallet"
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "scope": "/",
+  "lang": "en-US",
+  "dir": "ltr"
+}

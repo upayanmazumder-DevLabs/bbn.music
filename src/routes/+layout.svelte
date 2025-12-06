@@ -18,6 +18,7 @@
 	let authChecked = $state(false);
 	let sendingVerification = $state(false);
 	let avatarUrl = $state<string | null>(null);
+	let mounted = $state(false);
 
 	// Load avatar image as blob when user changes
 	async function loadAvatar() {
@@ -135,6 +136,9 @@
 		// Initialize PostHog analytics
 		initPostHog();
 		trackPageView(window.location.href);
+
+		// Mark as mounted so we can show auth UI without flash
+		mounted = true;
 
 		if (checkAuth(window.location.pathname)) {
 			authChecked = true;
@@ -291,8 +295,11 @@
 							<NotificationCenter />
 						{/if}
 
-						<!-- User section -->
-						{#if $auth.isAuthenticated}
+						<!-- User section (only render after mounted to prevent flash) -->
+						{#if !mounted}
+							<!-- Placeholder to prevent layout shift -->
+							<div class="w-8 h-8"></div>
+						{:else if $auth.isAuthenticated}
 							<!-- User avatar with dropdown -->
 							<div class="relative" data-user-menu>
 								<button

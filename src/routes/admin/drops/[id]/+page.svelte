@@ -5,8 +5,10 @@
 	import { Modal } from '$lib/components/ui';
 	import {
 		getIdByDropsByAdmin,
+		getIdByDropsByMusic,
 		getDropsByAdmin,
 		getArtworkByDropByMusic,
+		getPictureByUserByUser,
 		postReviewByDropByMusic,
 		getIdByShazamByMusic,
 		getIdByProviderByPublishByMusic,
@@ -46,6 +48,7 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let artworkUrl = $state<string | null>(null);
+	let userAvatarUrl = $state<string | null>(null);
 	let userDrops = $state<AdminDrop[]>([]);
 	let loadingUserDrops = $state(false);
 	let hasMoreUserDrops = $state(true);
@@ -121,21 +124,37 @@
 		error = null;
 
 		try {
-			const response = await getIdByDropsByAdmin({
-				path: { id: dropId },
-				headers: getAuthHeaders(),
-			});
+			// Fetch both admin data and drop data in parallel
+			const [adminResponse, dropResponse] = await Promise.all([
+				getIdByDropsByAdmin({
+					path: { id: dropId },
+					headers: getAuthHeaders(),
+				}),
+				getIdByDropsByMusic({
+					path: { id: dropId },
+					headers: getAuthHeaders(),
+				}),
+			]);
 
-			if (response.data) {
-				drop = response.data as SingleAdminDrop;
+			// Merge admin data (userInfo, events) with drop data (title, songs, etc.)
+			if (adminResponse.data || dropResponse.data) {
+				drop = {
+					...(dropResponse.data as SingleAdminDrop),
+					...(adminResponse.data as SingleAdminDrop),
+				};
 
 				// Load artwork
 				if (drop.artwork) {
 					loadArtwork();
 				}
 
+				// Load user avatar
+				if (drop.userInfo?.profile?.avatar) {
+					loadUserAvatar();
+				}
+
 				// Load user's other drops
-				if (drop.user) {
+				if (drop.user || drop.userInfo?._id) {
 					loadUserDrops();
 				}
 			}
@@ -160,13 +179,39 @@
 		}
 	}
 
+	async function loadUserAvatar() {
+		const avatar = drop?.userInfo?.profile?.avatar;
+		const userId = drop?.user || drop?.userInfo?._id;
+		if (!avatar || !userId) return;
+
+		// Check if avatar is already a full URL (OAuth providers)
+		if (avatar.startsWith('http')) {
+			userAvatarUrl = avatar;
+			return;
+		}
+
+		// Fetch avatar as blob with authentication
+		try {
+			const response = await getPictureByUserByUser({
+				path: { userId },
+				headers: getAuthHeaders(),
+			});
+			if (response.data) {
+				userAvatarUrl = URL.createObjectURL(response.data as Blob);
+			}
+		} catch {
+			// Avatar load failed
+		}
+	}
+
 	async function loadUserDrops(offset = 0) {
-		if (!drop?.user) return;
+		const userId = drop?.user || drop?.userInfo?._id;
+		if (!userId) return;
 		loadingUserDrops = true;
 
 		try {
 			const response = await getDropsByAdmin({
-				query: { user: drop.user, _limit: 10, _offset: offset },
+				query: { user: userId, _limit: 10, _offset: offset },
 				headers: getAuthHeaders(),
 			});
 
@@ -558,9 +603,9 @@
 								<div
 									class="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden"
 								>
-									{#if drop.userInfo.profile.avatar}
+									{#if userAvatarUrl}
 										<img
-											src={drop.userInfo.profile.avatar}
+											src={userAvatarUrl}
 											alt="Avatar"
 											class="w-full h-full object-cover"
 										/>

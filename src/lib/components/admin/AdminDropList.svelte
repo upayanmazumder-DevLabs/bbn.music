@@ -49,7 +49,7 @@
 			<thead class="bg-gray-900/50 border-b border-gray-700">
 				<tr>
 					<th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Title</th>
-					<th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">GTIN</th>
+					<th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">User</th>
 					<th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Release Date</th>
 					<th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Account</th>
 				</tr>
@@ -63,7 +63,7 @@
 						<td class="px-4 py-3">
 							<p class="text-white font-medium">{drop.title || 'Untitled'}</p>
 						</td>
-						<td class="px-4 py-3 text-gray-400 text-sm font-mono">{drop.gtin || '-'}</td>
+						<td class="px-4 py-3 text-gray-400 text-sm font-mono truncate max-w-32">{drop.user || '-'}</td>
 						<td class="px-4 py-3 text-gray-400 text-sm">{drop.release || '-'}</td>
 						<td class="px-4 py-3">
 							<span

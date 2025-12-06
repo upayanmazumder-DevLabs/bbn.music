@@ -301,7 +301,7 @@
 					>
 						<div class="flex items-center gap-4 p-4">
 							<!-- Artwork -->
-							<div class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-800">
+							<div class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-800">
 								{#if drop.artwork && drop._id && artworkUrls[drop._id]}
 									<img
 										src={artworkUrls[drop._id]}
@@ -319,20 +319,31 @@
 								{/if}
 							</div>
 
-							<!-- Info -->
+							<!-- Title & Artist -->
 							<div class="flex-1 min-w-0">
-								<div class="flex items-center gap-2 mb-1">
-									<h3 class="font-semibold text-gray-900 dark:text-white truncate">{drop.title}</h3>
-									<Badge color={status.color} size="sm">{status.label}</Badge>
-								</div>
+								<h3 class="font-semibold text-gray-900 dark:text-white truncate">{drop.title}</h3>
 								<p class="text-gray-500 dark:text-gray-400 text-sm truncate">{getArtistNames(drop.artists)}</p>
-								<div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
-									<span>{formatDate(drop.release)}</span>
-									<span>{drop.primaryGenre}</span>
-									{#if drop.songs && drop.songs.length > 0}
-										<span>{drop.songs.length} track{drop.songs.length !== 1 ? 's' : ''}</span>
-									{/if}
+							</div>
+
+							<!-- Metadata - hidden on mobile -->
+							<div class="hidden md:flex items-center gap-8 text-sm text-gray-500 dark:text-gray-400">
+								<div class="w-28 text-center">
+									<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">Release</p>
+									<p>{formatDate(drop.release)}</p>
 								</div>
+								<div class="w-24 text-center">
+									<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">Genre</p>
+									<p class="truncate">{drop.primaryGenre || '-'}</p>
+								</div>
+								<div class="w-16 text-center">
+									<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">Tracks</p>
+									<p>{drop.songs?.length || 0}</p>
+								</div>
+							</div>
+
+							<!-- Status Badge -->
+							<div class="flex-shrink-0">
+								<Badge color={status.color} size="sm">{status.label}</Badge>
 							</div>
 						</div>
 					</Card>

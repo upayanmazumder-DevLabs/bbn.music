@@ -58,7 +58,7 @@
 	async function selectItem(result: SearchReturn) {
 		// Drops navigate directly instead of showing details
 		if (result._index === 'drops') {
-			goto(`/drops/${result._source._id}`);
+			goto(`/admin/drops/${result._source._id}`);
 			return;
 		}
 
@@ -89,7 +89,7 @@
 	}
 
 	function navigateToDropById(dropId: string) {
-		goto(`/drops/${dropId}`);
+		goto(`/admin/drops/${dropId}`);
 	}
 
 	async function updateWallet(field: string, value: any) {
@@ -361,6 +361,38 @@
 								</button>
 							</div>
 						</div>
+
+						{#if wallet.transactions && wallet.transactions.length > 0}
+							<div class="p-4 bg-gray-700/50 rounded-lg">
+								<h3 class="text-sm font-medium text-gray-400 mb-3">
+									Transactions ({wallet.transactions.length})
+								</h3>
+								<div class="space-y-2 max-h-64 overflow-y-auto">
+									{#each wallet.transactions as tx}
+										<div
+											class="flex items-center justify-between p-2 bg-gray-800/50 rounded text-sm"
+										>
+											<div class="flex-1 min-w-0">
+												<p class="text-white truncate">{tx.description || tx.type}</p>
+												<p class="text-gray-500 text-xs">
+													{new Date(Number(tx.timestamp)).toLocaleDateString('de-DE')}
+													{#if tx.counterParty}
+														• {tx.counterParty}
+													{/if}
+												</p>
+											</div>
+											<span
+												class="ml-2 font-medium {tx.amount >= 0
+													? 'text-green-400'
+													: 'text-red-400'}"
+											>
+												{tx.amount >= 0 ? '+' : ''}{formatCurrency(tx.amount)}
+											</span>
+										</div>
+									{/each}
+								</div>
+							</div>
+						{/if}
 					{:else}
 						<p class="text-gray-500 text-center py-4">No wallet found for this user</p>
 					{/if}
@@ -491,6 +523,38 @@
 											: 'translate-x-0.5'}"
 									></div>
 								</button>
+							</div>
+						</div>
+					{/if}
+
+					{#if selectedItem._source.transactions && selectedItem._source.transactions.length > 0}
+						<div class="p-4 bg-gray-700/50 rounded-lg">
+							<h3 class="text-sm font-medium text-gray-400 mb-3">
+								Transactions ({selectedItem._source.transactions.length})
+							</h3>
+							<div class="space-y-2 max-h-64 overflow-y-auto">
+								{#each selectedItem._source.transactions as tx}
+									<div
+										class="flex items-center justify-between p-2 bg-gray-800/50 rounded text-sm"
+									>
+										<div class="flex-1 min-w-0">
+											<p class="text-white truncate">{tx.description || tx.type}</p>
+											<p class="text-gray-500 text-xs">
+												{new Date(Number(tx.timestamp)).toLocaleDateString('de-DE')}
+												{#if tx.counterParty}
+													• {tx.counterParty}
+												{/if}
+											</p>
+										</div>
+										<span
+											class="ml-2 font-medium {tx.amount >= 0
+												? 'text-green-400'
+												: 'text-red-400'}"
+										>
+											{tx.amount >= 0 ? '+' : ''}{formatCurrency(tx.amount)}
+										</span>
+									</div>
+								{/each}
 							</div>
 						</div>
 					{/if}

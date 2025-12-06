@@ -7,7 +7,6 @@
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let bbnRevenue = $state(0);
-	let walletCount = $state(0);
 
 	// BBN company account ID (from old webgen code)
 	const BBN_USER_ID = '62ea6fa5321b3702e93ca21c';
@@ -27,12 +26,11 @@
 
 			if (response.data) {
 				const wallets = response.data as AdminWallet[];
-				walletCount = wallets.length;
 
-				// Calculate BBN Revenue - sum of balance from BBN company wallet
+				// Calculate BBN Revenue - sum of all balance values from BBN company wallet
 				const bbnWallet = wallets.find((w) => w.user === BBN_USER_ID);
 				if (bbnWallet?.balance) {
-					bbnRevenue = (bbnWallet.balance.restrained || 0) + (bbnWallet.balance.unrestrained || 0);
+					bbnRevenue = Object.values(bbnWallet.balance).reduce((a, b) => a + b, 0);
 				}
 			}
 		} catch (e) {
@@ -43,10 +41,7 @@
 	}
 
 	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('de-DE', {
-			style: 'currency',
-			currency: 'EUR',
-		}).format(amount / 100);
+		return `£ ${amount.toFixed(2)}`;
 	}
 </script>
 
@@ -70,15 +65,6 @@
 				<h3 class="text-sm font-medium text-gray-400 uppercase tracking-wide mb-2">BBN Revenue</h3>
 				<p class="text-3xl font-bold text-white">{formatCurrency(bbnRevenue)}</p>
 				<p class="text-sm text-gray-500 mt-2">Total balance from BBN company wallet</p>
-			</div>
-
-			<!-- Total Wallets Card -->
-			<div class="bg-gray-800/50 border border-gray-700 rounded-xl p-6">
-				<h3 class="text-sm font-medium text-gray-400 uppercase tracking-wide mb-2">
-					Total Wallets
-				</h3>
-				<p class="text-3xl font-bold text-white">{walletCount}</p>
-				<p class="text-sm text-gray-500 mt-2">Registered user wallets</p>
 			</div>
 		</div>
 	{/if}

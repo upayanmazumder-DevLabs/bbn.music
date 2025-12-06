@@ -170,7 +170,6 @@
 		{ href: '/admin', label: 'Overview', exact: true },
 		{ href: '/admin/search', label: 'Search' },
 		{ href: '/admin/publishing', label: 'Publishing' },
-		{ href: '/admin/published', label: 'Published' },
 		{ href: '/admin/reviews', label: 'Reviews' },
 		{ href: '/admin/takedown', label: 'Takedowns' },
 		{ href: '/admin/payouts', label: 'Payouts' },

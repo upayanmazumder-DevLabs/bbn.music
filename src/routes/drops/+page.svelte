@@ -4,9 +4,9 @@
 	import { page } from '$app/stores';
 	import { Button, Card, Badge } from '$lib/components/ui';
 	import { PlusOutline } from 'flowbite-svelte-icons';
-	import type { Drop } from '$lib/api/types.gen';
+	import type { Drop, Artist, ArtistRef } from '$lib/api/types.gen';
 	import { auth } from '$lib/stores/auth';
-	import { getDropsByMusic, getArtworkByDropByMusic, postMusic } from '$lib/api/sdk.gen';
+	import { getDropsByMusic, getArtworkByDropByMusic, postMusic, getArtistsByMusic } from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/api';
 
 	// Tab configuration matching the old app
@@ -28,6 +28,7 @@
 	const activeTab = $derived($page.url.searchParams.get('list') || 'published');
 
 	let allDrops = $state<Drop[]>([]);
+	let allArtists = $state<Artist[]>([]);
 	let artworkUrls = $state<Record<string, string>>({});
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
@@ -78,6 +79,14 @@
 
 	onMount(async () => {
 		try {
+			// Load artists first for name resolution
+			const artistsResponse = await getArtistsByMusic({
+				headers: getAuthHeaders(),
+			});
+			if (artistsResponse.data) {
+				allArtists = artistsResponse.data as Artist[];
+			}
+
 			// Load all user's drops from real API
 			const response = await getDropsByMusic({
 				headers: getAuthHeaders(),
@@ -116,10 +125,22 @@
 
 	function getArtistNames(artists: Drop['artists'] | undefined) {
 		if (!artists || artists.length === 0) return 'Unknown Artist';
+
+		const primaryArtists = artists.filter((artist) => artist.type === 'PRIMARY');
+		if (primaryArtists.length === 0) return 'Unknown Artist';
+
 		return (
-			artists
-				.filter((artist) => artist.type === 'PRIMARY')
-				.map((artist) => ('name' in artist ? artist.name : 'Unknown'))
+			primaryArtists
+				.map((artist) => {
+					// If artist has name directly (PRODUCER/SONGWRITER types)
+					if ('name' in artist) return artist.name;
+					// If artist has _id, look it up in allArtists
+					if ('_id' in artist) {
+						const found = allArtists.find((a) => a._id === artist._id);
+						if (found) return found.name;
+					}
+					return 'Unknown';
+				})
 				.join(', ') || 'Unknown Artist'
 		);
 	}

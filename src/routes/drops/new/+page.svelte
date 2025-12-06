@@ -43,6 +43,7 @@
 		stepTwoSchema,
 		stepThreeSchema,
 		type ArtistRef,
+		type ArtistType,
 		type Song,
 		artistTypes,
 	} from '$lib/types/drop';
@@ -1553,7 +1554,7 @@
 		</Select>
 
 		<ArtistSearch
-			selectedArtist={{ _id: tempArtist._id, name: tempArtist.name }}
+			selectedArtist={{ _id: tempArtist._id, name: tempArtist.name ?? '' }}
 			onselect={(artist) => {
 				tempArtist._id = artist._id;
 				tempArtist.name = artist.name;
@@ -1781,7 +1782,11 @@
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<Input
 						type="number"
-						bind:value={tempSong.year}
+						value={tempSong.year?.toString() ?? ''}
+						oninput={(e) => {
+							const val = (e.target as HTMLInputElement).value;
+							tempSong.year = val ? parseInt(val, 10) : undefined;
+						}}
 						label="Recording Year"
 						placeholder="YYYY"
 						hint="Year when this track was originally recorded"

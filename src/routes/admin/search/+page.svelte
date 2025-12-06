@@ -6,7 +6,8 @@
 		patchIdByWalletsByAdmin,
 	} from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/stores/auth';
-	import type { SearchReturn, AdminWallet, AccountType } from '$lib/api/types.gen';
+	import type { SearchReturn, AdminWallet, AccountType, Wallet, ArtistRef } from '$lib/api/types.gen';
+
 	import {
 		SearchOutline,
 		UserOutline,
@@ -14,6 +15,12 @@
 		WalletOutline,
 		ArrowRightOutline,
 	} from 'flowbite-svelte-icons';
+
+	// Type helpers for narrowing SearchReturn discriminated union
+	type UserSearchResult = Extract<SearchReturn, { _index: 'users' }>;
+	type DropSearchResult = Extract<SearchReturn, { _index: 'drops' }>;
+	type SongSearchResult = Extract<SearchReturn, { _index: 'songs' }>;
+	type WalletSearchResult = Extract<SearchReturn, { _index: 'wallets' }>;
 
 	let searchQuery = $state('');
 	let loading = $state(false);
@@ -218,30 +225,34 @@
 							</div>
 							<div class="flex-1 min-w-0">
 								{#if result._index === 'users'}
-									<p class="text-gray-900 dark:text-white font-medium truncate">{result._source.profile?.username}</p>
-									<p class="text-gray-500 dark:text-gray-400 text-sm truncate">{result._source.profile?.email}</p>
+									{@const userSource = (result as UserSearchResult)._source}
+									<p class="text-gray-900 dark:text-white font-medium truncate">{userSource.profile?.username}</p>
+									<p class="text-gray-500 dark:text-gray-400 text-sm truncate">{userSource.profile?.email}</p>
 								{:else if result._index === 'drops'}
-									<p class="text-gray-900 dark:text-white font-medium truncate">{result._source.title}</p>
+									{@const dropSource = (result as DropSearchResult)._source}
+									<p class="text-gray-900 dark:text-white font-medium truncate">{dropSource.title}</p>
 									<p class="text-gray-500 dark:text-gray-400 text-sm truncate">
-										{result._source.type} • {result._source.artists
+										{dropSource.type} • {dropSource.artists
 											?.map((a: any) => a.name)
 											.join(', ') || 'Unknown Artist'}
 									</p>
 								{:else if result._index === 'songs'}
-									<p class="text-gray-900 dark:text-white font-medium truncate">{result._source.title}</p>
+									{@const songSource = (result as SongSearchResult)._source}
+									<p class="text-gray-900 dark:text-white font-medium truncate">{songSource.title}</p>
 									<p class="text-gray-500 dark:text-gray-400 text-sm truncate">
-										ISRC: {result._source.isrc || 'None'} • {result._source.artists
+										ISRC: {songSource.isrc || 'None'} • {songSource.artists
 											?.map((a: any) => a.name)
 											.join(', ') || 'Unknown Artist'}
 									</p>
 								{:else if result._index === 'wallets'}
+									{@const walletSource = (result as WalletSearchResult)._source}
 									<p class="text-gray-900 dark:text-white font-medium truncate">
-										{result._source.userName || result._source.email || 'Unknown'}
+										{walletSource.userName || walletSource.email || 'Unknown'}
 									</p>
 									<p class="text-gray-500 dark:text-gray-400 text-sm truncate">
 										Balance: {formatCurrency(
-											(result._source.balance?.unrestrained || 0) +
-												(result._source.balance?.restrained || 0),
+											(walletSource.balance?.unrestrained || 0) +
+												(walletSource.balance?.restrained || 0),
 										)}
 									</p>
 								{/if}
@@ -281,16 +292,16 @@
 				<div class="space-y-4">
 					<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
 						<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Profile</h3>
-						<p class="text-gray-900 dark:text-white font-medium">{selectedItem._source.profile?.username}</p>
-						<p class="text-gray-500 dark:text-gray-400 text-sm">{selectedItem._source.profile?.email}</p>
-						<p class="text-gray-500 text-xs mt-1">ID: {selectedItem._source._id}</p>
+						<p class="text-gray-900 dark:text-white font-medium">{(selectedItem as UserSearchResult)._source.profile?.username}</p>
+						<p class="text-gray-500 dark:text-gray-400 text-sm">{(selectedItem as UserSearchResult)._source.profile?.email}</p>
+						<p class="text-gray-500 text-xs mt-1">ID: {(selectedItem as UserSearchResult)._source._id}</p>
 					</div>
 
-					{#if selectedItem._source.groups?.length > 0}
+					{#if (selectedItem as UserSearchResult)._source.groups?.length > 0}
 						<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
 							<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Groups</h3>
 							<div class="flex flex-wrap gap-2">
-								{#each selectedItem._source.groups as group}
+								{#each (selectedItem as UserSearchResult)._source.groups as group}
 									<span class="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded"
 										>{group}</span
 									>
@@ -399,38 +410,39 @@
 					{/if}
 				</div>
 			{:else if selectedType === 'songs'}
+				{@const songSourceAny = (selectedItem as SongSearchResult)._source as any}
 				<!-- Song Details -->
 				<div class="space-y-4">
 					<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
 						<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Song Info</h3>
-						<p class="text-gray-900 dark:text-white font-medium text-lg">{selectedItem._source.title}</p>
+						<p class="text-gray-900 dark:text-white font-medium text-lg">{(selectedItem as SongSearchResult)._source.title}</p>
 						<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
-							{selectedItem._source.artists?.map((a: any) => a.name).join(', ') || 'Unknown Artist'}
+							{(selectedItem as SongSearchResult)._source.artists?.map((a: any) => a.name).join(', ') || 'Unknown Artist'}
 						</p>
-						<p class="text-gray-500 text-xs mt-2">ID: {selectedItem._source._id}</p>
+						<p class="text-gray-500 text-xs mt-2">ID: {(selectedItem as SongSearchResult)._source._id}</p>
 					</div>
 
-					{#if selectedItem._source.isrc}
+					{#if (selectedItem as SongSearchResult)._source.isrc}
 						<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
 							<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">ISRC</h3>
-							<p class="text-gray-900 dark:text-white font-mono">{selectedItem._source.isrc}</p>
+							<p class="text-gray-900 dark:text-white font-mono">{(selectedItem as SongSearchResult)._source.isrc}</p>
 						</div>
 					{/if}
 
-					{#if selectedItem._source.duration}
+					{#if songSourceAny.duration}
 						<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
 							<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Duration</h3>
 							<p class="text-gray-900 dark:text-white">
-								{Math.floor(selectedItem._source.duration / 60)}:{String(
-									selectedItem._source.duration % 60,
+								{Math.floor(songSourceAny.duration / 60)}:{String(
+									songSourceAny.duration % 60,
 								).padStart(2, '0')}
 							</p>
 						</div>
 					{/if}
 
-					{#if selectedItem._source.dropId}
+					{#if songSourceAny.dropId}
 						<button
-							onclick={() => navigateToDropById(selectedItem?._source.dropId)}
+							onclick={() => navigateToDropById(songSourceAny.dropId)}
 							class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
 						>
 							<span>View Parent Drop</span>
@@ -443,11 +455,11 @@
 				<div class="space-y-4">
 					<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
 						<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Owner</h3>
-						<p class="text-gray-900 dark:text-white font-medium">{selectedItem._source.userName || 'Unknown'}</p>
-						<p class="text-gray-500 dark:text-gray-400 text-sm">{selectedItem._source.email || 'No email'}</p>
-						<p class="text-gray-500 text-xs mt-1">Wallet ID: {selectedItem._source._id}</p>
-						{#if selectedItem._source.user}
-							<p class="text-gray-500 text-xs">User ID: {selectedItem._source.user}</p>
+						<p class="text-gray-900 dark:text-white font-medium">{(selectedItem as WalletSearchResult)._source.userName || 'Unknown'}</p>
+						<p class="text-gray-500 dark:text-gray-400 text-sm">{(selectedItem as WalletSearchResult)._source.email || 'No email'}</p>
+						<p class="text-gray-500 text-xs mt-1">Wallet ID: {(selectedItem as WalletSearchResult)._source._id}</p>
+						{#if (selectedItem as WalletSearchResult)._source.user}
+							<p class="text-gray-500 text-xs">User ID: {(selectedItem as WalletSearchResult)._source.user}</p>
 						{/if}
 					</div>
 
@@ -457,13 +469,13 @@
 							<div>
 								<p class="text-xs text-gray-500">Unrestrained</p>
 								<p class="text-gray-900 dark:text-white font-medium text-lg">
-									{formatCurrency(selectedItem._source.balance?.unrestrained || 0)}
+									{formatCurrency((selectedItem as WalletSearchResult)._source.balance?.unrestrained || 0)}
 								</p>
 							</div>
 							<div>
 								<p class="text-xs text-gray-500">Restrained</p>
 								<p class="text-gray-900 dark:text-white font-medium text-lg">
-									{formatCurrency(selectedItem._source.balance?.restrained || 0)}
+									{formatCurrency((selectedItem as WalletSearchResult)._source.balance?.restrained || 0)}
 								</p>
 							</div>
 						</div>
@@ -471,8 +483,8 @@
 							<p class="text-xs text-gray-500">Total</p>
 							<p class="text-green-600 dark:text-green-400 font-bold text-xl">
 								{formatCurrency(
-									(selectedItem._source.balance?.unrestrained || 0) +
-										(selectedItem._source.balance?.restrained || 0),
+									((selectedItem as WalletSearchResult)._source.balance?.unrestrained || 0) +
+										((selectedItem as WalletSearchResult)._source.balance?.restrained || 0),
 								)}
 							</p>
 						</div>
@@ -528,13 +540,13 @@
 						</div>
 					{/if}
 
-					{#if selectedItem._source.transactions && selectedItem._source.transactions.length > 0}
+					{#if (selectedItem as WalletSearchResult)._source.transactions && (selectedItem as WalletSearchResult)._source.transactions.length > 0}
 						<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
 							<h3 class="text-sm font-medium text-gray-400 mb-3">
-								Transactions ({selectedItem._source.transactions.length})
+								Transactions ({(selectedItem as WalletSearchResult)._source.transactions!.length})
 							</h3>
 							<div class="space-y-2 max-h-64 overflow-y-auto">
-								{#each selectedItem._source.transactions as tx}
+								{#each (selectedItem as WalletSearchResult)._source.transactions! as tx}
 									<div
 										class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded text-sm"
 									>

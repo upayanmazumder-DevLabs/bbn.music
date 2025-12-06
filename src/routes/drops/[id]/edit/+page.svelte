@@ -158,7 +158,7 @@
 				path: { id: dropId },
 				headers: getAuthHeaders(),
 			});
-			if (response.data && response.data !== false) {
+			if (response.data) {
 				share = response.data as Share;
 			}
 		} catch (e) {

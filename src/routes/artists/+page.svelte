@@ -78,6 +78,7 @@
 				const newArtist: Artist = {
 					_id: response.data.id,
 					name: newArtistName.trim(),
+					users: [],
 					spotify: newArtistSpotify.trim() || undefined,
 					apple: newArtistApple.trim() || undefined,
 				};

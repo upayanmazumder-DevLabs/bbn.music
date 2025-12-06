@@ -4,7 +4,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 
-	const slug = $page.params.slug;
+	const slug = $page.params.slug!;
 
 	let shareData = $state<{
 		services: Record<string, string>;

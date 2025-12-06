@@ -1,154 +1,152 @@
 <script lang="ts">
-import {
-	BellSolid,
-	BellOutline,
-	CheckCircleSolid,
-	ExclamationCircleOutline,
-	InfoCircleSolid,
-} from 'flowbite-svelte-icons';
-import { onMount } from 'svelte';
-import { scale, fly } from 'svelte/transition';
+	import {
+		BellSolid,
+		BellOutline,
+		CheckCircleSolid,
+		ExclamationCircleOutline,
+		InfoCircleSolid,
+	} from 'flowbite-svelte-icons';
+	import { onMount } from 'svelte';
+	import { scale, fly } from 'svelte/transition';
 
-let showDropdown = $state(false);
-let unreadCount = $state(0);
-let notifications = $state<
-	Array<{
-		id: string;
-		title: string;
-		message: string;
-		timestamp: Date;
-		read: boolean;
-		type: 'info' | 'success' | 'warning' | 'error';
-	}>
->([]);
+	let showDropdown = $state(false);
+	let unreadCount = $state(0);
+	let notifications = $state<
+		Array<{
+			id: string;
+			title: string;
+			message: string;
+			timestamp: Date;
+			read: boolean;
+			type: 'info' | 'success' | 'warning' | 'error';
+		}>
+	>([]);
 
-// Close dropdown when clicking outside
-function handleClickOutside(event: MouseEvent) {
-	const target = event.target as HTMLElement;
-	if (!target.closest('.notification-container')) {
-		showDropdown = false;
+	// Close dropdown when clicking outside
+	function handleClickOutside(event: MouseEvent) {
+		const target = event.target as HTMLElement;
+		if (!target.closest('.notification-container')) {
+			showDropdown = false;
+		}
 	}
-}
 
-onMount(() => {
-	document.addEventListener('click', handleClickOutside);
-	// TODO: Fetch notifications from API when endpoint is available
-	// loadNotifications();
+	onMount(() => {
+		document.addEventListener('click', handleClickOutside);
+		// TODO: Fetch notifications from API when endpoint is available
+		// loadNotifications();
 
-	// Mock notifications for development
-	notifications = [
-		{
-			id: '1',
-			title: 'Drop Published Successfully',
-			message:
-				'Your drop "Summer Vibes EP" has been published to all stores and is now live.',
-			timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
-			read: false,
-			type: 'success',
-		},
-		{
-			id: '2',
-			title: 'Review Completed',
-			message:
-				'Your submission "Midnight Dreams" has passed review and is ready for publishing.',
-			timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-			read: false,
-			type: 'info',
-		},
-		{
-			id: '3',
-			title: 'Artwork Issue Detected',
-			message:
-				'The artwork for "Neon Lights" does not meet the minimum resolution requirements. Please upload a higher quality image.',
-			timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-			read: true,
-			type: 'warning',
-		},
-		{
-			id: '4',
-			title: 'Payout Processed',
-			message:
-				'Your payout of $127.50 for October has been processed and will arrive in 2-3 business days.',
-			timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
-			read: true,
-			type: 'success',
-		},
-		{
-			id: '5',
-			title: 'Submission Rejected',
-			message:
-				'Your drop "Untitled Album" was rejected due to metadata issues. Please review and resubmit.',
-			timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), // 3 days ago
-			read: true,
-			type: 'error',
-		},
-	];
-	unreadCount = notifications.filter((n) => !n.read).length;
+		// Mock notifications for development
+		notifications = [
+			{
+				id: '1',
+				title: 'Drop Published Successfully',
+				message: 'Your drop "Summer Vibes EP" has been published to all stores and is now live.',
+				timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
+				read: false,
+				type: 'success',
+			},
+			{
+				id: '2',
+				title: 'Review Completed',
+				message: 'Your submission "Midnight Dreams" has passed review and is ready for publishing.',
+				timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
+				read: false,
+				type: 'info',
+			},
+			{
+				id: '3',
+				title: 'Artwork Issue Detected',
+				message:
+					'The artwork for "Neon Lights" does not meet the minimum resolution requirements. Please upload a higher quality image.',
+				timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
+				read: true,
+				type: 'warning',
+			},
+			{
+				id: '4',
+				title: 'Payout Processed',
+				message:
+					'Your payout of $127.50 for October has been processed and will arrive in 2-3 business days.',
+				timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
+				read: true,
+				type: 'success',
+			},
+			{
+				id: '5',
+				title: 'Submission Rejected',
+				message:
+					'Your drop "Untitled Album" was rejected due to metadata issues. Please review and resubmit.',
+				timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), // 3 days ago
+				read: true,
+				type: 'error',
+			},
+		];
+		unreadCount = notifications.filter((n) => !n.read).length;
 
-	return () => {
-		document.removeEventListener('click', handleClickOutside);
+		return () => {
+			document.removeEventListener('click', handleClickOutside);
+		};
+	});
+
+	function toggleDropdown() {
+		showDropdown = !showDropdown;
+	}
+
+	function markAsRead(id: string) {
+		const notification = notifications.find((n) => n.id === id);
+		if (notification && !notification.read) {
+			notification.read = true;
+			unreadCount = Math.max(0, unreadCount - 1);
+			// TODO: Send read status to API
+		}
+	}
+
+	function markAllAsRead() {
+		notifications.forEach((n) => (n.read = true));
+		unreadCount = 0;
+		// TODO: Send batch read status to API
+	}
+
+	function formatTimestamp(date: Date): string {
+		const now = new Date();
+		const diff = now.getTime() - date.getTime();
+		const minutes = Math.floor(diff / 60000);
+		const hours = Math.floor(diff / 3600000);
+		const days = Math.floor(diff / 86400000);
+
+		if (minutes < 1) return 'Just now';
+		if (minutes < 60) return `${minutes}m ago`;
+		if (hours < 24) return `${hours}h ago`;
+		if (days < 7) return `${days}d ago`;
+		return date.toLocaleDateString();
+	}
+
+	const typeConfig = {
+		info: {
+			icon: InfoCircleSolid,
+			color: 'text-blue-400',
+			bg: 'bg-blue-500/10',
+			border: 'border-blue-500/20',
+		},
+		success: {
+			icon: CheckCircleSolid,
+			color: 'text-green-400',
+			bg: 'bg-green-500/10',
+			border: 'border-green-500/20',
+		},
+		warning: {
+			icon: ExclamationCircleOutline,
+			color: 'text-yellow-400',
+			bg: 'bg-yellow-500/10',
+			border: 'border-yellow-500/20',
+		},
+		error: {
+			icon: ExclamationCircleOutline,
+			color: 'text-red-400',
+			bg: 'bg-red-500/10',
+			border: 'border-red-500/20',
+		},
 	};
-});
-
-function toggleDropdown() {
-	showDropdown = !showDropdown;
-}
-
-function markAsRead(id: string) {
-	const notification = notifications.find((n) => n.id === id);
-	if (notification && !notification.read) {
-		notification.read = true;
-		unreadCount = Math.max(0, unreadCount - 1);
-		// TODO: Send read status to API
-	}
-}
-
-function markAllAsRead() {
-	notifications.forEach((n) => (n.read = true));
-	unreadCount = 0;
-	// TODO: Send batch read status to API
-}
-
-function formatTimestamp(date: Date): string {
-	const now = new Date();
-	const diff = now.getTime() - date.getTime();
-	const minutes = Math.floor(diff / 60000);
-	const hours = Math.floor(diff / 3600000);
-	const days = Math.floor(diff / 86400000);
-
-	if (minutes < 1) return 'Just now';
-	if (minutes < 60) return `${minutes}m ago`;
-	if (hours < 24) return `${hours}h ago`;
-	if (days < 7) return `${days}d ago`;
-	return date.toLocaleDateString();
-}
-
-const typeConfig = {
-	info: {
-		icon: InfoCircleSolid,
-		color: 'text-blue-400',
-		bg: 'bg-blue-500/10',
-		border: 'border-blue-500/20',
-	},
-	success: {
-		icon: CheckCircleSolid,
-		color: 'text-green-400',
-		bg: 'bg-green-500/10',
-		border: 'border-green-500/20',
-	},
-	warning: {
-		icon: ExclamationCircleOutline,
-		color: 'text-yellow-400',
-		bg: 'bg-yellow-500/10',
-		border: 'border-yellow-500/20',
-	},
-	error: {
-		icon: ExclamationCircleOutline,
-		color: 'text-red-400',
-		bg: 'bg-red-500/10',
-		border: 'border-red-500/20',
-	},
-};
 </script>
 
 <div class="notification-container relative">
@@ -184,7 +182,9 @@ const typeConfig = {
 					<BellSolid class="w-5 h-5 text-orange-400" />
 					<h3 class="text-lg font-bold text-white">Notifications</h3>
 					{#if unreadCount > 0}
-						<span class="px-2 py-0.5 text-xs font-semibold bg-orange-500/20 text-orange-400 rounded-full">
+						<span
+							class="px-2 py-0.5 text-xs font-semibold bg-orange-500/20 text-orange-400 rounded-full"
+						>
 							{unreadCount} new
 						</span>
 					{/if}
@@ -203,7 +203,9 @@ const typeConfig = {
 			<div class="max-h-[480px] overflow-y-auto custom-scrollbar">
 				{#if notifications.length === 0}
 					<div class="p-12 text-center">
-						<div class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl flex items-center justify-center">
+						<div
+							class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-gray-700 to-gray-800 rounded-2xl flex items-center justify-center"
+						>
 							<BellOutline class="w-8 h-8 text-gray-500" />
 						</div>
 						<p class="text-gray-400 font-medium mb-1">All caught up!</p>
@@ -213,17 +215,18 @@ const typeConfig = {
 					{#each notifications as notification (notification.id)}
 						{@const config = typeConfig[notification.type]}
 						{@const Icon = config.icon}
-						<div
-							class="relative group"
-							transition:fly={{ x: 20, duration: 200 }}
-						>
+						<div class="relative group" transition:fly={{ x: 20, duration: 200 }}>
 							<button
 								onclick={() => markAsRead(notification.id)}
-								class="w-full p-4 text-left transition-all duration-200 border-b border-gray-700 last:border-b-0 {notification.read ? 'hover:bg-white/5' : 'bg-orange-500/5 hover:bg-orange-500/10'}"
+								class="w-full p-4 text-left transition-all duration-200 border-b border-gray-700 last:border-b-0 {notification.read
+									? 'hover:bg-white/5'
+									: 'bg-orange-500/5 hover:bg-orange-500/10'}"
 							>
 								<div class="flex items-start gap-3">
 									<!-- Type icon -->
-									<div class="flex-shrink-0 mt-0.5 {config.bg} {config.border} border rounded-lg p-2">
+									<div
+										class="flex-shrink-0 mt-0.5 {config.bg} {config.border} border rounded-lg p-2"
+									>
 										<Icon class="w-4 h-4 {config.color}" />
 									</div>
 
@@ -245,7 +248,9 @@ const typeConfig = {
 									<!-- Unread indicator -->
 									{#if !notification.read}
 										<div class="flex-shrink-0 mt-2">
-											<div class="w-2.5 h-2.5 bg-orange-500 rounded-full shadow-lg shadow-orange-500/50"></div>
+											<div
+												class="w-2.5 h-2.5 bg-orange-500 rounded-full shadow-lg shadow-orange-500/50"
+											></div>
 										</div>
 									{/if}
 								</div>
@@ -254,7 +259,6 @@ const typeConfig = {
 					{/each}
 				{/if}
 			</div>
-
 		</div>
 	{/if}
 </div>

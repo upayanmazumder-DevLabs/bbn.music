@@ -1,11 +1,6 @@
 import { z } from 'zod';
 
-export const artistTypes = [
-	'PRIMARY',
-	'FEATURING',
-	'SONGWRITER',
-	'PRODUCER',
-] as const;
+export const artistTypes = ['PRIMARY', 'FEATURING', 'SONGWRITER', 'PRODUCER'] as const;
 export type ArtistType = (typeof artistTypes)[number];
 
 export const artistRefSchema = z.object({
@@ -74,14 +69,8 @@ export const stepOneSchema = z.object({
 			(arr) => arr.some((a) => a.type === 'PRIMARY' && (a.name || a._id)),
 			'At least one primary artist with a name is required',
 		),
-	compositionCopyright: z
-		.string()
-		.min(1, 'Composition copyright is required')
-		.max(100),
-	soundRecordingCopyright: z
-		.string()
-		.min(1, 'Sound recording copyright is required')
-		.max(100),
+	compositionCopyright: z.string().min(1, 'Composition copyright is required').max(100),
+	soundRecordingCopyright: z.string().min(1, 'Sound recording copyright is required').max(100),
 	gtin: z.string().optional(),
 });
 

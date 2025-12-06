@@ -1,81 +1,86 @@
 <script lang="ts">
-import { page } from '$app/stores';
-import {
-	getSlugByShareByMusic,
-	getArtworkBySlugByShareByMusic,
-} from '$lib/api/sdk.gen';
-import { onMount } from 'svelte';
-import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { getSlugByShareByMusic, getArtworkBySlugByShareByMusic } from '$lib/api/sdk.gen';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 
-const slug = $page.params.slug;
+	const slug = $page.params.slug;
 
-let shareData = $state<{
-	services: Record<string, string>;
-	title: string;
-	artistNames: string[];
-	artwork: string;
-} | null>(null);
+	let shareData = $state<{
+		services: Record<string, string>;
+		title: string;
+		artistNames: string[];
+		artwork: string;
+	} | null>(null);
 
-let artworkUrl = $state<string | null>(null);
-let loading = $state(true);
-let error = $state(false);
+	let artworkUrl = $state<string | null>(null);
+	let loading = $state(true);
+	let error = $state(false);
 
-// Map service keys to display info (matching keys from backend)
-const serviceInfo: Record<string, { name: string; icon: string }> = {
-	spotify: { name: 'Spotify', icon: '/landing/spotify.svg' },
-	apple: { name: 'Apple Music', icon: '/landing/apple.svg' },
-	youtube: { name: 'YouTube Music', icon: '/landing/youtube.svg' },
-	tidal: { name: 'Tidal', icon: '/landing/tidal.svg' },
-	deezer: { name: 'Deezer', icon: '/landing/deezer.svg' },
-	pandora: { name: 'Pandora', icon: '/landing/pandora.svg' },
-	tiktok: { name: 'TikTok', icon: '/landing/tiktok.svg' },
-	instagram: { name: 'Instagram', icon: '/landing/instagram.svg' },
-	facebook: { name: 'Facebook', icon: '/landing/facebook.svg' },
-};
+	// Map service keys to display info (matching keys from backend)
+	const serviceInfo: Record<string, { name: string; icon: string }> = {
+		spotify: { name: 'Spotify', icon: '/landing/spotify.svg' },
+		apple: { name: 'Apple Music', icon: '/landing/apple.svg' },
+		youtube: { name: 'YouTube Music', icon: '/landing/youtube.svg' },
+		tidal: { name: 'Tidal', icon: '/landing/tidal.svg' },
+		deezer: { name: 'Deezer', icon: '/landing/deezer.svg' },
+		pandora: { name: 'Pandora', icon: '/landing/pandora.svg' },
+		tiktok: { name: 'TikTok', icon: '/landing/tiktok.svg' },
+		instagram: { name: 'Instagram', icon: '/landing/instagram.svg' },
+		facebook: { name: 'Facebook', icon: '/landing/facebook.svg' },
+	};
 
-onMount(async () => {
-	try {
-		// Fetch share data
-		const response = await getSlugByShareByMusic({
-			path: { slug },
-		});
+	onMount(async () => {
+		try {
+			// Fetch share data
+			const response = await getSlugByShareByMusic({
+				path: { slug },
+			});
 
-		if (response.error || !response.data) {
+			if (response.error || !response.data) {
+				error = true;
+				// Redirect to homepage on error
+				setTimeout(() => goto('/'), 2000);
+				return;
+			}
+
+			shareData = response.data as any;
+
+			// Fetch artwork as blob
+			const artworkResponse = await getArtworkBySlugByShareByMusic({
+				path: { slug },
+			});
+
+			if (artworkResponse.data) {
+				const blob = artworkResponse.data as Blob;
+				artworkUrl = URL.createObjectURL(blob);
+			}
+
+			loading = false;
+		} catch (e) {
+			console.error('Failed to load share page:', e);
 			error = true;
-			// Redirect to homepage on error
 			setTimeout(() => goto('/'), 2000);
-			return;
 		}
-
-		shareData = response.data as any;
-
-		// Fetch artwork as blob
-		const artworkResponse = await getArtworkBySlugByShareByMusic({
-			path: { slug },
-		});
-
-		if (artworkResponse.data) {
-			const blob = artworkResponse.data as Blob;
-			artworkUrl = URL.createObjectURL(blob);
-		}
-
-		loading = false;
-	} catch (e) {
-		console.error('Failed to load share page:', e);
-		error = true;
-		setTimeout(() => goto('/'), 2000);
-	}
-});
+	});
 </script>
 
 <svelte:head>
 	<title>{shareData?.title || 'Share'} - bbn.music</title>
-	<meta name="description" content="Listen to {shareData?.title || 'this track'} by {shareData?.artistNames?.join(', ') || 'various artists'} on your favorite streaming platform" />
+	<meta
+		name="description"
+		content="Listen to {shareData?.title || 'this track'} by {shareData?.artistNames?.join(', ') ||
+			'various artists'} on your favorite streaming platform"
+	/>
 
 	<!-- Open Graph / Facebook -->
 	<meta property="og:type" content="music.song" />
 	<meta property="og:title" content="{shareData?.title || 'Share'} - bbn.music" />
-	<meta property="og:description" content="Listen to {shareData?.title || 'this track'} by {shareData?.artistNames?.join(', ') || 'various artists'}" />
+	<meta
+		property="og:description"
+		content="Listen to {shareData?.title || 'this track'} by {shareData?.artistNames?.join(', ') ||
+			'various artists'}"
+	/>
 	{#if artworkUrl}
 		<meta property="og:image" content={artworkUrl} />
 	{/if}
@@ -83,7 +88,11 @@ onMount(async () => {
 	<!-- Twitter -->
 	<meta name="twitter:card" content="summary_large_image" />
 	<meta name="twitter:title" content="{shareData?.title || 'Share'} - bbn.music" />
-	<meta name="twitter:description" content="Listen to {shareData?.title || 'this track'} by {shareData?.artistNames?.join(', ') || 'various artists'}" />
+	<meta
+		name="twitter:description"
+		content="Listen to {shareData?.title || 'this track'} by {shareData?.artistNames?.join(', ') ||
+			'various artists'}"
+	/>
 </svelte:head>
 
 <!-- Blurred background artwork -->
@@ -143,8 +152,18 @@ onMount(async () => {
 							<img src={info.icon} alt={info.name} class="w-7 h-7 flex-shrink-0" />
 						{/if}
 						<span class="text-white font-semibold text-lg flex-1">{info.name}</span>
-						<svg class="w-5 h-5 text-white/50 group-hover:text-white group-hover:translate-x-0.5 transition-all duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+						<svg
+							class="w-5 h-5 text-white/50 group-hover:text-white group-hover:translate-x-0.5 transition-all duration-200"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+							/>
 						</svg>
 					</a>
 				{/each}
@@ -153,7 +172,11 @@ onMount(async () => {
 			<!-- Powered by bbn.music -->
 			<div class="text-center pt-2">
 				<p class="text-gray-400 text-sm">
-					Powered by <a href="/" class="text-orange-400 font-semibold hover:text-orange-300 transition-colors">bbn.music</a>
+					Powered by <a
+						href="/"
+						class="text-orange-400 font-semibold hover:text-orange-300 transition-colors"
+						>bbn.music</a
+					>
 				</p>
 			</div>
 		</div>

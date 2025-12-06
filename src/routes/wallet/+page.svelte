@@ -1,64 +1,60 @@
 <script lang="ts">
-import { onMount } from 'svelte';
-import { Button, Card } from '$lib/components/ui';
-import type { Wallet } from '$lib/api/types.gen';
-import { getWallet } from '$lib/api/sdk.gen';
-import { getAuthHeaders } from '$lib/api';
-import { toast } from '$lib/stores/toast';
+	import { onMount } from 'svelte';
+	import { Button, Card } from '$lib/components/ui';
+	import type { Wallet } from '$lib/api/types.gen';
+	import { getWallet } from '$lib/api/sdk.gen';
+	import { getAuthHeaders } from '$lib/api';
+	import { toast } from '$lib/stores/toast';
 
-let wallet = $state<Wallet | null>(null);
-let isLoading = $state(true);
-let error = $state<string | null>(null);
+	let wallet = $state<Wallet | null>(null);
+	let isLoading = $state(true);
+	let error = $state<string | null>(null);
 
-onMount(async () => {
-	try {
-		const response = await getWallet({
-			headers: getAuthHeaders(),
-		});
+	onMount(async () => {
+		try {
+			const response = await getWallet({
+				headers: getAuthHeaders(),
+			});
 
-		if (response.data) {
-			wallet = response.data as Wallet;
+			if (response.data) {
+				wallet = response.data as Wallet;
+			}
+		} catch (err) {
+			error = 'Failed to load wallet. Please try again later.';
+			console.error('Error loading wallet:', err);
+		} finally {
+			isLoading = false;
 		}
-	} catch (err) {
-		error = 'Failed to load wallet. Please try again later.';
-		console.error('Error loading wallet:', err);
-	} finally {
-		isLoading = false;
-	}
-});
-
-function formatCurrency(amount: number): string {
-	return `£ ${amount.toFixed(2)}`;
-}
-
-function formatDate(timestamp: string): string {
-	return new Date(timestamp).toLocaleDateString('en-GB', {
-		day: 'numeric',
-		month: 'short',
-		year: 'numeric',
 	});
-}
 
-function getAccountTypeLabel(type: string): string {
-	switch (type) {
-		case 'DEFAULT':
-			return 'Basic';
-		case 'SUBSCRIBED':
-			return 'Premium';
-		case 'VIP':
-			return 'VIP';
-		default:
-			return type;
+	function formatCurrency(amount: number): string {
+		return `£ ${amount.toFixed(2)}`;
 	}
-}
 
-function requestPayout() {
-	toast.show(
-		'Please email support@bbn.music and include your PayPal Address',
-		'info',
-		6000,
-	);
-}
+	function formatDate(timestamp: string): string {
+		return new Date(timestamp).toLocaleDateString('en-GB', {
+			day: 'numeric',
+			month: 'short',
+			year: 'numeric',
+		});
+	}
+
+	function getAccountTypeLabel(type: string): string {
+		switch (type) {
+			case 'DEFAULT':
+				return 'Basic';
+			case 'SUBSCRIBED':
+				return 'Premium';
+			case 'VIP':
+				return 'VIP';
+			default:
+				return type;
+		}
+	}
+
+	function requestPayout() {
+		toast.show('Please email support@bbn.music and include your PayPal Address', 'info', 6000);
+	}
 </script>
 
 <svelte:head>
@@ -74,7 +70,9 @@ function requestPayout() {
 
 	{#if isLoading}
 		<div class="flex justify-center items-center h-64">
-			<div class="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin"></div>
+			<div
+				class="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin"
+			></div>
 		</div>
 	{:else if error}
 		<Card variant="default" padding="lg">
@@ -90,7 +88,9 @@ function requestPayout() {
 			<Card variant="default" padding="lg">
 				<div class="space-y-1">
 					<p class="text-4xl font-bold text-white">
-						{formatCurrency((wallet.balance?.unrestrained ?? 0) + (wallet.balance?.restrained ?? 0))}
+						{formatCurrency(
+							(wallet.balance?.unrestrained ?? 0) + (wallet.balance?.restrained ?? 0),
+						)}
 					</p>
 					<p class="text-gray-400 font-medium">Balance</p>
 					{#if wallet.balance?.restrained && wallet.balance.restrained > 0}

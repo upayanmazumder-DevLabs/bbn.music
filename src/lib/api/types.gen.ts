@@ -76,10 +76,7 @@ export type DropType =
 	| 'UNSUBMITTED'
 	| 'REVIEW_DECLINED';
 
-export type ReviewResponse =
-	| 'APPROVED'
-	| 'DECLINE_COPYRIGHT'
-	| 'DECLINE_MALICIOUS_ACTIVITY';
+export type ReviewResponse = 'APPROVED' | 'DECLINE_COPYRIGHT' | 'DECLINE_MALICIOUS_ACTIVITY';
 
 export type Share = {
 	_id: string;
@@ -574,9 +571,7 @@ export type SearchReturn = (
 					| {
 							type: 'webAuthn';
 							id: string;
-							authenticatorAttachement:
-								| 'cross-platform'
-								| 'platform';
+							authenticatorAttachement: 'cross-platform' | 'platform';
 							publicKey: string;
 					  }
 					| {
@@ -667,8 +662,7 @@ export type GetDropsByAdminResponses = {
 	200: Array<AdminDrop>;
 };
 
-export type GetDropsByAdminResponse =
-	GetDropsByAdminResponses[keyof GetDropsByAdminResponses];
+export type GetDropsByAdminResponse = GetDropsByAdminResponses[keyof GetDropsByAdminResponses];
 
 export type GetIdByDropsByAdminData = {
 	body?: never;
@@ -759,9 +753,7 @@ export type GetIdByDropsByAdminResponses = {
 					| {
 							type: 'webAuthn';
 							id: string;
-							authenticatorAttachement:
-								| 'cross-platform'
-								| 'platform';
+							authenticatorAttachement: 'cross-platform' | 'platform';
 							publicKey: string;
 					  }
 					| {
@@ -830,8 +822,7 @@ export type GetGroupsByAdminResponses = {
 	200: Array<Group>;
 };
 
-export type GetGroupsByAdminResponse =
-	GetGroupsByAdminResponses[keyof GetGroupsByAdminResponses];
+export type GetGroupsByAdminResponse = GetGroupsByAdminResponses[keyof GetGroupsByAdminResponses];
 
 export type GetPayoutsByAdminData = {
 	body?: never;
@@ -1210,8 +1201,7 @@ export type GetDropsByMusicResponses = {
 	}>;
 };
 
-export type GetDropsByMusicResponse =
-	GetDropsByMusicResponses[keyof GetDropsByMusicResponses];
+export type GetDropsByMusicResponse = GetDropsByMusicResponses[keyof GetDropsByMusicResponses];
 
 export type PostDropByDropsByMusicData = {
 	body?: {
@@ -1502,8 +1492,7 @@ export type GetSongsByMusicResponses = {
 	200: Array<Song>;
 };
 
-export type GetSongsByMusicResponse =
-	GetSongsByMusicResponses[keyof GetSongsByMusicResponses];
+export type GetSongsByMusicResponse = GetSongsByMusicResponses[keyof GetSongsByMusicResponses];
 
 export type PostSongsByMusicData = {
 	body?: {
@@ -1533,8 +1522,7 @@ export type PostSongsByMusicResponses = {
 	};
 };
 
-export type PostSongsByMusicResponse =
-	PostSongsByMusicResponses[keyof PostSongsByMusicResponses];
+export type PostSongsByMusicResponse = PostSongsByMusicResponses[keyof PostSongsByMusicResponses];
 
 export type GetIdBySongsByMusicData = {
 	body?: never;
@@ -1880,8 +1868,7 @@ export type PutUserByUserResponses = {
 	};
 };
 
-export type PutUserByUserResponse =
-	PutUserByUserResponses[keyof PutUserByUserResponses];
+export type PutUserByUserResponse = PutUserByUserResponses[keyof PutUserByUserResponses];
 
 export type PatchIdByUsersByUserData = {
 	body?: {

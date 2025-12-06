@@ -1,68 +1,68 @@
 <script lang="ts">
-import type { Snippet } from 'svelte';
-import { fade, fly } from 'svelte/transition';
+	import type { Snippet } from 'svelte';
+	import { fade, fly } from 'svelte/transition';
 
-interface Props {
-	open?: boolean;
-	title?: string;
-	size?: 'sm' | 'md' | 'lg' | 'xl';
-	dismissible?: boolean;
-	class?: string;
-	children: Snippet;
-	footer?: Snippet;
-	onclose?: () => void;
-}
-
-let {
-	open = $bindable(false),
-	title,
-	size = 'md',
-	dismissible = true,
-	class: className = '',
-	children,
-	footer,
-	onclose,
-}: Props = $props();
-
-const sizeClasses: Record<NonNullable<Props['size']>, string> = {
-	sm: 'max-w-md',
-	md: 'max-w-lg',
-	lg: 'max-w-2xl',
-	xl: 'max-w-4xl',
-};
-
-function close() {
-	if (dismissible) {
-		open = false;
-		onclose?.();
-	}
-}
-
-function handleBackdropClick(e: MouseEvent) {
-	if (e.target === e.currentTarget) {
-		close();
-	}
-}
-
-function handleKeydown(e: KeyboardEvent) {
-	if (e.key === 'Escape' && dismissible) {
-		close();
-	}
-}
-
-// Apply overflow hidden to body when modal is open
-$effect(() => {
-	if (open) {
-		document.body.style.overflow = 'hidden';
-	} else {
-		document.body.style.overflow = '';
+	interface Props {
+		open?: boolean;
+		title?: string;
+		size?: 'sm' | 'md' | 'lg' | 'xl';
+		dismissible?: boolean;
+		class?: string;
+		children: Snippet;
+		footer?: Snippet;
+		onclose?: () => void;
 	}
 
-	// Cleanup on unmount
-	return () => {
-		document.body.style.overflow = '';
+	let {
+		open = $bindable(false),
+		title,
+		size = 'md',
+		dismissible = true,
+		class: className = '',
+		children,
+		footer,
+		onclose,
+	}: Props = $props();
+
+	const sizeClasses: Record<NonNullable<Props['size']>, string> = {
+		sm: 'max-w-md',
+		md: 'max-w-lg',
+		lg: 'max-w-2xl',
+		xl: 'max-w-4xl',
 	};
-});
+
+	function close() {
+		if (dismissible) {
+			open = false;
+			onclose?.();
+		}
+	}
+
+	function handleBackdropClick(e: MouseEvent) {
+		if (e.target === e.currentTarget) {
+			close();
+		}
+	}
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape' && dismissible) {
+			close();
+		}
+	}
+
+	// Apply overflow hidden to body when modal is open
+	$effect(() => {
+		if (open) {
+			document.body.style.overflow = 'hidden';
+		} else {
+			document.body.style.overflow = '';
+		}
+
+		// Cleanup on unmount
+		return () => {
+			document.body.style.overflow = '';
+		};
+	});
 </script>
 
 <svelte:window onkeydown={handleKeydown} />
@@ -81,7 +81,9 @@ $effect(() => {
 
 		<!-- Modal -->
 		<div
-			class="relative w-full {sizeClasses[size]} max-h-[calc(100vh-2rem)] bg-gray-800 rounded-xl shadow-2xl border border-gray-700 flex flex-col {className}"
+			class="relative w-full {sizeClasses[
+				size
+			]} max-h-[calc(100vh-2rem)] bg-gray-800 rounded-xl shadow-2xl border border-gray-700 flex flex-col {className}"
 			transition:fly={{ y: 20, duration: 200 }}
 			role="dialog"
 			aria-modal="true"
@@ -103,7 +105,12 @@ $effect(() => {
 							aria-label="Close modal"
 						>
 							<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+								<path
+									stroke-linecap="round"
+									stroke-linejoin="round"
+									stroke-width="2"
+									d="M6 18L18 6M6 6l12 12"
+								/>
 							</svg>
 						</button>
 					{/if}

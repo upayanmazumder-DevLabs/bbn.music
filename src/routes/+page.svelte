@@ -1,80 +1,74 @@
 <script lang="ts">
-import { Button } from '$lib/components/ui';
-import {
-	CheckCircleSolid,
-	GlobeSolid,
-	ChartPieSolid,
-	InboxSolid,
-} from 'flowbite-svelte-icons';
+	import { Button } from '$lib/components/ui';
+	import { CheckCircleSolid, GlobeSolid, ChartPieSolid, InboxSolid } from 'flowbite-svelte-icons';
 
-// Platform logos for the carousel
-const platforms = [
-	{ name: 'Spotify', logo: '/landing/spotify.svg' },
-	{ name: 'Apple Music', logo: '/landing/apple.svg' },
-	{ name: 'YouTube', logo: '/landing/youtube.svg' },
-	{ name: 'Deezer', logo: '/landing/deezer.svg' },
-	{ name: 'Tidal', logo: '/landing/tidal.svg' },
-	{ name: 'TikTok', logo: '/landing/tiktok.svg' },
-	{ name: 'Instagram', logo: '/landing/instagram.svg' },
-	{ name: 'Facebook', logo: '/landing/facebook.svg' },
-	{ name: 'Pandora', logo: '/landing/pandora.svg' },
-];
+	// Platform logos for the carousel
+	const platforms = [
+		{ name: 'Spotify', logo: '/landing/spotify.svg' },
+		{ name: 'Apple Music', logo: '/landing/apple.svg' },
+		{ name: 'YouTube', logo: '/landing/youtube.svg' },
+		{ name: 'Deezer', logo: '/landing/deezer.svg' },
+		{ name: 'Tidal', logo: '/landing/tidal.svg' },
+		{ name: 'TikTok', logo: '/landing/tiktok.svg' },
+		{ name: 'Instagram', logo: '/landing/instagram.svg' },
+		{ name: 'Facebook', logo: '/landing/facebook.svg' },
+		{ name: 'Pandora', logo: '/landing/pandora.svg' },
+	];
 
-const freePlanFeatures = [
-	'Unlimited Drops',
-	'Unlimited Artists',
-	'Reach 52 Stores',
-	'Reach 195 Countries',
-	'No Payment Needed',
-];
+	const freePlanFeatures = [
+		'Unlimited Drops',
+		'Unlimited Artists',
+		'Reach 52 Stores',
+		'Reach 195 Countries',
+		'No Payment Needed',
+	];
 
-const paidPlanFeatures = [
-	'Unlimited Drops',
-	'Unlimited Artists',
-	'Reach 52 Stores',
-	'Reach 195 Countries',
-	'No Revenue Cut',
-	'Fully Customizable',
-	'Priority Queue',
-	'Priority Support',
-];
+	const paidPlanFeatures = [
+		'Unlimited Drops',
+		'Unlimited Artists',
+		'Reach 52 Stores',
+		'Reach 195 Countries',
+		'No Revenue Cut',
+		'Fully Customizable',
+		'Priority Queue',
+		'Priority Support',
+	];
 
-const keyFeatures = [
-	{
-		icon: ChartPieSolid,
-		title: 'Lowest Cut',
-		description:
-			'With our free plan, we only take a 3% cut of your revenue.',
-		color: 'bg-red-500',
-	},
-	{
-		icon: GlobeSolid,
-		title: 'Global',
-		description:
-			'We support all major and many smaller stores, without any extra cost for you.',
-		color: 'bg-green-500',
-	},
-	{
-		icon: InboxSolid,
-		title: 'Unlimited',
-		description:
-			'No hard limits. You can manage as many Drops and Artists as you want.',
-		color: 'bg-indigo-500',
-	},
-];
+	const keyFeatures = [
+		{
+			icon: ChartPieSolid,
+			title: 'Lowest Cut',
+			description: 'With our free plan, we only take a 3% cut of your revenue.',
+			color: 'bg-red-500',
+		},
+		{
+			icon: GlobeSolid,
+			title: 'Global',
+			description: 'We support all major and many smaller stores, without any extra cost for you.',
+			color: 'bg-green-500',
+		},
+		{
+			icon: InboxSolid,
+			title: 'Unlimited',
+			description: 'No hard limits. You can manage as many Drops and Artists as you want.',
+			color: 'bg-indigo-500',
+		},
+	];
 
-const testimonials = [
-	{
-		quote: 'The thing I love the most is the flexibility and the contactability of the entire bbn.music team. It is also just great to develop concepts and plans with motivated and very friendly people.',
-		name: 'Redz',
-		avatar: '/landing/redz.jpg',
-	},
-	{
-		quote: 'There is pretty much no other digital distributor that offers more and at the same time, works so closely with artists and who artists are so valued by and feel so understood by.',
-		name: 'Criticz',
-		avatar: '/landing/criticz.jpg',
-	},
-];
+	const testimonials = [
+		{
+			quote:
+				'The thing I love the most is the flexibility and the contactability of the entire bbn.music team. It is also just great to develop concepts and plans with motivated and very friendly people.',
+			name: 'Redz',
+			avatar: '/landing/redz.jpg',
+		},
+		{
+			quote:
+				'There is pretty much no other digital distributor that offers more and at the same time, works so closely with artists and who artists are so valued by and feel so understood by.',
+			name: 'Criticz',
+			avatar: '/landing/criticz.jpg',
+		},
+	];
 </script>
 
 <svelte:head>
@@ -92,8 +86,8 @@ const testimonials = [
 				Drop in with<br />your Audience
 			</h1>
 			<p class="text-xl md:text-2xl text-gray-300 mb-8 max-w-2xl font-medium leading-relaxed">
-				bbn.music, your gateway to unlimited music distribution at a low cost.
-				Maximize your reach without limits. Join us and let the world hear your music.
+				bbn.music, your gateway to unlimited music distribution at a low cost. Maximize your reach
+				without limits. Join us and let the world hear your music.
 			</p>
 			<Button
 				href="/drops/new"
@@ -113,8 +107,12 @@ const testimonials = [
 
 		<div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
 			<!-- Free Plan -->
-			<div class="rounded-2xl p-8 bg-gradient-to-br from-orange-900/20 to-orange-800/10 border border-orange-500/20">
-				<span class="inline-block px-3 py-1 rounded-md bg-gradient-to-r from-orange-600/50 to-orange-500/50 text-white font-bold text-sm mb-6">
+			<div
+				class="rounded-2xl p-8 bg-gradient-to-br from-orange-900/20 to-orange-800/10 border border-orange-500/20"
+			>
+				<span
+					class="inline-block px-3 py-1 rounded-md bg-gradient-to-r from-orange-600/50 to-orange-500/50 text-white font-bold text-sm mb-6"
+				>
 					Free Plan
 				</span>
 
@@ -144,7 +142,9 @@ const testimonials = [
 
 			<!-- Paid Plan -->
 			<div class="rounded-2xl p-8 bg-gradient-to-br from-orange-600 to-orange-700">
-				<span class="inline-block px-3 py-1 rounded-md bg-black/30 text-white font-bold text-sm mb-6">
+				<span
+					class="inline-block px-3 py-1 rounded-md bg-black/30 text-white font-bold text-sm mb-6"
+				>
 					Paid Plan
 				</span>
 
@@ -206,7 +206,9 @@ const testimonials = [
 
 	<!-- Why bbn.music -->
 	<section>
-		<div class="rounded-2xl p-8 md:p-12 bg-gradient-to-br from-orange-900/20 to-orange-800/10 border border-orange-500/20">
+		<div
+			class="rounded-2xl p-8 md:p-12 bg-gradient-to-br from-orange-900/20 to-orange-800/10 border border-orange-500/20"
+		>
 			<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
 				<h2 class="text-3xl font-bold text-white">Why bbn.music?</h2>
 				<Button
@@ -235,14 +237,12 @@ const testimonials = [
 	<section>
 		<div class="text-center mb-12">
 			<h2 class="text-5xl md:text-6xl font-black text-white mb-4">Loved by Artists</h2>
-			<p class="text-xl text-gray-400 font-semibold">
-				See how our Artists value bbn.music
-			</p>
+			<p class="text-xl text-gray-400 font-semibold">See how our Artists value bbn.music</p>
 		</div>
 
 		<div class="max-w-3xl mx-auto space-y-12">
 			{#each testimonials as testimonial, i}
-				<div class="{i % 2 === 0 ? 'text-left' : 'text-right ml-auto'}">
+				<div class={i % 2 === 0 ? 'text-left' : 'text-right ml-auto'}>
 					<p class="text-lg md:text-xl text-white font-semibold italic mb-6 leading-relaxed">
 						"{testimonial.quote}"
 					</p>
@@ -283,18 +283,8 @@ const testimonials = [
 		background-size: cover;
 		z-index: -1;
 		/* Mask the image to fade to transparent at the bottom */
-		-webkit-mask-image: linear-gradient(
-			to bottom,
-			black 0%,
-			black 40%,
-			transparent 100%
-		);
-		mask-image: linear-gradient(
-			to bottom,
-			black 0%,
-			black 40%,
-			transparent 100%
-		);
+		-webkit-mask-image: linear-gradient(to bottom, black 0%, black 40%, transparent 100%);
+		mask-image: linear-gradient(to bottom, black 0%, black 40%, transparent 100%);
 	}
 
 	/* Dark overlay for text readability */
@@ -312,7 +302,12 @@ const testimonials = [
 
 	/* Carousel with mask fade effect */
 	.carousel-container {
-		mask-image: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, #fff 50%, rgba(255, 255, 255, 0) 100%);
+		mask-image: linear-gradient(
+			90deg,
+			rgba(255, 255, 255, 0) 0%,
+			#fff 50%,
+			rgba(255, 255, 255, 0) 100%
+		);
 		overflow: hidden;
 	}
 

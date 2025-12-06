@@ -103,9 +103,7 @@ function mapApiUser(apiUser: ApiUser): User {
 			email: apiUser.profile.email,
 			phone: apiUser.profile.phone,
 			username: apiUser.profile.username,
-			avatar: apiUser.profile.avatar
-				? String(apiUser.profile.avatar)
-				: undefined,
+			avatar: apiUser.profile.avatar ? String(apiUser.profile.avatar) : undefined,
 			verified: {
 				email: apiUser.profile.verified?.email ?? false,
 				phone: apiUser.profile.verified?.phone,
@@ -169,15 +167,11 @@ function createAuthStore() {
 					body: { email, password },
 				});
 
-				const responseData = response.data as
-					| { token?: string }
-					| undefined;
+				const responseData = response.data as { token?: string } | undefined;
 
 				if (!responseData?.token) {
 					if (response.error) {
-						throw new Error(
-							(response.error as any)?.message || 'Login failed',
-						);
+						throw new Error((response.error as any)?.message || 'Login failed');
 					}
 					throw new Error('Login failed - no token in response');
 				}
@@ -212,10 +206,7 @@ function createAuthStore() {
 				return true;
 			} catch (error: any) {
 				console.error('Login error:', error);
-				const errorMessage =
-					error?.response?.data?.message ||
-					error.message ||
-					'Login failed';
+				const errorMessage = error?.response?.data?.message || error.message || 'Login failed';
 				update((state) => ({
 					...state,
 					isLoading: false,
@@ -234,20 +225,13 @@ function createAuthStore() {
 					body: { email, password, username: name },
 				});
 
-				const responseData = response.data as
-					| { token?: string }
-					| undefined;
+				const responseData = response.data as { token?: string } | undefined;
 
 				if (!responseData?.token) {
 					if (response.error) {
-						throw new Error(
-							(response.error as any)?.message ||
-								'Registration failed',
-						);
+						throw new Error((response.error as any)?.message || 'Registration failed');
 					}
-					throw new Error(
-						'Registration failed - no token in response',
-					);
+					throw new Error('Registration failed - no token in response');
 				}
 
 				const refreshToken = responseData.token;
@@ -280,9 +264,7 @@ function createAuthStore() {
 				return true;
 			} catch (error: any) {
 				const errorMessage =
-					error?.response?.data?.message ||
-					error.message ||
-					'Registration failed';
+					error?.response?.data?.message || error.message || 'Registration failed';
 				update((state) => ({
 					...state,
 					isLoading: false,
@@ -301,20 +283,13 @@ function createAuthStore() {
 					path: { provider, code },
 				});
 
-				const responseData = response.data as
-					| { token?: string }
-					| undefined;
+				const responseData = response.data as { token?: string } | undefined;
 
 				if (!responseData?.token) {
 					if (response.error) {
-						throw new Error(
-							(response.error as any)?.message ||
-								'OAuth login failed',
-						);
+						throw new Error((response.error as any)?.message || 'OAuth login failed');
 					}
-					throw new Error(
-						'OAuth login failed - no token in response',
-					);
+					throw new Error('OAuth login failed - no token in response');
 				}
 
 				const refreshToken = responseData.token;
@@ -348,9 +323,7 @@ function createAuthStore() {
 			} catch (error: any) {
 				console.error('OAuth login error:', error);
 				const errorMessage =
-					error?.response?.data?.message ||
-					error.message ||
-					'OAuth login failed';
+					error?.response?.data?.message || error.message || 'OAuth login failed';
 				update((state) => ({
 					...state,
 					isLoading: false,
@@ -393,10 +366,7 @@ function createAuthStore() {
 				return true;
 			} catch (error: any) {
 				console.error('Token login error:', error);
-				const errorMessage =
-					error?.response?.data?.message ||
-					error.message ||
-					'Login failed';
+				const errorMessage = error?.response?.data?.message || error.message || 'Login failed';
 				update((state) => ({
 					...state,
 					isLoading: false,
@@ -407,9 +377,7 @@ function createAuthStore() {
 		},
 
 		async refreshToken() {
-			const refreshToken = browser
-				? localStorage.getItem('refresh-token')
-				: null;
+			const refreshToken = browser ? localStorage.getItem('refresh-token') : null;
 			if (!refreshToken) return false;
 
 			try {
@@ -439,9 +407,7 @@ function createAuthStore() {
 		},
 
 		fetchCurrentUser() {
-			const accessToken = browser
-				? localStorage.getItem('access-token')
-				: null;
+			const accessToken = browser ? localStorage.getItem('access-token') : null;
 			if (!accessToken) return null;
 
 			// Decode user directly from access token (no API call needed)

@@ -1,25 +1,24 @@
 <script lang="ts">
-import type { HTMLInputAttributes } from 'svelte/elements';
+	import type { HTMLInputAttributes } from 'svelte/elements';
 
-interface Props {
-	value?: string;
-	label?: string;
-	error?: string;
-	hint?: string;
-	class?: string;
-}
+	interface Props {
+		value?: string;
+		label?: string;
+		error?: string;
+		hint?: string;
+		class?: string;
+	}
 
-let {
-	value = $bindable(''),
-	label,
-	error,
-	hint,
-	class: className = '',
-	...restProps
-}: Props & Omit<HTMLInputAttributes, 'class'> = $props();
+	let {
+		value = $bindable(''),
+		label,
+		error,
+		hint,
+		class: className = '',
+		...restProps
+	}: Props & Omit<HTMLInputAttributes, 'class'> = $props();
 
-const inputId =
-	restProps.id ?? `input-${Math.random().toString(36).slice(2, 9)}`;
+	const inputId = restProps.id ?? `input-${Math.random().toString(36).slice(2, 9)}`;
 </script>
 
 <div class="w-full">
@@ -41,8 +40,8 @@ const inputId =
 			focus:outline-none focus:ring-2 focus:ring-offset-0
 			disabled:opacity-50 disabled:cursor-not-allowed
 			{error
-				? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
-				: 'border-gray-600 hover:border-gray-500 focus:border-orange-500 focus:ring-orange-500/20'}
+			? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
+			: 'border-gray-600 hover:border-gray-500 focus:border-orange-500 focus:ring-orange-500/20'}
 			{className}
 		"
 		{...restProps}

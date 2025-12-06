@@ -1,48 +1,41 @@
 <script lang="ts">
-import { Button, Spinner } from '$lib/components/ui';
-import {
-	EnvelopeSolid,
-	ExclamationCircleOutline,
-	CheckCircleSolid,
-} from 'flowbite-svelte-icons';
-import { postResetPasswordByAuth } from '$lib/api/sdk.gen';
+	import { Button, Spinner } from '$lib/components/ui';
+	import { EnvelopeSolid, ExclamationCircleOutline, CheckCircleSolid } from 'flowbite-svelte-icons';
+	import { postResetPasswordByAuth } from '$lib/api/sdk.gen';
 
-let email = $state('');
-let isLoading = $state(false);
-let error = $state('');
-let success = $state(false);
+	let email = $state('');
+	let isLoading = $state(false);
+	let error = $state('');
+	let success = $state(false);
 
-async function handleSubmit(event: Event) {
-	event.preventDefault();
-	error = '';
+	async function handleSubmit(event: Event) {
+		event.preventDefault();
+		error = '';
 
-	if (!email) {
-		error = 'Please enter your email address';
-		return;
-	}
-
-	isLoading = true;
-
-	try {
-		const response = await postResetPasswordByAuth({
-			body: { email },
-		});
-
-		if (response.error) {
-			throw new Error(
-				(response.error as any)?.message ||
-					'Failed to send reset email',
-			);
+		if (!email) {
+			error = 'Please enter your email address';
+			return;
 		}
 
-		success = true;
-	} catch (err: any) {
-		console.error('Password reset error:', err);
-		error = err.message || 'Failed to send reset email. Please try again.';
-	}
+		isLoading = true;
 
-	isLoading = false;
-}
+		try {
+			const response = await postResetPasswordByAuth({
+				body: { email },
+			});
+
+			if (response.error) {
+				throw new Error((response.error as any)?.message || 'Failed to send reset email');
+			}
+
+			success = true;
+		} catch (err: any) {
+			console.error('Password reset error:', err);
+			error = err.message || 'Failed to send reset email. Please try again.';
+		}
+
+		isLoading = false;
+	}
 </script>
 
 <svelte:head>
@@ -54,7 +47,9 @@ async function handleSubmit(event: Event) {
 		<div class="glass rounded-2xl p-8 space-y-6 border border-white/10">
 			<!-- Logo and Title -->
 			<div class="text-center">
-				<div class="w-20 h-20 bg-gradient-to-r from-orange-500 to-orange-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-orange-500/20">
+				<div
+					class="w-20 h-20 bg-gradient-to-r from-orange-500 to-orange-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg shadow-orange-500/20"
+				>
 					<span class="text-white font-bold text-3xl">B</span>
 				</div>
 				<h1 class="text-3xl font-bold text-white">Reset Password</h1>
@@ -89,7 +84,9 @@ async function handleSubmit(event: Event) {
 				</div>
 			{:else}
 				{#if error}
-					<div class="flex items-center gap-3 p-4 rounded-lg bg-red-500/20 border border-red-500/30 text-red-300">
+					<div
+						class="flex items-center gap-3 p-4 rounded-lg bg-red-500/20 border border-red-500/30 text-red-300"
+					>
 						<ExclamationCircleOutline class="w-5 h-5 flex-shrink-0" />
 						<span class="text-sm font-medium">{error}</span>
 						<button
@@ -99,7 +96,11 @@ async function handleSubmit(event: Event) {
 							aria-label="Dismiss error"
 						>
 							<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-								<path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+								<path
+									fill-rule="evenodd"
+									d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+									clip-rule="evenodd"
+								/>
 							</svg>
 						</button>
 					</div>

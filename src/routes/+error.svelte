@@ -1,13 +1,13 @@
 <script lang="ts">
-import { page } from '$app/stores';
-import { goto } from '$app/navigation';
-import { onMount } from 'svelte';
+	import { page } from '$app/stores';
+	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 
-onMount(() => {
-	if ($page.status === 404) {
-		goto('/', { replaceState: true });
-	}
-});
+	onMount(() => {
+		if ($page.status === 404) {
+			goto('/', { replaceState: true });
+		}
+	});
 </script>
 
 {#if $page.status !== 404}

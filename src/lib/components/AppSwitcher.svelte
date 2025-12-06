@@ -1,87 +1,87 @@
 <script lang="ts">
-import { auth } from '$lib/stores/auth';
-import { page } from '$app/stores';
-import bbnMusicLogo from '$lib/assets/bbnMusic.svg';
-import bbnWalletLogo from '$lib/assets/bbnWallet.svg';
-import bbnAdminLogo from '$lib/assets/bbnAdmin.svg';
-import { ChevronRightOutline, GridPlusOutline } from 'flowbite-svelte-icons';
+	import { auth } from '$lib/stores/auth';
+	import { page } from '$app/stores';
+	import bbnMusicLogo from '$lib/assets/bbnMusic.svg';
+	import bbnWalletLogo from '$lib/assets/bbnWallet.svg';
+	import bbnAdminLogo from '$lib/assets/bbnAdmin.svg';
+	import { ChevronRightOutline, GridPlusOutline } from 'flowbite-svelte-icons';
 
-let showMenu = $state(false);
+	let showMenu = $state(false);
 
-// App definitions with their routes and colors
-export const apps = [
-	{
-		id: 'music',
-		logo: bbnMusicLogo,
-		label: 'bbn.music',
-		route: '/drops',
-		pathPrefix: '', // default app
-		color: 'orange',
-		requiresAuth: false,
-		requiresAdmin: false,
-	},
-	{
-		id: 'wallet',
-		logo: bbnWalletLogo,
-		label: 'BBN Wallet',
-		route: '/wallet',
-		pathPrefix: '/wallet',
-		color: 'green',
-		requiresAuth: true,
-		requiresAdmin: false,
-	},
-	{
-		id: 'admin',
-		logo: bbnAdminLogo,
-		label: 'BBN Admin',
-		route: '/admin',
-		pathPrefix: '/admin',
-		color: 'red',
-		requiresAuth: true,
-		requiresAdmin: true,
-	},
-];
+	// App definitions with their routes and colors
+	export const apps = [
+		{
+			id: 'music',
+			logo: bbnMusicLogo,
+			label: 'bbn.music',
+			route: '/drops',
+			pathPrefix: '', // default app
+			color: 'orange',
+			requiresAuth: false,
+			requiresAdmin: false,
+		},
+		{
+			id: 'wallet',
+			logo: bbnWalletLogo,
+			label: 'BBN Wallet',
+			route: '/wallet',
+			pathPrefix: '/wallet',
+			color: 'green',
+			requiresAuth: true,
+			requiresAdmin: false,
+		},
+		{
+			id: 'admin',
+			logo: bbnAdminLogo,
+			label: 'BBN Admin',
+			route: '/admin',
+			pathPrefix: '/admin',
+			color: 'red',
+			requiresAuth: true,
+			requiresAdmin: true,
+		},
+	];
 
-// Detect current app based on URL path
-const currentApp = $derived.by(() => {
-	const path = $page.url.pathname;
-	if (path.startsWith('/admin')) return apps.find((a) => a.id === 'admin')!;
-	if (path.startsWith('/wallet')) return apps.find((a) => a.id === 'wallet')!;
-	return apps.find((a) => a.id === 'music')!;
-});
+	// Detect current app based on URL path
+	const currentApp = $derived.by(() => {
+		const path = $page.url.pathname;
+		if (path.startsWith('/admin')) return apps.find((a) => a.id === 'admin')!;
+		if (path.startsWith('/wallet')) return apps.find((a) => a.id === 'wallet')!;
+		return apps.find((a) => a.id === 'music')!;
+	});
 
-// Filter apps based on auth state and permissions
-const visibleApps = $derived(
-	apps.filter((app) => {
-		if (app.requiresAuth && !$auth.isAuthenticated) return false;
-		if (app.requiresAdmin && !$auth.user?.isAdmin) return false;
-		return true;
-	}),
-);
+	// Filter apps based on auth state and permissions
+	const visibleApps = $derived(
+		apps.filter((app) => {
+			if (app.requiresAuth && !$auth.isAuthenticated) return false;
+			if (app.requiresAdmin && !$auth.user?.isAdmin) return false;
+			return true;
+		}),
+	);
 
-// Get the appropriate route for an app based on auth state
-function getAppRoute(app: (typeof apps)[0]): string {
-	// For bbn.music, redirect to landing page if not authenticated
-	if (app.id === 'music' && !$auth.isAuthenticated) {
-		return '/';
+	// Get the appropriate route for an app based on auth state
+	function getAppRoute(app: (typeof apps)[0]): string {
+		// For bbn.music, redirect to landing page if not authenticated
+		if (app.id === 'music' && !$auth.isAuthenticated) {
+			return '/';
+		}
+		return app.route;
 	}
-	return app.route;
-}
 
-function toggleMenu() {
-	showMenu = !showMenu;
-}
+	function toggleMenu() {
+		showMenu = !showMenu;
+	}
 
-function closeMenu() {
-	showMenu = false;
-}
-
-function handleClickOutside(event: MouseEvent) {
-	const target = event.target as HTMLElement;
-	if (showMenu && !target.closest('[data-app-switcher]')) {
+	function closeMenu() {
 		showMenu = false;
 	}
-}
+
+	function handleClickOutside(event: MouseEvent) {
+		const target = event.target as HTMLElement;
+		if (showMenu && !target.closest('[data-app-switcher]')) {
+			showMenu = false;
+		}
+	}
 </script>
 
 <svelte:window onclick={handleClickOutside} />
@@ -95,7 +95,11 @@ function handleClickOutside(event: MouseEvent) {
 		aria-label="App switcher"
 	>
 		<GridPlusOutline class="w-5 h-5 text-white/80" />
-		<img src={currentApp.logo} alt={currentApp.label} class="h-5 w-auto brightness-0 invert hidden sm:block" />
+		<img
+			src={currentApp.logo}
+			alt={currentApp.label}
+			class="h-5 w-auto brightness-0 invert hidden sm:block"
+		/>
 	</button>
 
 	{#if showMenu}
@@ -117,7 +121,9 @@ function handleClickOutside(event: MouseEvent) {
 					<div class="flex items-center gap-3">
 						<img src={app.logo} alt={app.label} class="h-5 w-auto brightness-0 invert opacity-90" />
 					</div>
-					<ChevronRightOutline class="w-4 h-4 text-gray-500 group-hover:text-gray-300 transition-colors" />
+					<ChevronRightOutline
+						class="w-4 h-4 text-gray-500 group-hover:text-gray-300 transition-colors"
+					/>
 				</a>
 			{/each}
 		</div>

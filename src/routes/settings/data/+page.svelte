@@ -1,247 +1,238 @@
 <script lang="ts">
-import {
-	Card,
-	Button,
-	Badge,
-	Alert,
-	Toggle,
-	Select,
-	Modal,
-	Checkbox,
-} from '$lib/components/ui';
-import {
-	DownloadSolid,
-	UploadSolid,
-	DatabaseSolid,
-	ShieldCheckSolid,
-	InfoCircleSolid,
-	CheckCircleSolid,
-	ExclamationCircleSolid,
-	FileExportSolid,
-	FileImportSolid,
-	ClockSolid,
-	FileSolid,
-} from 'flowbite-svelte-icons';
-import { toast } from '$lib/stores/toast';
+	import { Card, Button, Badge, Alert, Toggle, Select, Modal, Checkbox } from '$lib/components/ui';
+	import {
+		DownloadSolid,
+		UploadSolid,
+		DatabaseSolid,
+		ShieldCheckSolid,
+		InfoCircleSolid,
+		CheckCircleSolid,
+		ExclamationCircleSolid,
+		FileExportSolid,
+		FileImportSolid,
+		ClockSolid,
+		FileSolid,
+	} from 'flowbite-svelte-icons';
+	import { toast } from '$lib/stores/toast';
 
-interface ExportOption {
-	id: string;
-	label: string;
-	description: string;
-	size?: string;
-	enabled: boolean;
-}
+	interface ExportOption {
+		id: string;
+		label: string;
+		description: string;
+		size?: string;
+		enabled: boolean;
+	}
 
-interface ExportHistory {
-	id: string;
-	date: Date;
-	type: string;
-	size: string;
-	status: 'completed' | 'failed' | 'pending';
-	downloadUrl?: string;
-}
+	interface ExportHistory {
+		id: string;
+		date: Date;
+		type: string;
+		size: string;
+		status: 'completed' | 'failed' | 'pending';
+		downloadUrl?: string;
+	}
 
-// Export options
-let exportOptions = $state<ExportOption[]>([
-	{
-		id: 'playlists',
-		label: 'Playlists',
-		description: 'All your created and saved playlists',
-		size: '2.3 MB',
-		enabled: true,
-	},
-	{
-		id: 'likes',
-		label: 'Liked Songs',
-		description: 'Your liked songs and albums',
-		size: '1.1 MB',
-		enabled: true,
-	},
-	{
-		id: 'listening_history',
-		label: 'Listening History',
-		description: 'Your complete listening history',
-		size: '8.7 MB',
-		enabled: true,
-	},
-	{
-		id: 'profile',
-		label: 'Profile Information',
-		description: 'Your profile data and preferences',
-		size: '0.2 MB',
-		enabled: true,
-	},
-	{
-		id: 'follows',
-		label: 'Following & Followers',
-		description: 'Artists and users you follow',
-		size: '0.5 MB',
-		enabled: true,
-	},
-	{
-		id: 'settings',
-		label: 'App Settings',
-		description: 'Your app preferences and settings',
-		size: '0.1 MB',
-		enabled: true,
-	},
-]);
-
-// Export history
-let exportHistory = $state<ExportHistory[]>([
-	{
-		id: '1',
-		date: new Date('2024-11-01'),
-		type: 'Full Export',
-		size: '12.9 MB',
-		status: 'completed',
-		downloadUrl: '/exports/1',
-	},
-	{
-		id: '2',
-		date: new Date('2024-10-15'),
-		type: 'Playlists Only',
-		size: '2.3 MB',
-		status: 'completed',
-		downloadUrl: '/exports/2',
-	},
-	{
-		id: '3',
-		date: new Date('2024-09-20'),
-		type: 'Full Export',
-		size: '11.5 MB',
-		status: 'completed',
-		downloadUrl: '/exports/3',
-	},
-]);
-
-// State
-let exportFormat = $state<'json' | 'csv' | 'xml'>('json');
-let includeMedia = $state(false);
-let encryptExport = $state(false);
-let autoExport = $state(false);
-let autoExportFrequency = $state<'weekly' | 'monthly'>('monthly');
-let isExporting = $state(false);
-let exportProgress = $state(0);
-let showImportModal = $state(false);
-let selectedFile = $state<File | null>(null);
-let importProgress = $state(0);
-let isImporting = $state(false);
-
-const totalSelectedSize = $derived.by(() => {
-	let totalBytes = 0;
-	exportOptions.forEach((option) => {
-		if (option.enabled && option.size) {
-			const size = parseFloat(option.size.replace(' MB', ''));
-			totalBytes += size;
-		}
-	});
-	return totalBytes.toFixed(1);
-});
-
-function toggleAll(checked: boolean) {
-	exportOptions.forEach((option) => {
-		option.enabled = checked;
-	});
-}
-
-async function startExport() {
-	isExporting = true;
-	exportProgress = 0;
-
-	// Simulate export progress
-	const interval = setInterval(() => {
-		exportProgress += 10;
-		if (exportProgress >= 100) {
-			clearInterval(interval);
-			completeExport();
-		}
-	}, 300);
-}
-
-function completeExport() {
-	isExporting = false;
-	exportProgress = 0;
-
-	// Add to history
-	exportHistory = [
+	// Export options
+	let exportOptions = $state<ExportOption[]>([
 		{
-			id: String(exportHistory.length + 1),
-			date: new Date(),
-			type: 'Custom Export',
-			size: `${totalSelectedSize} MB`,
-			status: 'completed',
-			downloadUrl: '/exports/new',
+			id: 'playlists',
+			label: 'Playlists',
+			description: 'All your created and saved playlists',
+			size: '2.3 MB',
+			enabled: true,
 		},
-		...exportHistory,
-	];
+		{
+			id: 'likes',
+			label: 'Liked Songs',
+			description: 'Your liked songs and albums',
+			size: '1.1 MB',
+			enabled: true,
+		},
+		{
+			id: 'listening_history',
+			label: 'Listening History',
+			description: 'Your complete listening history',
+			size: '8.7 MB',
+			enabled: true,
+		},
+		{
+			id: 'profile',
+			label: 'Profile Information',
+			description: 'Your profile data and preferences',
+			size: '0.2 MB',
+			enabled: true,
+		},
+		{
+			id: 'follows',
+			label: 'Following & Followers',
+			description: 'Artists and users you follow',
+			size: '0.5 MB',
+			enabled: true,
+		},
+		{
+			id: 'settings',
+			label: 'App Settings',
+			description: 'Your app preferences and settings',
+			size: '0.1 MB',
+			enabled: true,
+		},
+	]);
 
-	// Trigger download
-	downloadExport('/exports/new');
-}
+	// Export history
+	let exportHistory = $state<ExportHistory[]>([
+		{
+			id: '1',
+			date: new Date('2024-11-01'),
+			type: 'Full Export',
+			size: '12.9 MB',
+			status: 'completed',
+			downloadUrl: '/exports/1',
+		},
+		{
+			id: '2',
+			date: new Date('2024-10-15'),
+			type: 'Playlists Only',
+			size: '2.3 MB',
+			status: 'completed',
+			downloadUrl: '/exports/2',
+		},
+		{
+			id: '3',
+			date: new Date('2024-09-20'),
+			type: 'Full Export',
+			size: '11.5 MB',
+			status: 'completed',
+			downloadUrl: '/exports/3',
+		},
+	]);
 
-function downloadExport(url: string) {
-	// Simulate file download
-	const link = document.createElement('a');
-	link.href = url;
-	link.download = `bbn-music-export-${Date.now()}.${exportFormat}`;
-	document.body.appendChild(link);
-	link.click();
-	document.body.removeChild(link);
-}
+	// State
+	let exportFormat = $state<'json' | 'csv' | 'xml'>('json');
+	let includeMedia = $state(false);
+	let encryptExport = $state(false);
+	let autoExport = $state(false);
+	let autoExportFrequency = $state<'weekly' | 'monthly'>('monthly');
+	let isExporting = $state(false);
+	let exportProgress = $state(0);
+	let showImportModal = $state(false);
+	let selectedFile = $state<File | null>(null);
+	let importProgress = $state(0);
+	let isImporting = $state(false);
 
-function handleFileSelect(event: Event) {
-	const input = event.target as HTMLInputElement;
-	if (input.files && input.files[0]) {
-		selectedFile = input.files[0];
-		showImportModal = true;
+	const totalSelectedSize = $derived.by(() => {
+		let totalBytes = 0;
+		exportOptions.forEach((option) => {
+			if (option.enabled && option.size) {
+				const size = parseFloat(option.size.replace(' MB', ''));
+				totalBytes += size;
+			}
+		});
+		return totalBytes.toFixed(1);
+	});
+
+	function toggleAll(checked: boolean) {
+		exportOptions.forEach((option) => {
+			option.enabled = checked;
+		});
 	}
-}
 
-async function startImport() {
-	if (!selectedFile) return;
+	async function startExport() {
+		isExporting = true;
+		exportProgress = 0;
 
-	isImporting = true;
-	importProgress = 0;
+		// Simulate export progress
+		const interval = setInterval(() => {
+			exportProgress += 10;
+			if (exportProgress >= 100) {
+				clearInterval(interval);
+				completeExport();
+			}
+		}, 300);
+	}
 
-	// Simulate import progress
-	const interval = setInterval(() => {
-		importProgress += 10;
-		if (importProgress >= 100) {
-			clearInterval(interval);
-			completeImport();
+	function completeExport() {
+		isExporting = false;
+		exportProgress = 0;
+
+		// Add to history
+		exportHistory = [
+			{
+				id: String(exportHistory.length + 1),
+				date: new Date(),
+				type: 'Custom Export',
+				size: `${totalSelectedSize} MB`,
+				status: 'completed',
+				downloadUrl: '/exports/new',
+			},
+			...exportHistory,
+		];
+
+		// Trigger download
+		downloadExport('/exports/new');
+	}
+
+	function downloadExport(url: string) {
+		// Simulate file download
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = `bbn-music-export-${Date.now()}.${exportFormat}`;
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+	}
+
+	function handleFileSelect(event: Event) {
+		const input = event.target as HTMLInputElement;
+		if (input.files && input.files[0]) {
+			selectedFile = input.files[0];
+			showImportModal = true;
 		}
-	}, 300);
-}
-
-function completeImport() {
-	isImporting = false;
-	importProgress = 0;
-	showImportModal = false;
-	selectedFile = null;
-	toast.show('Data imported successfully!', 'success');
-}
-
-// State for delete confirmation modal
-let showDeleteModal = $state(false);
-let deleteConfirmation = $state('');
-
-function deleteAllData() {
-	showDeleteModal = true;
-	deleteConfirmation = '';
-}
-
-function confirmDelete() {
-	if (deleteConfirmation === 'DELETE') {
-		// Simulate data deletion
-		console.log('Deleting all user data...');
-		toast.show('All data has been deleted.', 'success');
-		showDeleteModal = false;
-		deleteConfirmation = '';
-	} else {
-		toast.show('Please type DELETE to confirm', 'warning');
 	}
-}
+
+	async function startImport() {
+		if (!selectedFile) return;
+
+		isImporting = true;
+		importProgress = 0;
+
+		// Simulate import progress
+		const interval = setInterval(() => {
+			importProgress += 10;
+			if (importProgress >= 100) {
+				clearInterval(interval);
+				completeImport();
+			}
+		}, 300);
+	}
+
+	function completeImport() {
+		isImporting = false;
+		importProgress = 0;
+		showImportModal = false;
+		selectedFile = null;
+		toast.show('Data imported successfully!', 'success');
+	}
+
+	// State for delete confirmation modal
+	let showDeleteModal = $state(false);
+	let deleteConfirmation = $state('');
+
+	function deleteAllData() {
+		showDeleteModal = true;
+		deleteConfirmation = '';
+	}
+
+	function confirmDelete() {
+		if (deleteConfirmation === 'DELETE') {
+			// Simulate data deletion
+			console.log('Deleting all user data...');
+			toast.show('All data has been deleted.', 'success');
+			showDeleteModal = false;
+			deleteConfirmation = '';
+		} else {
+			toast.show('Please type DELETE to confirm', 'warning');
+		}
+	}
 </script>
 
 <div class="min-h-screen">
@@ -256,7 +247,8 @@ function confirmDelete() {
 		<InfoCircleSolid slot="icon" class="w-5 h-5" />
 		<span class="font-semibold">Your Privacy Matters</span>
 		<p class="text-sm text-gray-300 mt-1">
-			All exports are encrypted and stored securely. You have full control over your data and can delete it at any time.
+			All exports are encrypted and stored securely. You have full control over your data and can
+			delete it at any time.
 		</p>
 	</Alert>
 
@@ -281,18 +273,17 @@ function confirmDelete() {
 				<span class="text-sm text-gray-400">Select data to export:</span>
 				<button
 					class="text-purple-400 hover:text-purple-300 text-sm"
-					onclick={() => toggleAll(exportOptions.some(o => !o.enabled))}
+					onclick={() => toggleAll(exportOptions.some((o) => !o.enabled))}
 				>
-					{exportOptions.every(o => o.enabled) ? 'Deselect All' : 'Select All'}
+					{exportOptions.every((o) => o.enabled) ? 'Deselect All' : 'Select All'}
 				</button>
 			</div>
 
 			{#each exportOptions as option}
-				<div class="flex items-start gap-3 p-3 bg-gray-900 rounded-lg hover:bg-gray-700/50 transition-colors">
-					<Checkbox
-						bind:checked={option.enabled}
-						class="mt-0.5"
-					/>
+				<div
+					class="flex items-start gap-3 p-3 bg-gray-900 rounded-lg hover:bg-gray-700/50 transition-colors"
+				>
+					<Checkbox bind:checked={option.enabled} class="mt-0.5" />
 					<div class="flex-1">
 						<div class="flex justify-between items-start">
 							<div>
@@ -312,7 +303,11 @@ function confirmDelete() {
 		<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
 			<div>
 				<label for="export-format" class="block text-sm text-gray-400 mb-2">Export Format</label>
-				<Select id="export-format" bind:value={exportFormat} class="bg-gray-900 border-gray-700 text-white">
+				<Select
+					id="export-format"
+					bind:value={exportFormat}
+					class="bg-gray-900 border-gray-700 text-white"
+				>
 					<option value="json">JSON (.json)</option>
 					<option value="csv">CSV (.csv)</option>
 					<option value="xml">XML (.xml)</option>
@@ -342,8 +337,10 @@ function confirmDelete() {
 					<span class="text-sm text-gray-400">{exportProgress}%</span>
 				</div>
 				<div class="w-full bg-gray-700 rounded-full h-2">
-					<div class="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all"
-						style="width: {exportProgress}%"></div>
+					<div
+						class="bg-gradient-to-r from-purple-500 to-pink-500 h-full rounded-full transition-all"
+						style="width: {exportProgress}%"
+					></div>
 				</div>
 			</div>
 		{/if}
@@ -368,7 +365,7 @@ function confirmDelete() {
 			<Button
 				gradient
 				color="purple"
-				disabled={isExporting || exportOptions.every(o => !o.enabled)}
+				disabled={isExporting || exportOptions.every((o) => !o.enabled)}
 				onclick={startExport}
 			>
 				<DownloadSolid class="w-4 h-4 mr-2" />
@@ -395,7 +392,9 @@ function confirmDelete() {
 			</p>
 		</Alert>
 
-		<div class="text-center p-8 bg-gray-900 rounded-lg border-2 border-dashed border-gray-700 hover:border-purple-500 transition-colors">
+		<div
+			class="text-center p-8 bg-gray-900 rounded-lg border-2 border-dashed border-gray-700 hover:border-purple-500 transition-colors"
+		>
 			<UploadSolid class="w-12 h-12 text-gray-500 mx-auto mb-4" />
 			<p class="text-white mb-2">Drop your export file here or</p>
 			<label for="import-file">
@@ -476,9 +475,7 @@ function confirmDelete() {
 					<p class="text-white font-medium">Delete All Data</p>
 					<p class="text-gray-400 text-sm">Permanently delete all your bbn.music data</p>
 				</div>
-				<Button color="red" size="sm" onclick={deleteAllData}>
-					Delete Everything
-				</Button>
+				<Button color="red" size="sm" onclick={deleteAllData}>Delete Everything</Button>
 			</div>
 		</div>
 	</Card>
@@ -512,15 +509,14 @@ function confirmDelete() {
 	{#snippet footer()}
 		<Button
 			color="alternative"
-			onclick={() => { showDeleteModal = false; deleteConfirmation = ''; }}
+			onclick={() => {
+				showDeleteModal = false;
+				deleteConfirmation = '';
+			}}
 		>
 			Cancel
 		</Button>
-		<Button
-			color="red"
-			onclick={confirmDelete}
-			disabled={deleteConfirmation !== 'DELETE'}
-		>
+		<Button color="red" onclick={confirmDelete} disabled={deleteConfirmation !== 'DELETE'}>
 			Delete Everything
 		</Button>
 	{/snippet}
@@ -533,7 +529,7 @@ function confirmDelete() {
 			<DatabaseSolid class="w-16 h-16 text-blue-400 mx-auto mb-4" />
 			<h3 class="text-xl font-bold text-white mb-2">Ready to Import</h3>
 			<p class="text-gray-400 mb-4">
-				File: {selectedFile.name}<br>
+				File: {selectedFile.name}<br />
 				Size: {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
 			</p>
 
@@ -544,8 +540,10 @@ function confirmDelete() {
 						<span class="text-sm text-gray-400">{importProgress}%</span>
 					</div>
 					<div class="w-full bg-gray-700 rounded-full h-2">
-						<div class="bg-gradient-to-r from-blue-500 to-cyan-500 h-full rounded-full transition-all"
-							style="width: {importProgress}%"></div>
+						<div
+							class="bg-gradient-to-r from-blue-500 to-cyan-500 h-full rounded-full transition-all"
+							style="width: {importProgress}%"
+						></div>
 					</div>
 				</div>
 			{/if}
@@ -560,19 +558,10 @@ function confirmDelete() {
 	{/if}
 
 	{#snippet footer()}
-		<Button
-			gradient
-			color="blueToGreen"
-			disabled={isImporting}
-			onclick={startImport}
-		>
+		<Button gradient color="blueToGreen" disabled={isImporting} onclick={startImport}>
 			{isImporting ? 'Importing...' : 'Start Import'}
 		</Button>
-		<Button
-			color="alternative"
-			disabled={isImporting}
-			onclick={() => showImportModal = false}
-		>
+		<Button color="alternative" disabled={isImporting} onclick={() => (showImportModal = false)}>
 			Cancel
 		</Button>
 	{/snippet}

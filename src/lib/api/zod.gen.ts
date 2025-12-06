@@ -18,10 +18,7 @@ export const zUserHistoryEvent = z.object({
 					z.object({
 						type: z.literal('webAuthn'),
 						id: z.string(),
-						authenticatorAttachement: z.enum([
-							'cross-platform',
-							'platform',
-						]),
+						authenticatorAttachement: z.enum(['cross-platform', 'platform']),
 						publicKey: z.string(),
 					}),
 					z.object({
@@ -49,10 +46,7 @@ export const zUser = z.object({
 				z.object({
 					type: z.literal('webAuthn'),
 					id: z.string(),
-					authenticatorAttachement: z.enum([
-						'cross-platform',
-						'platform',
-					]),
+					authenticatorAttachement: z.enum(['cross-platform', 'platform']),
 					publicKey: z.string(),
 				}),
 				z.object({
@@ -82,12 +76,7 @@ export const zUser = z.object({
 	groups: z.array(zObjectId),
 });
 
-export const zArtistTypes = z.enum([
-	'PRIMARY',
-	'FEATURING',
-	'SONGWRITER',
-	'PRODUCER',
-]);
+export const zArtistTypes = z.enum(['PRIMARY', 'FEATURING', 'SONGWRITER', 'PRODUCER']);
 
 export const zDropType = z.enum([
 	'TAKEDOWN_REQUESTED',
@@ -360,10 +349,7 @@ export const zMessage = z.object({
 	_id: z.string(),
 	user: z.optional(z.string()),
 	type: z.union([z.literal('outbound'), z.literal('inbound')]),
-	platform: z.union([
-		z.union([z.literal('whatsapp'), z.literal('email')]),
-		z.literal('rcs'),
-	]),
+	platform: z.union([z.union([z.literal('whatsapp'), z.literal('email')]), z.literal('rcs')]),
 	profile: z.object({
 		name: z.optional(z.string()),
 		phone: z.optional(z.string()),
@@ -519,10 +505,7 @@ export const zSingleAdminDrop = z.object({
 						z.object({
 							type: z.literal('webAuthn'),
 							id: z.string(),
-							authenticatorAttachement: z.enum([
-								'cross-platform',
-								'platform',
-							]),
+							authenticatorAttachement: z.enum(['cross-platform', 'platform']),
 							publicKey: z.string(),
 						}),
 						z.object({
@@ -568,10 +551,7 @@ export const zSingleAdminDrop = z.object({
 								z.object({
 									type: z.literal('webAuthn'),
 									id: z.string(),
-									authenticatorAttachement: z.enum([
-										'cross-platform',
-										'platform',
-									]),
+									authenticatorAttachement: z.enum(['cross-platform', 'platform']),
 									publicKey: z.string(),
 								}),
 								z.object({
@@ -654,12 +634,8 @@ export const zSearchReturn = z.intersection(
 				language: z.optional(z.string()),
 				primaryGenre: z.optional(z.string()),
 				secondaryGenre: z.optional(z.string()),
-				compositionCopyright: z
-					.optional(z.string())
-					.default('bbn.music'),
-				soundRecordingCopyright: z
-					.optional(z.string())
-					.default('bbn.music'),
+				compositionCopyright: z.optional(z.string()).default('bbn.music'),
+				soundRecordingCopyright: z.optional(z.string()).default('bbn.music'),
 				artwork: z.optional(z.string()),
 				songs: z.optional(z.array(z.string())),
 				comments: z.optional(z.string()),
@@ -696,10 +672,7 @@ export const zSearchReturn = z.intersection(
 							z.object({
 								type: z.literal('webAuthn'),
 								id: z.string(),
-								authenticatorAttachement: z.enum([
-									'cross-platform',
-									'platform',
-								]),
+								authenticatorAttachement: z.enum(['cross-platform', 'platform']),
 								publicKey: z.string(),
 							}),
 							z.object({
@@ -864,10 +837,7 @@ export const zGetIdByDropsByAdminResponse = z.object({
 						z.object({
 							type: z.literal('webAuthn'),
 							id: z.string(),
-							authenticatorAttachement: z.enum([
-								'cross-platform',
-								'platform',
-							]),
+							authenticatorAttachement: z.enum(['cross-platform', 'platform']),
 							publicKey: z.string(),
 						}),
 						z.object({
@@ -913,10 +883,7 @@ export const zGetIdByDropsByAdminResponse = z.object({
 								z.object({
 									type: z.literal('webAuthn'),
 									id: z.string(),
-									authenticatorAttachement: z.enum([
-										'cross-platform',
-										'platform',
-									]),
+									authenticatorAttachement: z.enum(['cross-platform', 'platform']),
 									publicKey: z.string(),
 								}),
 								z.object({
@@ -1406,9 +1373,7 @@ export const zPatchIdByDropsByMusicData = z.object({
 			primaryGenre: z.optional(z.string()),
 			secondaryGenre: z.optional(z.string()),
 			compositionCopyright: z.optional(z.string()).default('bbn.music'),
-			soundRecordingCopyright: z
-				.optional(z.string())
-				.default('bbn.music'),
+			soundRecordingCopyright: z.optional(z.string()).default('bbn.music'),
 			artwork: z.optional(z.string()),
 			songs: z.optional(
 				z.array(
@@ -1475,10 +1440,7 @@ export const zGetIdByShareByDropsByMusicData = z.object({
 /**
  * Successful operation
  */
-export const zGetIdByShareByDropsByMusicResponse = z.union([
-	zShare,
-	z.literal(false),
-]);
+export const zGetIdByShareByDropsByMusicResponse = z.union([zShare, z.literal(false)]);
 
 export const zGetFulldropByMusicData = z.object({
 	body: z.optional(z.never()),

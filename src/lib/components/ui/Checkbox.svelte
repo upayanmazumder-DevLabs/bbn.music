@@ -1,18 +1,13 @@
 <script lang="ts">
-import type { HTMLInputAttributes } from 'svelte/elements';
+	import type { HTMLInputAttributes } from 'svelte/elements';
 
-interface Props extends Omit<HTMLInputAttributes, 'type' | 'class'> {
-	checked?: boolean;
-	label?: string;
-	class?: string;
-}
+	interface Props extends Omit<HTMLInputAttributes, 'type' | 'class'> {
+		checked?: boolean;
+		label?: string;
+		class?: string;
+	}
 
-let {
-	checked = $bindable(false),
-	label,
-	class: className = '',
-	...restProps
-}: Props = $props();
+	let { checked = $bindable(false), label, class: className = '', ...restProps }: Props = $props();
 </script>
 
 <label class="flex items-center gap-2 cursor-pointer group {className}">

@@ -1,189 +1,173 @@
 <script lang="ts">
-import { onMount } from 'svelte';
-import { goto } from '$app/navigation';
-import { page } from '$app/stores';
-import { Button, Card, Badge } from '$lib/components/ui';
-import { PlusOutline } from 'flowbite-svelte-icons';
-import type { Drop } from '$lib/api/types.gen';
-import { auth } from '$lib/stores/auth';
-import {
-	getDropsByMusic,
-	getArtworkByDropByMusic,
-	postMusic,
-} from '$lib/api/sdk.gen';
-import { getAuthHeaders } from '$lib/api';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { Button, Card, Badge } from '$lib/components/ui';
+	import { PlusOutline } from 'flowbite-svelte-icons';
+	import type { Drop } from '$lib/api/types.gen';
+	import { auth } from '$lib/stores/auth';
+	import { getDropsByMusic, getArtworkByDropByMusic, postMusic } from '$lib/api/sdk.gen';
+	import { getAuthHeaders } from '$lib/api';
 
-// Tab configuration matching the old app
-const tabs = [
-	{
-		id: 'published',
-		label: 'Published',
-		filter: ['PUBLISHED', 'TAKEDOWN_REQUESTED'],
-	},
-	{
-		id: 'unpublished',
-		label: 'Unpublished',
-		filter: ['UNDER_REVIEW', 'PRIVATE', 'REVIEW_DECLINED', 'PUBLISHING'],
-	},
-	{ id: 'drafts', label: 'Drafts', filter: ['UNSUBMITTED'] },
-];
+	// Tab configuration matching the old app
+	const tabs = [
+		{
+			id: 'published',
+			label: 'Published',
+			filter: ['PUBLISHED', 'TAKEDOWN_REQUESTED'],
+		},
+		{
+			id: 'unpublished',
+			label: 'Unpublished',
+			filter: ['UNDER_REVIEW', 'PRIVATE', 'REVIEW_DECLINED', 'PUBLISHING'],
+		},
+		{ id: 'drafts', label: 'Drafts', filter: ['UNSUBMITTED'] },
+	];
 
-// Get active tab from URL
-const activeTab = $derived($page.url.searchParams.get('list') || 'published');
+	// Get active tab from URL
+	const activeTab = $derived($page.url.searchParams.get('list') || 'published');
 
-let allDrops = $state<Drop[]>([]);
-let artworkUrls = $state<Record<string, string>>({});
-let isLoading = $state(true);
-let error = $state<string | null>(null);
+	let allDrops = $state<Drop[]>([]);
+	let artworkUrls = $state<Record<string, string>>({});
+	let isLoading = $state(true);
+	let error = $state<string | null>(null);
 
-// Filter drops based on active tab
-const filteredDrops = $derived.by(() => {
-	const tab = tabs.find((t) => t.id === activeTab);
-	if (!tab) return [];
-	const filtered = allDrops.filter((drop) =>
-		tab.filter.includes(drop.type || ''),
-	);
+	// Filter drops based on active tab
+	const filteredDrops = $derived.by(() => {
+		const tab = tabs.find((t) => t.id === activeTab);
+		if (!tab) return [];
+		const filtered = allDrops.filter((drop) => tab.filter.includes(drop.type || ''));
 
-	// For unpublished tab, sort to show UNDER_REVIEW at the top
-	if (activeTab === 'unpublished') {
-		return filtered.sort((a, b) => {
-			if (a.type === 'UNDER_REVIEW' && b.type !== 'UNDER_REVIEW')
-				return -1;
-			if (a.type !== 'UNDER_REVIEW' && b.type === 'UNDER_REVIEW')
-				return 1;
-			return 0;
-		});
-	}
-
-	// For published tab, sort to show TAKEDOWN_REQUESTED at the top
-	if (activeTab === 'published') {
-		return filtered.sort((a, b) => {
-			if (
-				a.type === 'TAKEDOWN_REQUESTED' &&
-				b.type !== 'TAKEDOWN_REQUESTED'
-			)
-				return -1;
-			if (
-				a.type !== 'TAKEDOWN_REQUESTED' &&
-				b.type === 'TAKEDOWN_REQUESTED'
-			)
-				return 1;
-			return 0;
-		});
-	}
-
-	return filtered;
-});
-
-// Fetch artwork blob and create object URL
-async function loadArtwork(dropId: string) {
-	if (artworkUrls[dropId]) return; // Already loaded
-	try {
-		const response = await getArtworkByDropByMusic({
-			path: { dropId },
-			headers: getAuthHeaders(),
-		});
-		if (response.data) {
-			const blob = response.data as Blob;
-			artworkUrls[dropId] = URL.createObjectURL(blob);
+		// For unpublished tab, sort to show UNDER_REVIEW at the top
+		if (activeTab === 'unpublished') {
+			return filtered.sort((a, b) => {
+				if (a.type === 'UNDER_REVIEW' && b.type !== 'UNDER_REVIEW') return -1;
+				if (a.type !== 'UNDER_REVIEW' && b.type === 'UNDER_REVIEW') return 1;
+				return 0;
+			});
 		}
-	} catch {
-		// Artwork failed to load, ignore
+
+		// For published tab, sort to show TAKEDOWN_REQUESTED at the top
+		if (activeTab === 'published') {
+			return filtered.sort((a, b) => {
+				if (a.type === 'TAKEDOWN_REQUESTED' && b.type !== 'TAKEDOWN_REQUESTED') return -1;
+				if (a.type !== 'TAKEDOWN_REQUESTED' && b.type === 'TAKEDOWN_REQUESTED') return 1;
+				return 0;
+			});
+		}
+
+		return filtered;
+	});
+
+	// Fetch artwork blob and create object URL
+	async function loadArtwork(dropId: string) {
+		if (artworkUrls[dropId]) return; // Already loaded
+		try {
+			const response = await getArtworkByDropByMusic({
+				path: { dropId },
+				headers: getAuthHeaders(),
+			});
+			if (response.data) {
+				const blob = response.data as Blob;
+				artworkUrls[dropId] = URL.createObjectURL(blob);
+			}
+		} catch {
+			// Artwork failed to load, ignore
+		}
 	}
-}
 
-onMount(async () => {
-	try {
-		// Load all user's drops from real API
-		const response = await getDropsByMusic({
-			headers: getAuthHeaders(),
-		});
+	onMount(async () => {
+		try {
+			// Load all user's drops from real API
+			const response = await getDropsByMusic({
+				headers: getAuthHeaders(),
+			});
 
-		if (response.data) {
-			allDrops = response.data as Drop[];
-			// Load artwork for drops that have it
-			for (const drop of allDrops) {
-				if (drop.artwork && drop._id) {
-					loadArtwork(drop._id);
+			if (response.data) {
+				allDrops = response.data as Drop[];
+				// Load artwork for drops that have it
+				for (const drop of allDrops) {
+					if (drop.artwork && drop._id) {
+						loadArtwork(drop._id);
+					}
 				}
 			}
+		} catch (err) {
+			error = 'Failed to load drops. Please try again later.';
+			console.error('Error loading drops:', err);
+		} finally {
+			isLoading = false;
 		}
-	} catch (err) {
-		error = 'Failed to load drops. Please try again later.';
-		console.error('Error loading drops:', err);
-	} finally {
-		isLoading = false;
-	}
-});
-
-function setTab(tabId: string) {
-	const url = new URL($page.url);
-	url.searchParams.set('list', tabId);
-	goto(url.toString(), { replaceState: true });
-}
-
-function formatDate(dateString: string) {
-	return new Date(dateString).toLocaleDateString('en-US', {
-		year: 'numeric',
-		month: 'short',
-		day: 'numeric',
 	});
-}
 
-function getArtistNames(artists: Drop['artists'] | undefined) {
-	if (!artists || artists.length === 0) return 'Unknown Artist';
-	return (
-		artists
-			.filter((artist) => artist.type === 'PRIMARY')
-			.map((artist) => ('name' in artist ? artist.name : 'Unknown'))
-			.join(', ') || 'Unknown Artist'
-	);
-}
-
-function getStatusBadge(type: string | undefined): {
-	color: 'orange' | 'blue' | 'green' | 'red' | 'purple' | 'gray';
-	label: string;
-} {
-	switch (type) {
-		case 'PUBLISHED':
-			return { color: 'green', label: 'Published' };
-		case 'PUBLISHING':
-			return { color: 'blue', label: 'Publishing' };
-		case 'UNDER_REVIEW':
-			return { color: 'orange', label: 'Under Review' };
-		case 'PRIVATE':
-			return { color: 'gray', label: 'Private' };
-		case 'REVIEW_DECLINED':
-			return { color: 'red', label: 'Declined' };
-		case 'TAKEDOWN_REQUESTED':
-			return { color: 'red', label: 'Takedown Requested' };
-		case 'UNSUBMITTED':
-			return { color: 'gray', label: 'Draft' };
-		default:
-			return { color: 'gray', label: 'Unknown' };
+	function setTab(tabId: string) {
+		const url = new URL($page.url);
+		url.searchParams.set('list', tabId);
+		goto(url.toString(), { replaceState: true });
 	}
-}
 
-let isCreating = $state(false);
-
-async function createNewDrop() {
-	if (isCreating) return;
-	isCreating = true;
-
-	try {
-		const response = await postMusic({
-			headers: getAuthHeaders(),
+	function formatDate(dateString: string) {
+		return new Date(dateString).toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
 		});
-
-		// API returns { id: string } with the new drop ID
-		const { id } = response.data as { id: string };
-		goto(`/drops/new?id=${id}`);
-	} catch (err) {
-		console.error('Failed to create drop:', err);
-		error = 'Failed to create drop. Please try again.';
-		isCreating = false;
 	}
-}
+
+	function getArtistNames(artists: Drop['artists'] | undefined) {
+		if (!artists || artists.length === 0) return 'Unknown Artist';
+		return (
+			artists
+				.filter((artist) => artist.type === 'PRIMARY')
+				.map((artist) => ('name' in artist ? artist.name : 'Unknown'))
+				.join(', ') || 'Unknown Artist'
+		);
+	}
+
+	function getStatusBadge(type: string | undefined): {
+		color: 'orange' | 'blue' | 'green' | 'red' | 'purple' | 'gray';
+		label: string;
+	} {
+		switch (type) {
+			case 'PUBLISHED':
+				return { color: 'green', label: 'Published' };
+			case 'PUBLISHING':
+				return { color: 'blue', label: 'Publishing' };
+			case 'UNDER_REVIEW':
+				return { color: 'orange', label: 'Under Review' };
+			case 'PRIVATE':
+				return { color: 'gray', label: 'Private' };
+			case 'REVIEW_DECLINED':
+				return { color: 'red', label: 'Declined' };
+			case 'TAKEDOWN_REQUESTED':
+				return { color: 'red', label: 'Takedown Requested' };
+			case 'UNSUBMITTED':
+				return { color: 'gray', label: 'Draft' };
+			default:
+				return { color: 'gray', label: 'Unknown' };
+		}
+	}
+
+	let isCreating = $state(false);
+
+	async function createNewDrop() {
+		if (isCreating) return;
+		isCreating = true;
+
+		try {
+			const response = await postMusic({
+				headers: getAuthHeaders(),
+			});
+
+			// API returns { id: string } with the new drop ID
+			const { id } = response.data as { id: string };
+			goto(`/drops/new?id=${id}`);
+		} catch (err) {
+			console.error('Failed to create drop:', err);
+			error = 'Failed to create drop. Please try again.';
+			isCreating = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -199,7 +183,8 @@ async function createNewDrop() {
 			</h1>
 		</div>
 		<Button onclick={createNewDrop} disabled={isCreating} loading={isCreating}>
-			<PlusOutline class="w-4 h-4" /> {isCreating ? 'Creating...' : 'Create New Drop'}
+			<PlusOutline class="w-4 h-4" />
+			{isCreating ? 'Creating...' : 'Create New Drop'}
 		</Button>
 	</div>
 
@@ -216,7 +201,9 @@ async function createNewDrop() {
 			>
 				{tab.label}
 				{#if count > 0}
-					<span class="ml-2 px-2 py-0.5 rounded-full text-xs {isActive ? 'bg-white/20' : 'bg-gray-700'}">
+					<span
+						class="ml-2 px-2 py-0.5 rounded-full text-xs {isActive ? 'bg-white/20' : 'bg-gray-700'}"
+					>
 						{count}
 					</span>
 				{/if}
@@ -227,7 +214,9 @@ async function createNewDrop() {
 	<!-- Content -->
 	{#if isLoading}
 		<div class="flex justify-center items-center h-64">
-			<div class="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin"></div>
+			<div
+				class="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin"
+			></div>
 		</div>
 	{:else if error}
 		<Card variant="default" padding="lg">
@@ -239,12 +228,26 @@ async function createNewDrop() {
 	{:else if filteredDrops.length === 0}
 		<Card variant="default" padding="lg">
 			<div class="text-center py-12">
-				<div class="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4">
-					<svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
+				<div
+					class="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4"
+				>
+					<svg
+						class="w-10 h-10 text-gray-500"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"
+						/>
 					</svg>
 				</div>
-				<h3 class="text-xl font-semibold text-white mb-2">No {tabs.find((t) => t.id === activeTab)?.label.toLowerCase()} drops</h3>
+				<h3 class="text-xl font-semibold text-white mb-2">
+					No {tabs.find((t) => t.id === activeTab)?.label.toLowerCase()} drops
+				</h3>
 				<p class="text-gray-400 mb-6">
 					{#if activeTab === 'drafts'}
 						Start creating your first drop to get started.
@@ -256,7 +259,8 @@ async function createNewDrop() {
 				</p>
 				{#if activeTab === 'drafts'}
 					<Button onclick={createNewDrop} disabled={isCreating} loading={isCreating}>
-						<PlusOutline class="w-4 h-4" /> {isCreating ? 'Creating...' : 'Create New Drop'}
+						<PlusOutline class="w-4 h-4" />
+						{isCreating ? 'Creating...' : 'Create New Drop'}
 					</Button>
 				{/if}
 			</div>
@@ -266,18 +270,29 @@ async function createNewDrop() {
 		<div class="space-y-4">
 			{#each filteredDrops as drop}
 				{@const status = getStatusBadge(drop.type)}
-				{@const dropUrl = drop.type === 'UNSUBMITTED' ? `/drops/new?id=${drop._id}` : `/drops/${drop._id}/edit`}
+				{@const dropUrl =
+					drop.type === 'UNSUBMITTED' ? `/drops/new?id=${drop._id}` : `/drops/${drop._id}/edit`}
 				<a href={dropUrl} class="block">
-					<Card variant="default" padding="none" class="hover:bg-gray-800/80 transition-colors cursor-pointer">
+					<Card
+						variant="default"
+						padding="none"
+						class="hover:bg-gray-800/80 transition-colors cursor-pointer"
+					>
 						<div class="flex items-center gap-4 p-4">
 							<!-- Artwork -->
 							<div class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-800">
 								{#if drop.artwork && drop._id && artworkUrls[drop._id]}
-									<img src={artworkUrls[drop._id]} alt={drop.title} class="w-full h-full object-cover" />
+									<img
+										src={artworkUrls[drop._id]}
+										alt={drop.title}
+										class="w-full h-full object-cover"
+									/>
 								{:else}
 									<div class="w-full h-full flex items-center justify-center">
 										<svg class="w-8 h-8 text-gray-600" fill="currentColor" viewBox="0 0 24 24">
-											<path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z" />
+											<path
+												d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"
+											/>
 										</svg>
 									</div>
 								{/if}

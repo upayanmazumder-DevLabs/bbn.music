@@ -1,16 +1,16 @@
 <script lang="ts">
-import { auth } from '$lib/stores/auth';
-import { goto } from '$app/navigation';
-import { onMount } from 'svelte';
+	import { auth } from '$lib/stores/auth';
+	import { goto } from '$app/navigation';
+	import { onMount } from 'svelte';
 
-const { children } = $props();
+	const { children } = $props();
 
-onMount(() => {
-	// Redirect non-admin users
-	if (!$auth.isAuthenticated || !$auth.user?.isAdmin) {
-		goto('/drops');
-	}
-});
+	onMount(() => {
+		// Redirect non-admin users
+		if (!$auth.isAuthenticated || !$auth.user?.isAdmin) {
+			goto('/drops');
+		}
+	});
 </script>
 
 {#if $auth.user?.isAdmin}

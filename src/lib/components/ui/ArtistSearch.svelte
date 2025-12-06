@@ -1,114 +1,105 @@
 <script lang="ts">
-import type { Artist } from '$lib/api/types.gen';
-import { getArtistsByMusic } from '$lib/api/sdk.gen';
-import { getAuthHeaders } from '$lib/api';
-import { onMount } from 'svelte';
-import {
-	UserSolid,
-	PlusOutline,
-	SearchOutline,
-	CloseOutline,
-} from 'flowbite-svelte-icons';
+	import type { Artist } from '$lib/api/types.gen';
+	import { getArtistsByMusic } from '$lib/api/sdk.gen';
+	import { getAuthHeaders } from '$lib/api';
+	import { onMount } from 'svelte';
+	import { UserSolid, PlusOutline, SearchOutline, CloseOutline } from 'flowbite-svelte-icons';
 
-interface Props {
-	selectedArtist?: { _id: string | null; name: string } | null;
-	onselect: (artist: { _id: string | null; name: string }) => void;
-	placeholder?: string;
-	label?: string;
-}
+	interface Props {
+		selectedArtist?: { _id: string | null; name: string } | null;
+		onselect: (artist: { _id: string | null; name: string }) => void;
+		placeholder?: string;
+		label?: string;
+	}
 
-const {
-	selectedArtist = null,
-	onselect,
-	placeholder = 'Search artists...',
-	label = 'Artist',
-}: Props = $props();
+	const {
+		selectedArtist = null,
+		onselect,
+		placeholder = 'Search artists...',
+		label = 'Artist',
+	}: Props = $props();
 
-let searchQuery = $state('');
-let isOpen = $state(false);
-let inputElement: HTMLInputElement | undefined = $state();
-let containerElement: HTMLDivElement | undefined = $state();
-let allArtists = $state<Artist[]>([]);
-let dropdownPosition = $state({ top: 0, left: 0, width: 0 });
-const inputId = `artist-search-${crypto.randomUUID().slice(0, 8)}`;
+	let searchQuery = $state('');
+	let isOpen = $state(false);
+	let inputElement: HTMLInputElement | undefined = $state();
+	let containerElement: HTMLDivElement | undefined = $state();
+	let allArtists = $state<Artist[]>([]);
+	let dropdownPosition = $state({ top: 0, left: 0, width: 0 });
+	const inputId = `artist-search-${crypto.randomUUID().slice(0, 8)}`;
 
-// Load artists on mount
-onMount(async () => {
-	try {
-		const response = await getArtistsByMusic({
-			headers: getAuthHeaders(),
-		});
-		if (response.data) {
-			allArtists = response.data as Artist[];
+	// Load artists on mount
+	onMount(async () => {
+		try {
+			const response = await getArtistsByMusic({
+				headers: getAuthHeaders(),
+			});
+			if (response.data) {
+				allArtists = response.data as Artist[];
+			}
+		} catch (err) {
+			console.error('Failed to load artists:', err);
 		}
-	} catch (err) {
-		console.error('Failed to load artists:', err);
+	});
+
+	// Update dropdown position when opening
+	function updateDropdownPosition() {
+		if (inputElement) {
+			const rect = inputElement.getBoundingClientRect();
+			dropdownPosition = {
+				top: rect.bottom + 8, // 8px gap (mt-2)
+				left: rect.left,
+				width: rect.width,
+			};
+		}
 	}
-});
 
-// Update dropdown position when opening
-function updateDropdownPosition() {
-	if (inputElement) {
-		const rect = inputElement.getBoundingClientRect();
-		dropdownPosition = {
-			top: rect.bottom + 8, // 8px gap (mt-2)
-			left: rect.left,
-			width: rect.width,
-		};
-	}
-}
+	// Search results filtered from loaded artists
+	const searchResults = $derived.by(() => {
+		if (!searchQuery.trim()) return [];
+		const query = searchQuery.toLowerCase();
+		return allArtists.filter((a: Artist) => a.name.toLowerCase().includes(query)).slice(0, 5);
+	});
 
-// Search results filtered from loaded artists
-const searchResults = $derived.by(() => {
-	if (!searchQuery.trim()) return [];
-	const query = searchQuery.toLowerCase();
-	return allArtists
-		.filter((a: Artist) => a.name.toLowerCase().includes(query))
-		.slice(0, 5);
-});
+	// Check if we can create a new artist (no exact match)
+	const canCreateNew = $derived(
+		searchQuery.trim().length > 0 &&
+			!searchResults.some((a: Artist) => a.name.toLowerCase() === searchQuery.toLowerCase()),
+	);
 
-// Check if we can create a new artist (no exact match)
-const canCreateNew = $derived(
-	searchQuery.trim().length > 0 &&
-		!searchResults.some(
-			(a: Artist) => a.name.toLowerCase() === searchQuery.toLowerCase(),
-		),
-);
-
-function selectExisting(artist: Artist) {
-	onselect({ _id: artist._id, name: artist.name });
-	searchQuery = '';
-	isOpen = false;
-}
-
-function createNew() {
-	onselect({ _id: null, name: searchQuery.trim() });
-	searchQuery = '';
-	isOpen = false;
-}
-
-function clearSelection() {
-	onselect({ _id: null, name: '' });
-}
-
-function handleInputFocus() {
-	updateDropdownPosition();
-	isOpen = true;
-}
-
-function handleInputBlur(e: FocusEvent) {
-	// Delay close to allow click on dropdown items
-	setTimeout(() => {
+	function selectExisting(artist: Artist) {
+		onselect({ _id: artist._id, name: artist.name });
+		searchQuery = '';
 		isOpen = false;
-	}, 200);
-}
-
-function handleKeydown(e: KeyboardEvent) {
-	if (e.key === 'Escape') {
-		isOpen = false;
-		inputElement?.blur();
 	}
-}
+
+	function createNew() {
+		onselect({ _id: null, name: searchQuery.trim() });
+		searchQuery = '';
+		isOpen = false;
+	}
+
+	function clearSelection() {
+		onselect({ _id: null, name: '' });
+	}
+
+	function handleInputFocus() {
+		updateDropdownPosition();
+		isOpen = true;
+	}
+
+	function handleInputBlur(e: FocusEvent) {
+		// Delay close to allow click on dropdown items
+		setTimeout(() => {
+			isOpen = false;
+		}, 200);
+	}
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') {
+			isOpen = false;
+			inputElement?.blur();
+		}
+	}
 </script>
 
 <div class="space-y-2">
@@ -209,9 +200,7 @@ function handleKeydown(e: KeyboardEvent) {
 							onclick={createNew}
 							class="w-full flex items-center gap-3 px-4 py-3 hover:bg-orange-500/10 transition-colors text-left"
 						>
-							<div
-								class="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center"
-							>
+							<div class="w-8 h-8 rounded-full bg-orange-500/20 flex items-center justify-center">
 								<PlusOutline class="w-4 h-4 text-orange-500" />
 							</div>
 							<span class="text-orange-400 font-medium">Create "{searchQuery}"</span>

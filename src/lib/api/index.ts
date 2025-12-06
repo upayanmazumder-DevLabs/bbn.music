@@ -5,10 +5,7 @@ export { client as apiClient };
 
 // API Tools - matches old webgen app pattern
 export const APITools = {
-	token: () =>
-		typeof window !== 'undefined'
-			? localStorage.getItem('access-token')
-			: null,
+	token: () => (typeof window !== 'undefined' ? localStorage.getItem('access-token') : null),
 	baseUrl: () => {
 		if (typeof window !== 'undefined') {
 			const override = localStorage.getItem('OVERRIDE_BASE_URL');
@@ -24,9 +21,7 @@ export const APITools = {
 	oauthRedirect: (provider: 'discord' | 'google' | 'microsoft') => {
 		const baseUrl = APITools.baseUrl();
 		const goal =
-			typeof window !== 'undefined'
-				? (localStorage.getItem('goal') ?? '/drops')
-				: '/drops';
+			typeof window !== 'undefined' ? (localStorage.getItem('goal') ?? '/drops') : '/drops';
 		return `${baseUrl}api/@bbn/auth/redirect/${provider}?goal=${encodeURIComponent(goal)}`;
 	},
 };

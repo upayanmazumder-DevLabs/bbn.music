@@ -1,6 +1,4 @@
-interface SerializeOptions<T>
-	extends SerializePrimitiveOptions,
-		SerializerOptions<T> {}
+interface SerializeOptions<T> extends SerializePrimitiveOptions, SerializerOptions<T> {}
 
 interface SerializePrimitiveOptions {
 	allowReserved?: boolean;
@@ -75,9 +73,7 @@ export const serializeArrayParam = ({
 }) => {
 	if (!explode) {
 		const joinedValues = (
-			allowReserved
-				? value
-				: value.map((v) => encodeURIComponent(v as string))
+			allowReserved ? value : value.map((v) => encodeURIComponent(v as string))
 		).join(separatorArrayNoExplode(style));
 		switch (style) {
 			case 'label':
@@ -105,9 +101,7 @@ export const serializeArrayParam = ({
 			});
 		})
 		.join(separator);
-	return style === 'label' || style === 'matrix'
-		? separator + joinedValues
-		: joinedValues;
+	return style === 'label' || style === 'matrix' ? separator + joinedValues : joinedValues;
 };
 
 export const serializePrimitiveParam = ({
@@ -140,19 +134,13 @@ export const serializeObjectParam = ({
 	valueOnly?: boolean;
 }) => {
 	if (value instanceof Date) {
-		return valueOnly
-			? value.toISOString()
-			: `${name}=${value.toISOString()}`;
+		return valueOnly ? value.toISOString() : `${name}=${value.toISOString()}`;
 	}
 
 	if (style !== 'deepObject' && !explode) {
 		let values: string[] = [];
 		Object.entries(value).forEach(([key, v]) => {
-			values = [
-				...values,
-				key,
-				allowReserved ? (v as string) : encodeURIComponent(v as string),
-			];
+			values = [...values, key, allowReserved ? (v as string) : encodeURIComponent(v as string)];
 		});
 		const joinedValues = values.join(',');
 		switch (style) {
@@ -177,7 +165,5 @@ export const serializeObjectParam = ({
 			}),
 		)
 		.join(separator);
-	return style === 'label' || style === 'matrix'
-		? separator + joinedValues
-		: joinedValues;
+	return style === 'label' || style === 'matrix' ? separator + joinedValues : joinedValues;
 };

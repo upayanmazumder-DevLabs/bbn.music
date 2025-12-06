@@ -1,31 +1,31 @@
 <script lang="ts">
-import { onMount } from 'svelte';
-import { getGroupsByAdmin } from '$lib/api/sdk.gen';
-import { getAuthHeaders } from '$lib/stores/auth';
-import type { Group } from '$lib/api/types.gen';
+	import { onMount } from 'svelte';
+	import { getGroupsByAdmin } from '$lib/api/sdk.gen';
+	import { getAuthHeaders } from '$lib/stores/auth';
+	import type { Group } from '$lib/api/types.gen';
 
-let groups = $state<Group[]>([]);
-let loading = $state(true);
-let error = $state<string | null>(null);
+	let groups = $state<Group[]>([]);
+	let loading = $state(true);
+	let error = $state<string | null>(null);
 
-onMount(async () => {
-	await loadGroups();
-});
+	onMount(async () => {
+		await loadGroups();
+	});
 
-async function loadGroups() {
-	loading = true;
-	error = null;
-	try {
-		const response = await getGroupsByAdmin({ headers: getAuthHeaders() });
-		if (response.data) {
-			groups = response.data as Group[];
+	async function loadGroups() {
+		loading = true;
+		error = null;
+		try {
+			const response = await getGroupsByAdmin({ headers: getAuthHeaders() });
+			if (response.data) {
+				groups = response.data as Group[];
+			}
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to load groups';
+		} finally {
+			loading = false;
 		}
-	} catch (e) {
-		error = e instanceof Error ? e.message : 'Failed to load groups';
-	} finally {
-		loading = false;
 	}
-}
 </script>
 
 <div>
@@ -33,7 +33,9 @@ async function loadGroups() {
 
 	{#if loading}
 		<div class="flex items-center justify-center py-12">
-			<div class="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+			<div
+				class="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin"
+			></div>
 		</div>
 	{:else if error}
 		<div class="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400">{error}</div>
@@ -48,7 +50,9 @@ async function loadGroups() {
 					{#if group.permission?.length > 0}
 						<div class="mt-3 flex flex-wrap gap-2">
 							{#each group.permission as perm}
-								<span class="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded font-mono">{perm}</span>
+								<span class="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded font-mono"
+									>{perm}</span
+								>
 							{/each}
 						</div>
 					{/if}

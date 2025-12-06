@@ -1,352 +1,342 @@
 <script lang="ts">
-import { onMount } from 'svelte';
-import { goto } from '$app/navigation';
-import { page } from '$app/stores';
-import { Modal } from '$lib/components/ui';
-import {
-	getIdByDropsByAdmin,
-	getDropsByAdmin,
-	getArtworkByDropByMusic,
-	postReviewByDropByMusic,
-	getIdByShazamByMusic,
-	getIdByProviderByPublishByMusic,
-	postTypeByTypeByDropByMusic,
-} from '$lib/api/sdk.gen';
-import { getAuthHeaders, auth } from '$lib/stores/auth';
-import { toast } from '$lib/stores/toast';
-import type {
-	SingleAdminDrop,
-	AdminDrop,
-	DropType,
-	ShazamResults,
-} from '$lib/api/types.gen';
-import { Card, Badge, Button } from '$lib/components/ui';
-import {
-	ArrowLeftOutline,
-	UserOutline,
-	CalendarMonthOutline,
-	MusicOutline,
-	CheckCircleSolid,
-	CloseCircleSolid,
-	ExclamationCircleOutline,
-} from 'flowbite-svelte-icons';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { Modal } from '$lib/components/ui';
+	import {
+		getIdByDropsByAdmin,
+		getDropsByAdmin,
+		getArtworkByDropByMusic,
+		postReviewByDropByMusic,
+		getIdByShazamByMusic,
+		getIdByProviderByPublishByMusic,
+		postTypeByTypeByDropByMusic,
+	} from '$lib/api/sdk.gen';
+	import { getAuthHeaders, auth } from '$lib/stores/auth';
+	import { toast } from '$lib/stores/toast';
+	import type { SingleAdminDrop, AdminDrop, DropType, ShazamResults } from '$lib/api/types.gen';
+	import { Card, Badge, Button } from '$lib/components/ui';
+	import {
+		ArrowLeftOutline,
+		UserOutline,
+		CalendarMonthOutline,
+		MusicOutline,
+		CheckCircleSolid,
+		CloseCircleSolid,
+		ExclamationCircleOutline,
+	} from 'flowbite-svelte-icons';
 
-// Drop ID is guaranteed by SvelteKit routing
-const dropId = $page.params.id!;
+	// Drop ID is guaranteed by SvelteKit routing
+	const dropId = $page.params.id!;
 
-// Template keys type
-type TemplateKey =
-	| 'Copyright bad'
-	| 'Beat license needed'
-	| 'Full Songwriter Name'
-	| 'AI Generated'
-	| 'Wrong Language'
-	| 'Artwork low quality'
-	| 'Accepted'
-	| 'Takedown Accepted'
-	| 'Takedown Declined';
+	// Template keys type
+	type TemplateKey =
+		| 'Copyright bad'
+		| 'Beat license needed'
+		| 'Full Songwriter Name'
+		| 'AI Generated'
+		| 'Wrong Language'
+		| 'Artwork low quality'
+		| 'Accepted'
+		| 'Takedown Accepted'
+		| 'Takedown Declined';
 
-// State
-let drop = $state<SingleAdminDrop | null>(null);
-let loading = $state(true);
-let error = $state<string | null>(null);
-let artworkUrl = $state<string | null>(null);
-let userDrops = $state<AdminDrop[]>([]);
-let loadingUserDrops = $state(false);
-let hasMoreUserDrops = $state(true);
+	// State
+	let drop = $state<SingleAdminDrop | null>(null);
+	let loading = $state(true);
+	let error = $state<string | null>(null);
+	let artworkUrl = $state<string | null>(null);
+	let userDrops = $state<AdminDrop[]>([]);
+	let loadingUserDrops = $state(false);
+	let hasMoreUserDrops = $state(true);
 
-// Response dialog state
-let showResponseDialog = $state(false);
-let responseAction = $state<'ACCEPT' | 'REJECT'>('ACCEPT');
-let responseTemplate = $state<TemplateKey>('Copyright bad');
-let responseTitle = $state('');
-let responseBody = $state('');
-let denyEdits = $state(false);
-let submittingResponse = $state(false);
+	// Response dialog state
+	let showResponseDialog = $state(false);
+	let responseAction = $state<'ACCEPT' | 'REJECT'>('ACCEPT');
+	let responseTemplate = $state<TemplateKey>('Copyright bad');
+	let responseTitle = $state('');
+	let responseBody = $state('');
+	let denyEdits = $state(false);
+	let submittingResponse = $state(false);
 
-// Change type dialog
-let showTypeDialog = $state(false);
-let selectedType = $state<DropType>('UNDER_REVIEW');
+	// Change type dialog
+	let showTypeDialog = $state(false);
+	let selectedType = $state<DropType>('UNDER_REVIEW');
 
-// Publish dialog
-let showPublishDialog = $state(false);
-let selectedProvider = $state('musixmatch');
-let publishing = $state(false);
+	// Publish dialog
+	let showPublishDialog = $state(false);
+	let selectedProvider = $state('musixmatch');
+	let publishing = $state(false);
 
-// Shazam results
-let shazamResults = $state<ShazamResults | null>(null);
-let loadingShazam = $state(false);
+	// Shazam results
+	let shazamResults = $state<ShazamResults | null>(null);
+	let loadingShazam = $state(false);
 
-// Email templates
-const getTemplates = (): Record<TemplateKey, [string, string]> => ({
-	'Copyright bad': [
-		`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
-		`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and our Systems detected Copyright Issues with your Drop.\nCould you please send over proof that you own the rights to the Music?\nYou must own 100% of the legal rights to the music you are distributing.\nThis includes all types of samples or remixes.\nI have marked your Drop as rejected for now, until you send over the proof.\n\nBest regards,\n${$auth.user?.profile.username}`,
-	],
-	'Beat license needed': [
-		`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
-		`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that we need a beat license for the music you are using.\nPlease supply the necessary licenses or proof that you produced the music yourself and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
-	],
-	'Full Songwriter Name': [
-		`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
-		`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed missing Metadata.\nYour Drop is missing the Songwriters Full Name.\nPlease correct the names in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
-	],
-	'AI Generated': [
-		`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
-		`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the Drop is AI generated.\nWe are currently not accepting AI generated music.\nPlease remove the AI generated music and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
-	],
-	'Wrong Language': [
-		`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
-		`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the language of the Drop and/or Songs is wrong.\nPlease update the language in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
-	],
-	'Artwork low quality': [
-		`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
-		`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the Artwork is low quality.\nThe Artwork needs to be 3000x3000px and not blurry.\nPlease update the Artwork in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
-	],
-	Accepted: [
-		`${drop?.title} Accepted!`,
-		`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and I am happy to inform you that it has been accepted.\nYour music will now be sent to the stores.\nIt could take up to 72h for all stores to show your Drop.\n\nBest regards,\n${$auth.user?.profile.username}`,
-	],
-	'Takedown Accepted': [
-		`${drop?.title} Takedown Processed!`,
-		`Hey ${drop?.userInfo?.profile.username},\n\nI just processed your Takedown for the Drop ${drop?.title} with ID (${dropId}). The takedown has been sent to the stores.\nIt could take up to 72h for all stores to process the takedown.\n\nBest regards,\n${$auth.user?.profile.username}`,
-	],
-	'Takedown Declined': [
-		`${drop?.title} Takedown Declined!`,
-		`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Takedown for the Drop ${drop?.title} with ID (${dropId}) and I am sorry to inform you that I have declined your request.\nPlease contact us if you have any questions.\n\nBest regards,\n${$auth.user?.profile.username}`,
-	],
-});
-
-onMount(async () => {
-	await loadDrop();
-});
-
-async function loadDrop() {
-	loading = true;
-	error = null;
-
-	try {
-		const response = await getIdByDropsByAdmin({
-			path: { id: dropId },
-			headers: getAuthHeaders(),
-		});
-
-		if (response.data) {
-			drop = response.data as SingleAdminDrop;
-
-			// Load artwork
-			if (drop.artwork) {
-				loadArtwork();
-			}
-
-			// Load user's other drops
-			if (drop.user) {
-				loadUserDrops();
-			}
-		}
-	} catch (e) {
-		error = e instanceof Error ? e.message : 'Failed to load drop';
-	} finally {
-		loading = false;
-	}
-}
-
-async function loadArtwork() {
-	try {
-		const response = await getArtworkByDropByMusic({
-			path: { dropId },
-			headers: getAuthHeaders(),
-		});
-		if (response.data) {
-			artworkUrl = URL.createObjectURL(response.data as Blob);
-		}
-	} catch {
-		// Artwork load failed
-	}
-}
-
-async function loadUserDrops(offset = 0) {
-	if (!drop?.user) return;
-	loadingUserDrops = true;
-
-	try {
-		const response = await getDropsByAdmin({
-			query: { user: drop.user, _limit: 10, _offset: offset },
-			headers: getAuthHeaders(),
-		});
-
-		if (response.data) {
-			const newDrops = response.data as AdminDrop[];
-			userDrops = offset === 0 ? newDrops : [...userDrops, ...newDrops];
-			hasMoreUserDrops = newDrops.length === 10;
-		}
-	} catch {
-		// Failed to load user drops
-	} finally {
-		loadingUserDrops = false;
-	}
-}
-
-function openResponseDialog(action: 'ACCEPT' | 'REJECT') {
-	responseAction = action;
-	const templates = getTemplates();
-
-	if (action === 'ACCEPT') {
-		if (drop?.type === 'TAKEDOWN_REQUESTED') {
-			responseTemplate = 'Takedown Accepted';
-		} else {
-			responseTemplate = 'Accepted';
-		}
-	} else {
-		if (drop?.type === 'TAKEDOWN_REQUESTED') {
-			responseTemplate = 'Takedown Declined';
-		} else {
-			responseTemplate = 'Copyright bad';
-		}
-	}
-
-	const template = templates[responseTemplate];
-	if (template) {
-		responseTitle = template[0];
-		responseBody = template[1];
-	}
-
-	showResponseDialog = true;
-}
-
-function onTemplateChange() {
-	const templates = getTemplates();
-	const template = templates[responseTemplate];
-	if (template) {
-		responseTitle = template[0];
-		responseBody = template[1];
-	}
-}
-
-async function submitResponse() {
-	submittingResponse = true;
-
-	try {
-		await postReviewByDropByMusic({
-			path: { dropId },
-			body: {
-				title: responseTitle,
-				action: responseAction,
-				body: responseBody.replaceAll('\n', '<br>'),
-				denyEdits,
-			},
-			headers: getAuthHeaders(),
-		});
-
-		showResponseDialog = false;
-		// Reload the page to reflect changes
-		await loadDrop();
-	} catch (e) {
-		console.error('Failed to submit response:', e);
-	} finally {
-		submittingResponse = false;
-	}
-}
-
-async function changeDropType() {
-	try {
-		await postTypeByTypeByDropByMusic({
-			path: { dropId, type: selectedType },
-			headers: getAuthHeaders(),
-		});
-
-		showTypeDialog = false;
-		await loadDrop();
-	} catch (e) {
-		console.error('Failed to change type:', e);
-	}
-}
-
-async function runShazam() {
-	loadingShazam = true;
-	shazamResults = null;
-
-	try {
-		const response = await getIdByShazamByMusic({
-			path: { id: dropId },
-			headers: getAuthHeaders(),
-		});
-
-		// API spec incorrectly types response as null, but it returns ShazamResults
-		const data = (response as unknown as { data: ShazamResults }).data;
-		if (data) {
-			shazamResults = data;
-		}
-	} catch (e) {
-		console.error('Shazam failed:', e);
-	} finally {
-		loadingShazam = false;
-	}
-}
-
-async function publishDrop() {
-	publishing = true;
-
-	try {
-		const response = await getIdByProviderByPublishByMusic({
-			path: { id: dropId, provider: selectedProvider },
-			headers: getAuthHeaders(),
-		});
-
-		toast.show(
-			'Drop published successfully: ' + JSON.stringify(response.data),
-			'success',
-			6000,
-		);
-		showPublishDialog = false;
-	} catch (e) {
-		console.error('Publish failed:', e);
-		toast.show(
-			'Publish failed: ' +
-				(e instanceof Error ? e.message : 'Unknown error'),
-			'error',
-			6000,
-		);
-	} finally {
-		publishing = false;
-	}
-}
-
-function getStatusColor(type: string | undefined) {
-	switch (type) {
-		case 'PUBLISHED':
-			return 'green';
-		case 'PUBLISHING':
-			return 'blue';
-		case 'UNDER_REVIEW':
-			return 'orange';
-		case 'TAKEDOWN_REQUESTED':
-			return 'red';
-		case 'REVIEW_DECLINED':
-			return 'red';
-		case 'PRIVATE':
-			return 'gray';
-		default:
-			return 'gray';
-	}
-}
-
-function formatDate(dateStr: string | undefined) {
-	if (!dateStr) return 'N/A';
-	return new Date(dateStr).toLocaleDateString('en-US', {
-		year: 'numeric',
-		month: 'short',
-		day: 'numeric',
+	// Email templates
+	const getTemplates = (): Record<TemplateKey, [string, string]> => ({
+		'Copyright bad': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and our Systems detected Copyright Issues with your Drop.\nCould you please send over proof that you own the rights to the Music?\nYou must own 100% of the legal rights to the music you are distributing.\nThis includes all types of samples or remixes.\nI have marked your Drop as rejected for now, until you send over the proof.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Beat license needed': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that we need a beat license for the music you are using.\nPlease supply the necessary licenses or proof that you produced the music yourself and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Full Songwriter Name': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed missing Metadata.\nYour Drop is missing the Songwriters Full Name.\nPlease correct the names in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'AI Generated': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the Drop is AI generated.\nWe are currently not accepting AI generated music.\nPlease remove the AI generated music and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Wrong Language': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the language of the Drop and/or Songs is wrong.\nPlease update the language in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Artwork low quality': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the Artwork is low quality.\nThe Artwork needs to be 3000x3000px and not blurry.\nPlease update the Artwork in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		Accepted: [
+			`${drop?.title} Accepted!`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and I am happy to inform you that it has been accepted.\nYour music will now be sent to the stores.\nIt could take up to 72h for all stores to show your Drop.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Takedown Accepted': [
+			`${drop?.title} Takedown Processed!`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just processed your Takedown for the Drop ${drop?.title} with ID (${dropId}). The takedown has been sent to the stores.\nIt could take up to 72h for all stores to process the takedown.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Takedown Declined': [
+			`${drop?.title} Takedown Declined!`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Takedown for the Drop ${drop?.title} with ID (${dropId}) and I am sorry to inform you that I have declined your request.\nPlease contact us if you have any questions.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
 	});
-}
 
-function getArtistNames(artists: SingleAdminDrop['artists']) {
-	if (!artists) return 'Unknown';
-	return artists
-		.filter((a) => a.type === 'PRIMARY')
-		.map((a) => ('name' in a ? a.name : a._id))
-		.join(', ');
-}
+	onMount(async () => {
+		await loadDrop();
+	});
+
+	async function loadDrop() {
+		loading = true;
+		error = null;
+
+		try {
+			const response = await getIdByDropsByAdmin({
+				path: { id: dropId },
+				headers: getAuthHeaders(),
+			});
+
+			if (response.data) {
+				drop = response.data as SingleAdminDrop;
+
+				// Load artwork
+				if (drop.artwork) {
+					loadArtwork();
+				}
+
+				// Load user's other drops
+				if (drop.user) {
+					loadUserDrops();
+				}
+			}
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to load drop';
+		} finally {
+			loading = false;
+		}
+	}
+
+	async function loadArtwork() {
+		try {
+			const response = await getArtworkByDropByMusic({
+				path: { dropId },
+				headers: getAuthHeaders(),
+			});
+			if (response.data) {
+				artworkUrl = URL.createObjectURL(response.data as Blob);
+			}
+		} catch {
+			// Artwork load failed
+		}
+	}
+
+	async function loadUserDrops(offset = 0) {
+		if (!drop?.user) return;
+		loadingUserDrops = true;
+
+		try {
+			const response = await getDropsByAdmin({
+				query: { user: drop.user, _limit: 10, _offset: offset },
+				headers: getAuthHeaders(),
+			});
+
+			if (response.data) {
+				const newDrops = response.data as AdminDrop[];
+				userDrops = offset === 0 ? newDrops : [...userDrops, ...newDrops];
+				hasMoreUserDrops = newDrops.length === 10;
+			}
+		} catch {
+			// Failed to load user drops
+		} finally {
+			loadingUserDrops = false;
+		}
+	}
+
+	function openResponseDialog(action: 'ACCEPT' | 'REJECT') {
+		responseAction = action;
+		const templates = getTemplates();
+
+		if (action === 'ACCEPT') {
+			if (drop?.type === 'TAKEDOWN_REQUESTED') {
+				responseTemplate = 'Takedown Accepted';
+			} else {
+				responseTemplate = 'Accepted';
+			}
+		} else {
+			if (drop?.type === 'TAKEDOWN_REQUESTED') {
+				responseTemplate = 'Takedown Declined';
+			} else {
+				responseTemplate = 'Copyright bad';
+			}
+		}
+
+		const template = templates[responseTemplate];
+		if (template) {
+			responseTitle = template[0];
+			responseBody = template[1];
+		}
+
+		showResponseDialog = true;
+	}
+
+	function onTemplateChange() {
+		const templates = getTemplates();
+		const template = templates[responseTemplate];
+		if (template) {
+			responseTitle = template[0];
+			responseBody = template[1];
+		}
+	}
+
+	async function submitResponse() {
+		submittingResponse = true;
+
+		try {
+			await postReviewByDropByMusic({
+				path: { dropId },
+				body: {
+					title: responseTitle,
+					action: responseAction,
+					body: responseBody.replaceAll('\n', '<br>'),
+					denyEdits,
+				},
+				headers: getAuthHeaders(),
+			});
+
+			showResponseDialog = false;
+			// Reload the page to reflect changes
+			await loadDrop();
+		} catch (e) {
+			console.error('Failed to submit response:', e);
+		} finally {
+			submittingResponse = false;
+		}
+	}
+
+	async function changeDropType() {
+		try {
+			await postTypeByTypeByDropByMusic({
+				path: { dropId, type: selectedType },
+				headers: getAuthHeaders(),
+			});
+
+			showTypeDialog = false;
+			await loadDrop();
+		} catch (e) {
+			console.error('Failed to change type:', e);
+		}
+	}
+
+	async function runShazam() {
+		loadingShazam = true;
+		shazamResults = null;
+
+		try {
+			const response = await getIdByShazamByMusic({
+				path: { id: dropId },
+				headers: getAuthHeaders(),
+			});
+
+			// API spec incorrectly types response as null, but it returns ShazamResults
+			const data = (response as unknown as { data: ShazamResults }).data;
+			if (data) {
+				shazamResults = data;
+			}
+		} catch (e) {
+			console.error('Shazam failed:', e);
+		} finally {
+			loadingShazam = false;
+		}
+	}
+
+	async function publishDrop() {
+		publishing = true;
+
+		try {
+			const response = await getIdByProviderByPublishByMusic({
+				path: { id: dropId, provider: selectedProvider },
+				headers: getAuthHeaders(),
+			});
+
+			toast.show('Drop published successfully: ' + JSON.stringify(response.data), 'success', 6000);
+			showPublishDialog = false;
+		} catch (e) {
+			console.error('Publish failed:', e);
+			toast.show(
+				'Publish failed: ' + (e instanceof Error ? e.message : 'Unknown error'),
+				'error',
+				6000,
+			);
+		} finally {
+			publishing = false;
+		}
+	}
+
+	function getStatusColor(type: string | undefined) {
+		switch (type) {
+			case 'PUBLISHED':
+				return 'green';
+			case 'PUBLISHING':
+				return 'blue';
+			case 'UNDER_REVIEW':
+				return 'orange';
+			case 'TAKEDOWN_REQUESTED':
+				return 'red';
+			case 'REVIEW_DECLINED':
+				return 'red';
+			case 'PRIVATE':
+				return 'gray';
+			default:
+				return 'gray';
+		}
+	}
+
+	function formatDate(dateStr: string | undefined) {
+		if (!dateStr) return 'N/A';
+		return new Date(dateStr).toLocaleDateString('en-US', {
+			year: 'numeric',
+			month: 'short',
+			day: 'numeric',
+		});
+	}
+
+	function getArtistNames(artists: SingleAdminDrop['artists']) {
+		if (!artists) return 'Unknown';
+		return artists
+			.filter((a) => a.type === 'PRIMARY')
+			.map((a) => ('name' in a ? a.name : a._id))
+			.join(', ');
+	}
 </script>
 
 <svelte:head>
@@ -356,7 +346,10 @@ function getArtistNames(artists: SingleAdminDrop['artists']) {
 <div class="space-y-6">
 	<!-- Header -->
 	<div class="flex items-center gap-4">
-		<button onclick={() => history.back()} class="p-2 hover:bg-gray-800 rounded-lg transition-colors">
+		<button
+			onclick={() => history.back()}
+			class="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+		>
 			<ArrowLeftOutline class="w-5 h-5 text-gray-400" />
 		</button>
 		<div class="flex-1">
@@ -370,7 +363,9 @@ function getArtistNames(artists: SingleAdminDrop['artists']) {
 
 	{#if loading}
 		<div class="flex items-center justify-center py-12">
-			<div class="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+			<div
+				class="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"
+			></div>
 		</div>
 	{:else if error}
 		<Card variant="default" padding="lg">
@@ -383,18 +378,20 @@ function getArtistNames(artists: SingleAdminDrop['artists']) {
 				<Button variant="danger" onclick={() => openResponseDialog('REJECT')}>
 					<CloseCircleSolid class="w-4 h-4" /> Reject
 				</Button>
-				<Button variant="secondary" onclick={() => { selectedType = drop?.type ?? 'UNDER_REVIEW'; showTypeDialog = true; }}>
+				<Button
+					variant="secondary"
+					onclick={() => {
+						selectedType = drop?.type ?? 'UNDER_REVIEW';
+						showTypeDialog = true;
+					}}
+				>
 					Change Type
 				</Button>
 				<Button variant="secondary" onclick={runShazam} disabled={loadingShazam}>
 					{loadingShazam ? 'Checking...' : 'Check Shazam'}
 				</Button>
-				<Button variant="secondary" onclick={() => showPublishDialog = true}>
-					Publish
-				</Button>
-				<Button variant="secondary" onclick={() => goto(`/drops/${dropId}/edit`)}>
-					Edit Drop
-				</Button>
+				<Button variant="secondary" onclick={() => (showPublishDialog = true)}>Publish</Button>
+				<Button variant="secondary" onclick={() => goto(`/drops/${dropId}/edit`)}>Edit Drop</Button>
 				<Button onclick={() => openResponseDialog('ACCEPT')}>
 					<CheckCircleSolid class="w-4 h-4" /> Accept
 				</Button>
@@ -415,13 +412,25 @@ function getArtistNames(artists: SingleAdminDrop['artists']) {
 							<p class="text-gray-400 text-sm">{result.artist}</p>
 							<div class="flex gap-2 mt-2">
 								{#if result.shazamUrl}
-									<a href={result.shazamUrl} target="_blank" class="text-xs text-blue-400 hover:underline">Shazam</a>
+									<a
+										href={result.shazamUrl}
+										target="_blank"
+										class="text-xs text-blue-400 hover:underline">Shazam</a
+									>
 								{/if}
 								{#if result.spotifyUrl}
-									<a href={result.spotifyUrl} target="_blank" class="text-xs text-green-400 hover:underline">Spotify</a>
+									<a
+										href={result.spotifyUrl}
+										target="_blank"
+										class="text-xs text-green-400 hover:underline">Spotify</a
+									>
 								{/if}
 								{#if result.appleUrl}
-									<a href={result.appleUrl} target="_blank" class="text-xs text-pink-400 hover:underline">Apple</a>
+									<a
+										href={result.appleUrl}
+										target="_blank"
+										class="text-xs text-pink-400 hover:underline">Apple</a
+									>
 								{/if}
 							</div>
 						</div>
@@ -546,9 +555,15 @@ function getArtistNames(artists: SingleAdminDrop['artists']) {
 					{#if drop.userInfo}
 						<div class="space-y-4">
 							<div class="flex items-center gap-4">
-								<div class="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
+								<div
+									class="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden"
+								>
 									{#if drop.userInfo.profile.avatar}
-										<img src={drop.userInfo.profile.avatar} alt="Avatar" class="w-full h-full object-cover" />
+										<img
+											src={drop.userInfo.profile.avatar}
+											alt="Avatar"
+											class="w-full h-full object-cover"
+										/>
 									{:else}
 										<UserOutline class="w-8 h-8 text-gray-500" />
 									{/if}
@@ -645,7 +660,10 @@ function getArtistNames(artists: SingleAdminDrop['artists']) {
 </div>
 
 <!-- Response Dialog -->
-<Modal bind:open={showResponseDialog} title="{responseAction === 'ACCEPT' ? 'Accept' : 'Reject'} Drop">
+<Modal
+	bind:open={showResponseDialog}
+	title="{responseAction === 'ACCEPT' ? 'Accept' : 'Reject'} Drop"
+>
 	<div class="space-y-4">
 		<div>
 			<label for="template" class="block text-sm text-gray-400 mb-1">Template</label>
@@ -682,7 +700,12 @@ function getArtistNames(artists: SingleAdminDrop['artists']) {
 		</div>
 
 		<div class="flex items-center gap-2">
-			<input type="checkbox" id="denyEdits" bind:checked={denyEdits} class="rounded bg-gray-800 border-gray-700" />
+			<input
+				type="checkbox"
+				id="denyEdits"
+				bind:checked={denyEdits}
+				class="rounded bg-gray-800 border-gray-700"
+			/>
 			<label for="denyEdits" class="text-sm text-gray-400">Deny further edits</label>
 		</div>
 	</div>

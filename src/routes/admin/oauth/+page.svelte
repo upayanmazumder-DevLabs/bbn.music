@@ -1,65 +1,62 @@
 <script lang="ts">
-import { onMount } from 'svelte';
-import {
-	getApplicationsByOauth,
-	deleteIdByApplicationsByOauth,
-} from '$lib/api/sdk.gen';
-import { getAuthHeaders } from '$lib/stores/auth';
-import type { OAuthApp } from '$lib/api/types.gen';
-import { Modal, Button } from '$lib/components/ui';
-import { toast } from '$lib/stores/toast';
+	import { onMount } from 'svelte';
+	import { getApplicationsByOauth, deleteIdByApplicationsByOauth } from '$lib/api/sdk.gen';
+	import { getAuthHeaders } from '$lib/stores/auth';
+	import type { OAuthApp } from '$lib/api/types.gen';
+	import { Modal, Button } from '$lib/components/ui';
+	import { toast } from '$lib/stores/toast';
 
-let apps = $state<OAuthApp[]>([]);
-let loading = $state(true);
-let error = $state<string | null>(null);
-let showDeleteModal = $state(false);
-let appToDelete = $state<string | null>(null);
+	let apps = $state<OAuthApp[]>([]);
+	let loading = $state(true);
+	let error = $state<string | null>(null);
+	let showDeleteModal = $state(false);
+	let appToDelete = $state<string | null>(null);
 
-onMount(async () => {
-	await loadApps();
-});
-
-async function loadApps() {
-	loading = true;
-	error = null;
-	try {
-		const response = await getApplicationsByOauth({
-			headers: getAuthHeaders(),
-		});
-		if (response.data) {
-			apps = response.data as OAuthApp[];
-		}
-	} catch (e) {
-		error = e instanceof Error ? e.message : 'Failed to load OAuth apps';
-	} finally {
-		loading = false;
-	}
-}
-
-function requestDelete(appId: string) {
-	appToDelete = appId;
-	showDeleteModal = true;
-}
-
-async function confirmDelete() {
-	if (!appToDelete) return;
-
-	showDeleteModal = false;
-
-	try {
-		await deleteIdByApplicationsByOauth({
-			path: { id: appToDelete },
-			headers: getAuthHeaders(),
-		});
+	onMount(async () => {
 		await loadApps();
-		toast.show('OAuth application deleted successfully', 'success');
-	} catch (e) {
-		console.error('Delete failed:', e);
-		toast.show('Failed to delete OAuth application', 'error');
-	} finally {
-		appToDelete = null;
+	});
+
+	async function loadApps() {
+		loading = true;
+		error = null;
+		try {
+			const response = await getApplicationsByOauth({
+				headers: getAuthHeaders(),
+			});
+			if (response.data) {
+				apps = response.data as OAuthApp[];
+			}
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to load OAuth apps';
+		} finally {
+			loading = false;
+		}
 	}
-}
+
+	function requestDelete(appId: string) {
+		appToDelete = appId;
+		showDeleteModal = true;
+	}
+
+	async function confirmDelete() {
+		if (!appToDelete) return;
+
+		showDeleteModal = false;
+
+		try {
+			await deleteIdByApplicationsByOauth({
+				path: { id: appToDelete },
+				headers: getAuthHeaders(),
+			});
+			await loadApps();
+			toast.show('OAuth application deleted successfully', 'success');
+		} catch (e) {
+			console.error('Delete failed:', e);
+			toast.show('Failed to delete OAuth application', 'error');
+		} finally {
+			appToDelete = null;
+		}
+	}
 </script>
 
 <div>
@@ -67,7 +64,9 @@ async function confirmDelete() {
 
 	{#if loading}
 		<div class="flex items-center justify-center py-12">
-			<div class="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+			<div
+				class="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin"
+			></div>
 		</div>
 	{:else if error}
 		<div class="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400">{error}</div>
@@ -91,7 +90,9 @@ async function confirmDelete() {
 								</div>
 							{/if}
 						</div>
-						<button onclick={() => requestDelete(app._id)} class="text-red-400 hover:text-red-300">Delete</button>
+						<button onclick={() => requestDelete(app._id)} class="text-red-400 hover:text-red-300"
+							>Delete</button
+						>
 					</div>
 				</div>
 			{/each}
@@ -101,14 +102,20 @@ async function confirmDelete() {
 
 <!-- Delete Confirmation Modal -->
 <Modal bind:open={showDeleteModal} title="Delete OAuth Application" size="md">
-	<p class="text-white">Are you sure you want to delete this OAuth application? This action cannot be undone.</p>
+	<p class="text-white">
+		Are you sure you want to delete this OAuth application? This action cannot be undone.
+	</p>
 
 	{#snippet footer()}
-		<Button variant="secondary" onclick={() => { showDeleteModal = false; appToDelete = null; }}>
+		<Button
+			variant="secondary"
+			onclick={() => {
+				showDeleteModal = false;
+				appToDelete = null;
+			}}
+		>
 			Cancel
 		</Button>
-		<Button variant="danger" onclick={confirmDelete}>
-			Delete
-		</Button>
+		<Button variant="danger" onclick={confirmDelete}>Delete</Button>
 	{/snippet}
 </Modal>

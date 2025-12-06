@@ -1,401 +1,393 @@
 <script lang="ts">
-import { onMount } from 'svelte';
-import { goto } from '$app/navigation';
-import { page } from '$app/stores';
-import { Modal } from '$lib/components/ui';
-import {
-	ArrowLeftOutline,
-	PlusOutline,
-	TrashBinOutline,
-	UploadOutline,
-	EditOutline,
-	UserSolid,
-	MusicSolid,
-	ImageOutline,
-	CheckCircleSolid,
-	CloseCircleSolid,
-	ExclamationCircleOutline,
-} from 'flowbite-svelte-icons';
+	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/stores';
+	import { Modal } from '$lib/components/ui';
+	import {
+		ArrowLeftOutline,
+		PlusOutline,
+		TrashBinOutline,
+		UploadOutline,
+		EditOutline,
+		UserSolid,
+		MusicSolid,
+		ImageOutline,
+		CheckCircleSolid,
+		CloseCircleSolid,
+		ExclamationCircleOutline,
+	} from 'flowbite-svelte-icons';
 
-import {
-	Button,
-	Input,
-	Select,
-	Textarea,
-	Card,
-	Badge,
-	Toggle,
-	Alert,
-	IconButton,
-	ArtistSearch,
-} from '$lib/components/ui';
-import { primaryGenres, getSecondaryGenres } from '$lib/data/genres';
-import { languages, getLanguageName } from '$lib/data/languages';
-import {
-	getIdByDropsByMusic,
-	patchIdByDropsByMusic,
-	postTypeByTypeByDropByMusic,
-	getArtworkByDropByMusic,
-	postShareByDropsByMusic,
-	getIdByShareByDropsByMusic,
-	deleteIdByShareByDropsByMusic,
-} from '$lib/api';
-import { getAuthHeaders, auth } from '$lib/stores/auth';
-import type {
-	FullDrop,
-	DropType,
-	Song,
-	ArtistRef,
-	Share,
-} from '$lib/api/types.gen';
-import { artistTypes, type ArtistType } from '$lib/types/drop';
+	import {
+		Button,
+		Input,
+		Select,
+		Textarea,
+		Card,
+		Badge,
+		Toggle,
+		Alert,
+		IconButton,
+		ArtistSearch,
+	} from '$lib/components/ui';
+	import { primaryGenres, getSecondaryGenres } from '$lib/data/genres';
+	import { languages, getLanguageName } from '$lib/data/languages';
+	import {
+		getIdByDropsByMusic,
+		patchIdByDropsByMusic,
+		postTypeByTypeByDropByMusic,
+		getArtworkByDropByMusic,
+		postShareByDropsByMusic,
+		getIdByShareByDropsByMusic,
+		deleteIdByShareByDropsByMusic,
+	} from '$lib/api';
+	import { getAuthHeaders, auth } from '$lib/stores/auth';
+	import type { FullDrop, DropType, Song, ArtistRef, Share } from '$lib/api/types.gen';
+	import { artistTypes, type ArtistType } from '$lib/types/drop';
 
-// Drop ID is always defined in this route (guaranteed by SvelteKit routing)
-const dropId = $page.params.id!;
+	// Drop ID is always defined in this route (guaranteed by SvelteKit routing)
+	const dropId = $page.params.id!;
 
-// Form state
-let drop = $state<FullDrop | null>(null);
-let loading = $state(true);
-let saving = $state(false);
-let error = $state<string | null>(null);
-let successMessage = $state<string | null>(null);
-let artworkUrl = $state<string | null>(null);
+	// Form state
+	let drop = $state<FullDrop | null>(null);
+	let loading = $state(true);
+	let saving = $state(false);
+	let error = $state<string | null>(null);
+	let successMessage = $state<string | null>(null);
+	let artworkUrl = $state<string | null>(null);
 
-// Edit state - track what's been modified
-let hasChanges = $state(false);
+	// Edit state - track what's been modified
+	let hasChanges = $state(false);
 
-// Form fields (copied from drop for editing)
-let title = $state('');
-let release = $state('');
-let language = $state('en');
-let primaryGenre = $state('');
-let secondaryGenre = $state('');
-let compositionCopyright = $state('');
-let soundRecordingCopyright = $state('');
-let gtin = $state('');
-let comments = $state('');
-let artists = $state<ArtistRef[]>([]);
+	// Form fields (copied from drop for editing)
+	let title = $state('');
+	let release = $state('');
+	let language = $state('en');
+	let primaryGenre = $state('');
+	let secondaryGenre = $state('');
+	let compositionCopyright = $state('');
+	let soundRecordingCopyright = $state('');
+	let gtin = $state('');
+	let comments = $state('');
+	let artists = $state<ArtistRef[]>([]);
 
-// Share state
-let share = $state<Share | null>(null);
-let shareLoading = $state(false);
+	// Share state
+	let share = $state<Share | null>(null);
+	let shareLoading = $state(false);
 
-// Modals
-let showArtistModal = $state(false);
-let editingArtistIndex = $state<number | null>(null);
-let tempArtist = $state<{ type: ArtistType; _id: string | null; name: string }>(
-	{ type: 'PRIMARY', _id: null, name: '' },
-);
-let showStatusChangeModal = $state(false);
-let pendingStatusChange = $state<DropType | null>(null);
+	// Modals
+	let showArtistModal = $state(false);
+	let editingArtistIndex = $state<number | null>(null);
+	let tempArtist = $state<{ type: ArtistType; _id: string | null; name: string }>({
+		type: 'PRIMARY',
+		_id: null,
+		name: '',
+	});
+	let showStatusChangeModal = $state(false);
+	let pendingStatusChange = $state<DropType | null>(null);
 
-// Derived values
-const secondaryGenreOptions = $derived(getSecondaryGenres(primaryGenre));
-const isEditable = $derived(
-	drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE',
-);
-const canSubmitForReview = $derived(drop?.type === 'UNSUBMITTED');
-const canCancelReview = $derived(drop?.type === 'UNDER_REVIEW');
-const canRequestTakedown = $derived(drop?.type === 'PUBLISHED');
-const canCancelTakedown = $derived(drop?.type === 'TAKEDOWN_REQUESTED');
-const isAdmin = $derived($auth.user?.isAdmin ?? false);
+	// Derived values
+	const secondaryGenreOptions = $derived(getSecondaryGenres(primaryGenre));
+	const isEditable = $derived(drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE');
+	const canSubmitForReview = $derived(drop?.type === 'UNSUBMITTED');
+	const canCancelReview = $derived(drop?.type === 'UNDER_REVIEW');
+	const canRequestTakedown = $derived(drop?.type === 'PUBLISHED');
+	const canCancelTakedown = $derived(drop?.type === 'TAKEDOWN_REQUESTED');
+	const isAdmin = $derived($auth.user?.isAdmin ?? false);
 
-onMount(async () => {
-	await loadDrop();
-});
+	onMount(async () => {
+		await loadDrop();
+	});
 
-async function loadDrop() {
-	loading = true;
-	error = null;
-	try {
-		const response = await getIdByDropsByMusic({
-			path: { id: dropId },
-			headers: getAuthHeaders(),
-		});
-		if (response.data) {
-			drop = response.data as FullDrop;
-			// Copy to editable fields
-			title = drop.title;
-			release = drop.release;
-			language = drop.language;
-			primaryGenre = drop.primaryGenre;
-			secondaryGenre = drop.secondaryGenre;
-			compositionCopyright = drop.compositionCopyright;
-			soundRecordingCopyright = drop.soundRecordingCopyright;
-			gtin = drop.gtin ?? '';
-			comments = drop.comments ?? '';
-			artists = [...drop.artists];
+	async function loadDrop() {
+		loading = true;
+		error = null;
+		try {
+			const response = await getIdByDropsByMusic({
+				path: { id: dropId },
+				headers: getAuthHeaders(),
+			});
+			if (response.data) {
+				drop = response.data as FullDrop;
+				// Copy to editable fields
+				title = drop.title;
+				release = drop.release;
+				language = drop.language;
+				primaryGenre = drop.primaryGenre;
+				secondaryGenre = drop.secondaryGenre;
+				compositionCopyright = drop.compositionCopyright;
+				soundRecordingCopyright = drop.soundRecordingCopyright;
+				gtin = drop.gtin ?? '';
+				comments = drop.comments ?? '';
+				artists = [...drop.artists];
 
-			// Load artwork if available
-			if (drop.artwork) {
-				loadArtwork(drop._id);
+				// Load artwork if available
+				if (drop.artwork) {
+					loadArtwork(drop._id);
+				}
+
+				// Load share link only for published drops
+				if (drop.type === 'PUBLISHED') {
+					await loadShare();
+				}
 			}
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to load drop';
+		} finally {
+			loading = false;
+		}
+	}
 
-			// Load share link only for published drops
-			if (drop.type === 'PUBLISHED') {
-				await loadShare();
+	async function loadArtwork(id: string) {
+		try {
+			const response = await getArtworkByDropByMusic({
+				path: { dropId: id },
+				headers: getAuthHeaders(),
+			});
+			if (response.data) {
+				const blob = response.data as Blob;
+				artworkUrl = URL.createObjectURL(blob);
 			}
+		} catch (e) {
+			console.error('Failed to load artwork:', e);
 		}
-	} catch (e) {
-		error = e instanceof Error ? e.message : 'Failed to load drop';
-	} finally {
-		loading = false;
 	}
-}
 
-async function loadArtwork(id: string) {
-	try {
-		const response = await getArtworkByDropByMusic({
-			path: { dropId: id },
-			headers: getAuthHeaders(),
-		});
-		if (response.data) {
-			const blob = response.data as Blob;
-			artworkUrl = URL.createObjectURL(blob);
+	async function loadShare() {
+		try {
+			const response = await getIdByShareByDropsByMusic({
+				path: { id: dropId },
+				headers: getAuthHeaders(),
+			});
+			if (response.data && response.data !== false) {
+				share = response.data as Share;
+			}
+		} catch (e) {
+			console.error('Failed to load share:', e);
 		}
-	} catch (e) {
-		console.error('Failed to load artwork:', e);
 	}
-}
 
-async function loadShare() {
-	try {
-		const response = await getIdByShareByDropsByMusic({
-			path: { id: dropId },
-			headers: getAuthHeaders(),
-		});
-		if (response.data && response.data !== false) {
-			share = response.data as Share;
+	async function createShare() {
+		shareLoading = true;
+		error = null;
+		try {
+			const response = await postShareByDropsByMusic({
+				body: { id: dropId },
+				headers: getAuthHeaders(),
+			});
+
+			if (response.data) {
+				share = response.data as Share;
+				successMessage = 'Share link created successfully!';
+				setTimeout(() => (successMessage = null), 3000);
+			}
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to create share link';
+		} finally {
+			shareLoading = false;
 		}
-	} catch (e) {
-		console.error('Failed to load share:', e);
 	}
-}
 
-async function createShare() {
-	shareLoading = true;
-	error = null;
-	try {
-		const response = await postShareByDropsByMusic({
-			body: { id: dropId },
-			headers: getAuthHeaders(),
-		});
-
-		if (response.data) {
-			share = response.data as Share;
-			successMessage = 'Share link created successfully!';
+	async function deleteShare() {
+		if (!share) return;
+		shareLoading = true;
+		error = null;
+		try {
+			await deleteIdByShareByDropsByMusic({
+				path: { id: share._id },
+				headers: getAuthHeaders(),
+			});
+			share = null;
+			successMessage = 'Share link deleted successfully!';
 			setTimeout(() => (successMessage = null), 3000);
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to delete share link';
+		} finally {
+			shareLoading = false;
 		}
-	} catch (e) {
-		error = e instanceof Error ? e.message : 'Failed to create share link';
-	} finally {
-		shareLoading = false;
 	}
-}
 
-async function deleteShare() {
-	if (!share) return;
-	shareLoading = true;
-	error = null;
-	try {
-		await deleteIdByShareByDropsByMusic({
-			path: { id: share._id },
-			headers: getAuthHeaders(),
-		});
-		share = null;
-		successMessage = 'Share link deleted successfully!';
-		setTimeout(() => (successMessage = null), 3000);
-	} catch (e) {
-		error = e instanceof Error ? e.message : 'Failed to delete share link';
-	} finally {
-		shareLoading = false;
+	function copyShareUrl() {
+		if (!share) return;
+		const url = `${window.location.origin}/s/${share.slug}`;
+		navigator.clipboard.writeText(url);
+		successMessage = 'Share URL copied to clipboard!';
+		setTimeout(() => (successMessage = null), 2000);
 	}
-}
 
-function copyShareUrl() {
-	if (!share) return;
-	const url = `${window.location.origin}/s/${share.slug}`;
-	navigator.clipboard.writeText(url);
-	successMessage = 'Share URL copied to clipboard!';
-	setTimeout(() => (successMessage = null), 2000);
-}
-
-async function saveDrop() {
-	if (!drop || !isEditable) return;
-	saving = true;
-	error = null;
-	successMessage = null;
-	try {
-		await patchIdByDropsByMusic({
-			path: { id: dropId },
-			body: {
-				title,
-				release,
-				language,
-				primaryGenre,
-				secondaryGenre,
-				compositionCopyright,
-				soundRecordingCopyright,
-				gtin: gtin || undefined,
-				comments: comments || undefined,
-				artists,
-			},
-			headers: getAuthHeaders(),
-		});
-		successMessage = 'Drop saved successfully';
-		hasChanges = false;
-		await loadDrop();
-	} catch (e) {
-		error = e instanceof Error ? e.message : 'Failed to save drop';
-	} finally {
-		saving = false;
+	async function saveDrop() {
+		if (!drop || !isEditable) return;
+		saving = true;
+		error = null;
+		successMessage = null;
+		try {
+			await patchIdByDropsByMusic({
+				path: { id: dropId },
+				body: {
+					title,
+					release,
+					language,
+					primaryGenre,
+					secondaryGenre,
+					compositionCopyright,
+					soundRecordingCopyright,
+					gtin: gtin || undefined,
+					comments: comments || undefined,
+					artists,
+				},
+				headers: getAuthHeaders(),
+			});
+			successMessage = 'Drop saved successfully';
+			hasChanges = false;
+			await loadDrop();
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to save drop';
+		} finally {
+			saving = false;
+		}
 	}
-}
 
-function requestStatusChange(newType: DropType) {
-	pendingStatusChange = newType;
-	showStatusChangeModal = true;
-}
-
-async function confirmStatusChange() {
-	if (!drop || !pendingStatusChange) return;
-
-	saving = true;
-	error = null;
-	showStatusChangeModal = false;
-
-	try {
-		await postTypeByTypeByDropByMusic({
-			path: { dropId, type: pendingStatusChange },
-			headers: getAuthHeaders(),
-		});
-		await loadDrop();
-		successMessage = 'Status updated successfully';
-	} catch (e) {
-		error = e instanceof Error ? e.message : 'Failed to update status';
-	} finally {
-		saving = false;
-		pendingStatusChange = null;
+	function requestStatusChange(newType: DropType) {
+		pendingStatusChange = newType;
+		showStatusChangeModal = true;
 	}
-}
 
-function getStatusChangeMessage(type: DropType | null): string {
-	if (!type) return '';
+	async function confirmStatusChange() {
+		if (!drop || !pendingStatusChange) return;
 
-	const messages: Record<string, string> = {
-		UNDER_REVIEW:
-			'Submit this drop for review? Once submitted, you cannot edit it until the review is complete.',
-		UNSUBMITTED:
-			'Cancel the review? Your drop will be moved back to draft status.',
-		TAKEDOWN_REQUESTED:
-			'Request a takedown? This will remove your release from all platforms.',
-		PUBLISHED:
-			'Cancel the takedown request? Your release will remain published on all platforms.',
-	};
+		saving = true;
+		error = null;
+		showStatusChangeModal = false;
 
-	return messages[type] ?? `Change status to ${type}?`;
-}
+		try {
+			await postTypeByTypeByDropByMusic({
+				path: { dropId, type: pendingStatusChange },
+				headers: getAuthHeaders(),
+			});
+			await loadDrop();
+			successMessage = 'Status updated successfully';
+		} catch (e) {
+			error = e instanceof Error ? e.message : 'Failed to update status';
+		} finally {
+			saving = false;
+			pendingStatusChange = null;
+		}
+	}
 
-function markChanged() {
-	hasChanges = true;
-}
+	function getStatusChangeMessage(type: DropType | null): string {
+		if (!type) return '';
 
-// Artist management
-function openAddArtist() {
-	tempArtist = { type: 'PRIMARY', _id: null, name: '' };
-	editingArtistIndex = null;
-	showArtistModal = true;
-}
-
-function openEditArtist(index: number) {
-	const artist = artists[index];
-	if ('_id' in artist) {
-		tempArtist = {
-			type: artist.type as ArtistType,
-			_id: artist._id,
-			name: '',
+		const messages: Record<string, string> = {
+			UNDER_REVIEW:
+				'Submit this drop for review? Once submitted, you cannot edit it until the review is complete.',
+			UNSUBMITTED: 'Cancel the review? Your drop will be moved back to draft status.',
+			TAKEDOWN_REQUESTED: 'Request a takedown? This will remove your release from all platforms.',
+			PUBLISHED:
+				'Cancel the takedown request? Your release will remain published on all platforms.',
 		};
-	} else {
-		tempArtist = {
-			type: artist.type as ArtistType,
-			_id: null,
-			name: artist.name,
-		};
-	}
-	editingArtistIndex = index;
-	showArtistModal = true;
-}
 
-function saveArtist() {
-	let newArtist: ArtistRef;
-	if (tempArtist.type === 'PRIMARY' || tempArtist.type === 'FEATURING') {
-		newArtist = { _id: tempArtist._id ?? '', type: tempArtist.type };
-	} else {
-		newArtist = { name: tempArtist.name, type: tempArtist.type };
+		return messages[type] ?? `Change status to ${type}?`;
 	}
 
-	if (editingArtistIndex !== null) {
-		artists[editingArtistIndex] = newArtist;
-	} else {
-		artists = [...artists, newArtist];
+	function markChanged() {
+		hasChanges = true;
 	}
-	showArtistModal = false;
-	markChanged();
-}
 
-function removeArtist(index: number) {
-	artists = artists.filter((_, i) => i !== index);
-	markChanged();
-}
-
-function getStatusColor(type: DropType | undefined): string {
-	switch (type) {
-		case 'PUBLISHED':
-			return 'bg-green-500/20 text-green-400 border-green-500/30';
-		case 'PUBLISHING':
-			return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
-		case 'UNDER_REVIEW':
-			return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
-		case 'TAKEDOWN_REQUESTED':
-			return 'bg-red-500/20 text-red-400 border-red-500/30';
-		case 'REVIEW_DECLINED':
-			return 'bg-red-500/20 text-red-400 border-red-500/30';
-		case 'PRIVATE':
-			return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
-		default:
-			return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+	// Artist management
+	function openAddArtist() {
+		tempArtist = { type: 'PRIMARY', _id: null, name: '' };
+		editingArtistIndex = null;
+		showArtistModal = true;
 	}
-}
 
-function getStatusLabel(type: DropType | undefined): string {
-	switch (type) {
-		case 'UNSUBMITTED':
-			return 'Draft';
-		case 'UNDER_REVIEW':
-			return 'Under Review';
-		case 'PUBLISHED':
-			return 'Published';
-		case 'PUBLISHING':
-			return 'Publishing';
-		case 'TAKEDOWN_REQUESTED':
-			return 'Takedown Requested';
-		case 'REVIEW_DECLINED':
-			return 'Declined';
-		case 'PRIVATE':
-			return 'Private';
-		default:
-			return type ?? 'Unknown';
+	function openEditArtist(index: number) {
+		const artist = artists[index];
+		if ('_id' in artist) {
+			tempArtist = {
+				type: artist.type as ArtistType,
+				_id: artist._id,
+				name: '',
+			};
+		} else {
+			tempArtist = {
+				type: artist.type as ArtistType,
+				_id: null,
+				name: artist.name,
+			};
+		}
+		editingArtistIndex = index;
+		showArtistModal = true;
 	}
-}
 
-function getArtistTypeLabel(type: string): string {
-	return type.charAt(0) + type.slice(1).toLowerCase();
-}
+	function saveArtist() {
+		let newArtist: ArtistRef;
+		if (tempArtist.type === 'PRIMARY' || tempArtist.type === 'FEATURING') {
+			newArtist = { _id: tempArtist._id ?? '', type: tempArtist.type };
+		} else {
+			newArtist = { name: tempArtist.name, type: tempArtist.type };
+		}
 
-function getArtistDisplayName(artist: ArtistRef): string {
-	if ('name' in artist) return artist.name;
-	return artist._id;
-}
+		if (editingArtistIndex !== null) {
+			artists[editingArtistIndex] = newArtist;
+		} else {
+			artists = [...artists, newArtist];
+		}
+		showArtistModal = false;
+		markChanged();
+	}
+
+	function removeArtist(index: number) {
+		artists = artists.filter((_, i) => i !== index);
+		markChanged();
+	}
+
+	function getStatusColor(type: DropType | undefined): string {
+		switch (type) {
+			case 'PUBLISHED':
+				return 'bg-green-500/20 text-green-400 border-green-500/30';
+			case 'PUBLISHING':
+				return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+			case 'UNDER_REVIEW':
+				return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+			case 'TAKEDOWN_REQUESTED':
+				return 'bg-red-500/20 text-red-400 border-red-500/30';
+			case 'REVIEW_DECLINED':
+				return 'bg-red-500/20 text-red-400 border-red-500/30';
+			case 'PRIVATE':
+				return 'bg-purple-500/20 text-purple-400 border-purple-500/30';
+			default:
+				return 'bg-gray-500/20 text-gray-400 border-gray-500/30';
+		}
+	}
+
+	function getStatusLabel(type: DropType | undefined): string {
+		switch (type) {
+			case 'UNSUBMITTED':
+				return 'Draft';
+			case 'UNDER_REVIEW':
+				return 'Under Review';
+			case 'PUBLISHED':
+				return 'Published';
+			case 'PUBLISHING':
+				return 'Publishing';
+			case 'TAKEDOWN_REQUESTED':
+				return 'Takedown Requested';
+			case 'REVIEW_DECLINED':
+				return 'Declined';
+			case 'PRIVATE':
+				return 'Private';
+			default:
+				return type ?? 'Unknown';
+		}
+	}
+
+	function getArtistTypeLabel(type: string): string {
+		return type.charAt(0) + type.slice(1).toLowerCase();
+	}
+
+	function getArtistDisplayName(artist: ArtistRef): string {
+		if ('name' in artist) return artist.name;
+		return artist._id;
+	}
 </script>
 
 <svelte:head>
@@ -420,7 +412,9 @@ function getArtistDisplayName(artist: ArtistRef): string {
 
 	{#if loading}
 		<div class="flex items-center justify-center py-24">
-			<div class="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+			<div
+				class="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"
+			></div>
 		</div>
 	{:else if error && !drop}
 		<Alert variant="error">{error}</Alert>
@@ -428,26 +422,32 @@ function getArtistDisplayName(artist: ArtistRef): string {
 		<!-- Alerts -->
 		{#if error}
 			<div class="mb-6">
-				<Alert variant="error" dismissible ondismiss={() => error = null}>{error}</Alert>
+				<Alert variant="error" dismissible ondismiss={() => (error = null)}>{error}</Alert>
 			</div>
 		{/if}
 		{#if successMessage}
 			<div class="mb-6">
-				<Alert variant="success" dismissible ondismiss={() => successMessage = null}>{successMessage}</Alert>
+				<Alert variant="success" dismissible ondismiss={() => (successMessage = null)}
+					>{successMessage}</Alert
+				>
 			</div>
 		{/if}
 
 		<!-- Non-editable notice -->
 		{#if !isEditable}
-			<div class="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex items-start gap-3">
+			<div
+				class="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex items-start gap-3"
+			>
 				<ExclamationCircleOutline class="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" />
 				<div>
 					<p class="text-yellow-400 font-medium">Editing Disabled</p>
 					<p class="text-yellow-400/70 text-sm">
 						{#if drop.type === 'UNDER_REVIEW'}
-							This drop is currently under review. You cannot make changes until the review is complete.
+							This drop is currently under review. You cannot make changes until the review is
+							complete.
 						{:else if drop.type === 'PUBLISHED'}
-							This drop has been published. To make changes, you'll need to request a takedown first.
+							This drop has been published. To make changes, you'll need to request a takedown
+							first.
 						{:else}
 							This drop cannot be edited in its current status.
 						{/if}
@@ -466,7 +466,9 @@ function getArtistDisplayName(artist: ArtistRef): string {
 							<img src={artworkUrl} alt="Album artwork" class="w-full h-full object-cover" />
 						{:else if drop.artwork}
 							<div class="w-full h-full flex items-center justify-center">
-								<div class="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+								<div
+									class="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"
+								></div>
 							</div>
 						{:else}
 							<div class="w-full h-full flex items-center justify-center">
@@ -478,7 +480,9 @@ function getArtistDisplayName(artist: ArtistRef): string {
 						<Button variant="secondary" class="w-full" disabled>
 							<UploadOutline class="w-4 h-4" /> Change Artwork
 						</Button>
-						<p class="text-xs text-gray-500 mt-2 text-center">JPG or PNG, 3000x3000px recommended</p>
+						<p class="text-xs text-gray-500 mt-2 text-center">
+							JPG or PNG, 3000x3000px recommended
+						</p>
 					{/if}
 				</Card>
 
@@ -487,28 +491,49 @@ function getArtistDisplayName(artist: ArtistRef): string {
 					<h3 class="text-lg font-semibold text-white mb-4">Actions</h3>
 					<div class="space-y-3">
 						{#if canSubmitForReview}
-							<Button class="w-full" onclick={() => requestStatusChange('UNDER_REVIEW')} disabled={saving || hasChanges}>
+							<Button
+								class="w-full"
+								onclick={() => requestStatusChange('UNDER_REVIEW')}
+								disabled={saving || hasChanges}
+							>
 								<CheckCircleSolid class="w-4 h-4" /> Submit for Review
 							</Button>
 							{#if hasChanges}
-								<p class="text-xs text-yellow-400 text-center">Save your changes before submitting</p>
+								<p class="text-xs text-yellow-400 text-center">
+									Save your changes before submitting
+								</p>
 							{/if}
 						{/if}
 						{#if canCancelReview}
-							<Button variant="secondary" class="w-full" onclick={() => requestStatusChange('UNSUBMITTED')} disabled={saving}>
+							<Button
+								variant="secondary"
+								class="w-full"
+								onclick={() => requestStatusChange('UNSUBMITTED')}
+								disabled={saving}
+							>
 								<CloseCircleSolid class="w-4 h-4" /> Cancel Review
-			</Button>
+							</Button>
 						{/if}
 						{#if canRequestTakedown}
-							<Button variant="danger" class="w-full" onclick={() => requestStatusChange('TAKEDOWN_REQUESTED')} disabled={saving}>
+							<Button
+								variant="danger"
+								class="w-full"
+								onclick={() => requestStatusChange('TAKEDOWN_REQUESTED')}
+								disabled={saving}
+							>
 								<TrashBinOutline class="w-4 h-4" /> Request Takedown
-						</Button>
-				{/if}
+							</Button>
+						{/if}
 						{#if canCancelTakedown}
-							<Button variant="secondary" class="w-full" onclick={() => requestStatusChange('PUBLISHED')} disabled={saving}>
+							<Button
+								variant="secondary"
+								class="w-full"
+								onclick={() => requestStatusChange('PUBLISHED')}
+								disabled={saving}
+							>
 								<CloseCircleSolid class="w-4 h-4" /> Cancel Takedown Request
-						</Button>
-				{/if}
+							</Button>
+						{/if}
 					</div>
 				</Card>
 
@@ -517,10 +542,16 @@ function getArtistDisplayName(artist: ArtistRef): string {
 					<Card variant="glass" padding="md" class="mt-6 border-red-500/30">
 						<h3 class="text-lg font-semibold text-red-400 mb-4">Admin Actions</h3>
 						<div class="space-y-2 text-sm">
-							<p class="text-gray-400">Drop ID: <span class="font-mono text-gray-300">{drop._id}</span></p>
-							<p class="text-gray-400">User: <span class="font-mono text-gray-300">{drop.user}</span></p>
+							<p class="text-gray-400">
+								Drop ID: <span class="font-mono text-gray-300">{drop._id}</span>
+							</p>
+							<p class="text-gray-400">
+								User: <span class="font-mono text-gray-300">{drop.user}</span>
+							</p>
 							{#if drop.gtin}
-								<p class="text-gray-400">GTIN: <span class="font-mono text-gray-300">{drop.gtin}</span></p>
+								<p class="text-gray-400">
+									GTIN: <span class="font-mono text-gray-300">{drop.gtin}</span>
+								</p>
 							{/if}
 						</div>
 					</Card>
@@ -554,21 +585,36 @@ function getArtistDisplayName(artist: ArtistRef): string {
 						</div>
 
 						<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-							<Select bind:value={primaryGenre} label="Primary Genre" disabled={!isEditable} onchange={markChanged}>
+							<Select
+								bind:value={primaryGenre}
+								label="Primary Genre"
+								disabled={!isEditable}
+								onchange={markChanged}
+							>
 								<option value="">Select genre...</option>
 								{#each primaryGenres as genre}
 									<option value={genre}>{genre}</option>
 								{/each}
 							</Select>
 
-							<Select bind:value={secondaryGenre} label="Sub-genre" disabled={!isEditable || !primaryGenre} onchange={markChanged}>
+							<Select
+								bind:value={secondaryGenre}
+								label="Sub-genre"
+								disabled={!isEditable || !primaryGenre}
+								onchange={markChanged}
+							>
 								<option value="">Select sub-genre...</option>
 								{#each secondaryGenreOptions as genre}
 									<option value={genre}>{genre}</option>
 								{/each}
 							</Select>
 
-							<Select bind:value={language} label="Language" disabled={!isEditable} onchange={markChanged}>
+							<Select
+								bind:value={language}
+								label="Language"
+								disabled={!isEditable}
+								onchange={markChanged}
+							>
 								{#each Object.entries(languages) as [code, name]}
 									<option value={code}>{name}</option>
 								{/each}
@@ -613,8 +659,12 @@ function getArtistDisplayName(artist: ArtistRef): string {
 
 					<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 						{#each artists as artist, index}
-							<div class="group flex items-center gap-3 p-3 bg-gray-900/50 rounded-xl border border-gray-700/50">
-								<div class="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center">
+							<div
+								class="group flex items-center gap-3 p-3 bg-gray-900/50 rounded-xl border border-gray-700/50"
+							>
+								<div
+									class="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center"
+								>
 									<UserSolid class="w-5 h-5 text-orange-400" />
 								</div>
 								<div class="flex-1 min-w-0">
@@ -640,19 +690,27 @@ function getArtistDisplayName(artist: ArtistRef): string {
 				<Card variant="glass" padding="md">
 					<div class="flex items-center justify-between mb-4">
 						<h3 class="text-lg font-semibold text-white">Songs</h3>
-						<Badge color="gray">{drop.songs.length} track{drop.songs.length !== 1 ? 's' : ''}</Badge>
+						<Badge color="gray">{drop.songs.length} track{drop.songs.length !== 1 ? 's' : ''}</Badge
+						>
 					</div>
 
 					<div class="space-y-2">
 						{#each drop.songs as song, index}
-							<div class="flex items-center gap-4 p-3 bg-gray-900/50 rounded-xl border border-gray-700/50">
-								<div class="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-400 font-bold text-sm">
+							<div
+								class="flex items-center gap-4 p-3 bg-gray-900/50 rounded-xl border border-gray-700/50"
+							>
+								<div
+									class="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-400 font-bold text-sm"
+								>
 									{index + 1}
 								</div>
 								<div class="flex-1 min-w-0">
 									<p class="text-white font-medium truncate">{song.title}</p>
 									<p class="text-sm text-gray-400 truncate">
-										{song.artists.filter((a) => a.type === 'PRIMARY').map(a => 'name' in a ? a.name : a._id).join(', ') || 'No artists'}
+										{song.artists
+											.filter((a) => a.type === 'PRIMARY')
+											.map((a) => ('name' in a ? a.name : a._id))
+											.join(', ') || 'No artists'}
 									</p>
 								</div>
 								<div class="flex items-center gap-2">
@@ -685,7 +743,9 @@ function getArtistDisplayName(artist: ArtistRef): string {
 							{#if share}
 								<!-- Share URL Display -->
 								<div class="p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-									<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+									<div
+										class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
+									>
 										<div class="flex-1 min-w-0 space-y-1">
 											<p class="text-xs text-green-400">Share URL</p>
 											<p class="text-white font-mono text-sm break-all">
@@ -717,11 +777,7 @@ function getArtistDisplayName(artist: ArtistRef): string {
 									<p class="text-gray-400 mb-4">
 										Create a shareable landing page for your release with streaming platform links.
 									</p>
-									<Button
-										onclick={createShare}
-										disabled={shareLoading}
-										loading={shareLoading}
-									>
+									<Button onclick={createShare} disabled={shareLoading} loading={shareLoading}>
 										Create Share Link
 									</Button>
 								</div>
@@ -761,7 +817,12 @@ function getArtistDisplayName(artist: ArtistRef): string {
 </div>
 
 <!-- Artist Modal -->
-<Modal bind:open={showArtistModal} title={editingArtistIndex !== null ? 'Edit Artist' : 'Add Artist'} size="md" class="bg-gray-800">
+<Modal
+	bind:open={showArtistModal}
+	title={editingArtistIndex !== null ? 'Edit Artist' : 'Add Artist'}
+	size="md"
+	class="bg-gray-800"
+>
 	<div class="space-y-4">
 		<Select bind:value={tempArtist.type} label="Artist Type">
 			{#each artistTypes as type}
@@ -775,8 +836,12 @@ function getArtistDisplayName(artist: ArtistRef): string {
 				tempArtist._id = artist._id;
 				tempArtist.name = artist.name;
 			}}
-			label={tempArtist.type === 'SONGWRITER' || tempArtist.type === 'PRODUCER' ? 'Full Name (First Last)' : 'Artist Name'}
-			placeholder={tempArtist.type === 'SONGWRITER' || tempArtist.type === 'PRODUCER' ? 'Search or enter full name...' : 'Search existing artists or create new...'}
+			label={tempArtist.type === 'SONGWRITER' || tempArtist.type === 'PRODUCER'
+				? 'Full Name (First Last)'
+				: 'Artist Name'}
+			placeholder={tempArtist.type === 'SONGWRITER' || tempArtist.type === 'PRODUCER'
+				? 'Search or enter full name...'
+				: 'Search existing artists or create new...'}
 		/>
 	</div>
 
@@ -796,7 +861,13 @@ function getArtistDisplayName(artist: ArtistRef): string {
 	</div>
 
 	{#snippet footer()}
-		<Button variant="secondary" onclick={() => { showStatusChangeModal = false; pendingStatusChange = null; }}>
+		<Button
+			variant="secondary"
+			onclick={() => {
+				showStatusChangeModal = false;
+				pendingStatusChange = null;
+			}}
+		>
 			Cancel
 		</Button>
 		<Button

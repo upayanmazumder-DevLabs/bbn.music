@@ -1,100 +1,98 @@
 <script lang="ts">
-import { onMount } from 'svelte';
-import { Button, Card, Modal, Input } from '$lib/components/ui';
-import { SearchOutline, PlusOutline } from 'flowbite-svelte-icons';
-import type { Artist } from '$lib/api/types.gen';
-import { getArtistsByMusic, postArtistsByMusic } from '$lib/api/sdk.gen';
-import { getAuthHeaders } from '$lib/api';
-import { toast } from '$lib/stores/toast';
+	import { onMount } from 'svelte';
+	import { Button, Card, Modal, Input } from '$lib/components/ui';
+	import { SearchOutline, PlusOutline } from 'flowbite-svelte-icons';
+	import type { Artist } from '$lib/api/types.gen';
+	import { getArtistsByMusic, postArtistsByMusic } from '$lib/api/sdk.gen';
+	import { getAuthHeaders } from '$lib/api';
+	import { toast } from '$lib/stores/toast';
 
-let artists = $state<Artist[]>([]);
-let filteredArtists = $state<Artist[]>([]);
-let isLoading = $state(true);
-let error = $state<string | null>(null);
-let searchTerm = $state('');
+	let artists = $state<Artist[]>([]);
+	let filteredArtists = $state<Artist[]>([]);
+	let isLoading = $state(true);
+	let error = $state<string | null>(null);
+	let searchTerm = $state('');
 
-// Add artist modal state
-let showAddModal = $state(false);
-let newArtistName = $state('');
-let newArtistSpotify = $state('');
-let newArtistApple = $state('');
-let isCreating = $state(false);
+	// Add artist modal state
+	let showAddModal = $state(false);
+	let newArtistName = $state('');
+	let newArtistSpotify = $state('');
+	let newArtistApple = $state('');
+	let isCreating = $state(false);
 
-onMount(async () => {
-	try {
-		const response = await getArtistsByMusic({
-			headers: getAuthHeaders(),
-		});
+	onMount(async () => {
+		try {
+			const response = await getArtistsByMusic({
+				headers: getAuthHeaders(),
+			});
 
-		if (response.data) {
-			artists = response.data as Artist[];
-			filteredArtists = artists;
+			if (response.data) {
+				artists = response.data as Artist[];
+				filteredArtists = artists;
+			}
+		} catch (err) {
+			error = 'Failed to load artists. Please try again later.';
+			console.error('Error loading artists:', err);
+		} finally {
+			isLoading = false;
 		}
-	} catch (err) {
-		error = 'Failed to load artists. Please try again later.';
-		console.error('Error loading artists:', err);
-	} finally {
-		isLoading = false;
-	}
-});
+	});
 
-// Filter artists based on search
-$effect(() => {
-	if (!searchTerm) {
-		filteredArtists = artists;
-		return;
-	}
-
-	const term = searchTerm.toLowerCase();
-	filteredArtists = artists.filter((artist) =>
-		artist.name.toLowerCase().includes(term),
-	);
-});
-
-function openAddModal() {
-	newArtistName = '';
-	newArtistSpotify = '';
-	newArtistApple = '';
-	showAddModal = true;
-}
-
-async function createArtist() {
-	if (!newArtistName.trim()) {
-		toast.show('Please enter an artist name', 'error');
-		return;
-	}
-
-	isCreating = true;
-	try {
-		const response = await postArtistsByMusic({
-			headers: getAuthHeaders(),
-			body: {
-				name: newArtistName.trim(),
-				spotify: newArtistSpotify.trim() || undefined,
-				apple: newArtistApple.trim() || undefined,
-			},
-		});
-
-		if (response.data) {
-			// API only returns { id }, so construct the full artist object
-			const newArtist: Artist = {
-				_id: response.data.id,
-				name: newArtistName.trim(),
-				spotify: newArtistSpotify.trim() || undefined,
-				apple: newArtistApple.trim() || undefined,
-			};
-			artists = [...artists, newArtist];
+	// Filter artists based on search
+	$effect(() => {
+		if (!searchTerm) {
 			filteredArtists = artists;
-			toast.show('Artist created successfully', 'success');
-			showAddModal = false;
+			return;
 		}
-	} catch (err) {
-		console.error('Failed to create artist:', err);
-		toast.show('Failed to create artist', 'error');
-	} finally {
-		isCreating = false;
+
+		const term = searchTerm.toLowerCase();
+		filteredArtists = artists.filter((artist) => artist.name.toLowerCase().includes(term));
+	});
+
+	function openAddModal() {
+		newArtistName = '';
+		newArtistSpotify = '';
+		newArtistApple = '';
+		showAddModal = true;
 	}
-}
+
+	async function createArtist() {
+		if (!newArtistName.trim()) {
+			toast.show('Please enter an artist name', 'error');
+			return;
+		}
+
+		isCreating = true;
+		try {
+			const response = await postArtistsByMusic({
+				headers: getAuthHeaders(),
+				body: {
+					name: newArtistName.trim(),
+					spotify: newArtistSpotify.trim() || undefined,
+					apple: newArtistApple.trim() || undefined,
+				},
+			});
+
+			if (response.data) {
+				// API only returns { id }, so construct the full artist object
+				const newArtist: Artist = {
+					_id: response.data.id,
+					name: newArtistName.trim(),
+					spotify: newArtistSpotify.trim() || undefined,
+					apple: newArtistApple.trim() || undefined,
+				};
+				artists = [...artists, newArtist];
+				filteredArtists = artists;
+				toast.show('Artist created successfully', 'success');
+				showAddModal = false;
+			}
+		} catch (err) {
+			console.error('Failed to create artist:', err);
+			toast.show('Failed to create artist', 'error');
+		} finally {
+			isCreating = false;
+		}
+	}
 </script>
 
 <svelte:head>
@@ -127,7 +125,9 @@ async function createArtist() {
 	<!-- Loading State -->
 	{#if isLoading}
 		<div class="flex justify-center items-center h-64">
-			<div class="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin"></div>
+			<div
+				class="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin"
+			></div>
 		</div>
 	{:else if error}
 		<!-- Error State -->
@@ -141,9 +141,21 @@ async function createArtist() {
 		<!-- Empty State -->
 		<Card variant="default" padding="lg">
 			<div class="text-center py-12">
-				<div class="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4">
-					<svg class="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+				<div
+					class="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4"
+				>
+					<svg
+						class="w-10 h-10 text-gray-500"
+						fill="none"
+						stroke="currentColor"
+						viewBox="0 0 24 24"
+					>
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+						/>
 					</svg>
 				</div>
 				<h3 class="text-xl font-semibold text-white mb-2">
@@ -155,9 +167,7 @@ async function createArtist() {
 						: 'Add your first artist to get started with distributing music.'}
 				</p>
 				{#if searchTerm}
-					<Button variant="secondary" onclick={() => searchTerm = ''}>
-						Clear Search
-					</Button>
+					<Button variant="secondary" onclick={() => (searchTerm = '')}>Clear Search</Button>
 				{:else}
 					<Button onclick={openAddModal}>
 						<PlusOutline class="w-4 h-4" /> Add Artist
@@ -180,7 +190,9 @@ async function createArtist() {
 									class="w-full aspect-square rounded-full object-cover"
 								/>
 							{:else}
-								<div class="w-full aspect-square rounded-full bg-gradient-to-r from-orange-500 to-orange-400 flex items-center justify-center">
+								<div
+									class="w-full aspect-square rounded-full bg-gradient-to-r from-orange-500 to-orange-400 flex items-center justify-center"
+								>
 									<span class="text-white text-3xl font-bold">
 										{artist.name?.[0]?.toUpperCase() ?? '?'}
 									</span>
@@ -234,7 +246,11 @@ async function createArtist() {
 
 	{#snippet footer()}
 		<Button variant="secondary" onclick={() => (showAddModal = false)}>Cancel</Button>
-		<Button onclick={createArtist} disabled={!newArtistName.trim() || isCreating} loading={isCreating}>
+		<Button
+			onclick={createArtist}
+			disabled={!newArtistName.trim() || isCreating}
+			loading={isCreating}
+		>
 			{isCreating ? 'Creating...' : 'Create Artist'}
 		</Button>
 	{/snippet}

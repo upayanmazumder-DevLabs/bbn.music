@@ -117,6 +117,7 @@
 		<input
 			type="search"
 			placeholder="Search artists..."
+			aria-label="Search artists"
 			bind:value={searchTerm}
 			class="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
 		/>

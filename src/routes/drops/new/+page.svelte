@@ -1113,7 +1113,7 @@
 										<UserSolid class="w-8 h-8 text-gray-500" />
 									</div>
 									<p class="text-gray-400 font-medium mb-1">No artists yet</p>
-									<p class="text-gray-600 text-sm">Click "Add Artist" to get started</p>
+									<p class="text-gray-400 text-sm">Click "Add Artist" to get started</p>
 								</div>
 							{/if}
 						</div>
@@ -1303,6 +1303,7 @@
 						accept="image/jpeg,image/png"
 						onchange={handleArtworkUpload}
 						class="hidden"
+						aria-label="Upload artwork"
 					/>
 
 					<div class="flex flex-col items-center gap-4">
@@ -1656,6 +1657,7 @@
 				accept="audio/wav,audio/x-wav,audio/flac,audio/x-flac"
 				onchange={handleSongFileUpload}
 				class="hidden"
+				aria-label="Upload song file"
 			/>
 		</div>
 
@@ -1701,7 +1703,7 @@
 
 				<!-- Flags - Side by side -->
 				<div>
-					<label class="block text-sm font-medium text-white mb-3">Content Flags</label>
+					<span class="block text-sm font-medium text-white mb-3">Content Flags</span>
 					<div class="flex gap-6">
 						<Toggle bind:checked={tempSong.explicit} label="Explicit Content" color="red" />
 						<Toggle bind:checked={tempSong.instrumental} label="Instrumental" color="blue" />

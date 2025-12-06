@@ -81,6 +81,7 @@
 		'/privacy',
 		'/terms',
 		'/imprint',
+		'/accessibility',
 		'/forgot-password',
 	];
 	const isPublicRoute = $derived(
@@ -254,6 +255,14 @@
 </svelte:head>
 
 <div class="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 via-black to-gray-900">
+	<!-- Skip link for keyboard navigation (BFSG/WCAG 2.1 AA compliance) -->
+	<a
+		href="#main-content"
+		class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-orange-500 focus:text-white focus:rounded-lg focus:outline-none focus:ring-2 focus:ring-white"
+	>
+		Skip to main content
+	</a>
+
 	<!-- Modern Navigation Bar (hidden on share pages) -->
 	{#if !isSharePage}
 		<nav class="glass sticky top-0 z-50 border-b border-white/10">
@@ -387,6 +396,7 @@
 							<button
 								onclick={toggle}
 								class="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
+								aria-label={hidden ? 'Open menu' : 'Close menu'}
 							>
 								<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 									{#if hidden}
@@ -473,6 +483,7 @@
 
 	<!-- Main Content -->
 	<main
+		id="main-content"
 		class={isSharePage ? 'flex-1' : 'flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full'}
 	>
 		{#if isPublicRoute || authChecked}
@@ -508,6 +519,9 @@
 							>Terms & Conditions</a
 						>
 						<a href="/imprint" class="text-gray-400 hover:text-white transition-colors">Imprint</a>
+						<a href="/accessibility" class="text-gray-400 hover:text-white transition-colors"
+							>Accessibility</a
+						>
 					</div>
 
 					<div

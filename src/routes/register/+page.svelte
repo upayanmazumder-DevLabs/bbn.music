@@ -138,13 +138,15 @@
 							placeholder="John Doe"
 							required
 							autocomplete="name"
+							aria-invalid={!!validationErrors.name}
+							aria-describedby={validationErrors.name ? 'name-error' : undefined}
 							class="w-full pl-10 pr-4 py-3 bg-white/5 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all {validationErrors.name
 								? 'border-red-500'
 								: 'border-white/10 hover:border-white/20'}"
 						/>
 					</div>
 					{#if validationErrors.name}
-						<p class="mt-1.5 text-sm text-red-400">{validationErrors.name}</p>
+						<p id="name-error" role="alert" class="mt-1.5 text-sm text-red-400">{validationErrors.name}</p>
 					{/if}
 				</div>
 
@@ -162,13 +164,15 @@
 							placeholder="you@example.com"
 							required
 							autocomplete="email"
+							aria-invalid={!!validationErrors.email}
+							aria-describedby={validationErrors.email ? 'email-error' : undefined}
 							class="w-full pl-10 pr-4 py-3 bg-white/5 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all {validationErrors.email
 								? 'border-red-500'
 								: 'border-white/10 hover:border-white/20'}"
 						/>
 					</div>
 					{#if validationErrors.email}
-						<p class="mt-1.5 text-sm text-red-400">{validationErrors.email}</p>
+						<p id="email-error" role="alert" class="mt-1.5 text-sm text-red-400">{validationErrors.email}</p>
 					{/if}
 				</div>
 
@@ -187,15 +191,17 @@
 							placeholder="Minimum 8 characters"
 							required
 							autocomplete="new-password"
+							aria-invalid={!!validationErrors.password}
+							aria-describedby={validationErrors.password ? 'password-error' : 'password-hint'}
 							class="w-full pl-10 pr-4 py-3 bg-white/5 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all {validationErrors.password
 								? 'border-red-500'
 								: 'border-white/10 hover:border-white/20'}"
 						/>
 					</div>
 					{#if validationErrors.password}
-						<p class="mt-1.5 text-sm text-red-400">{validationErrors.password}</p>
+						<p id="password-error" role="alert" class="mt-1.5 text-sm text-red-400">{validationErrors.password}</p>
 					{:else}
-						<p class="mt-1.5 text-sm text-gray-500">
+						<p id="password-hint" class="mt-1.5 text-sm text-gray-500">
 							Use 8 or more characters with letters, numbers & symbols
 						</p>
 					{/if}
@@ -217,13 +223,15 @@
 							placeholder="Repeat your password"
 							required
 							autocomplete="new-password"
+							aria-invalid={!!validationErrors.confirmPassword}
+							aria-describedby={validationErrors.confirmPassword ? 'confirm-password-error' : undefined}
 							class="w-full pl-10 pr-4 py-3 bg-white/5 border rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all {validationErrors.confirmPassword
 								? 'border-red-500'
 								: 'border-white/10 hover:border-white/20'}"
 						/>
 					</div>
 					{#if validationErrors.confirmPassword}
-						<p class="mt-1.5 text-sm text-red-400">{validationErrors.confirmPassword}</p>
+						<p id="confirm-password-error" role="alert" class="mt-1.5 text-sm text-red-400">{validationErrors.confirmPassword}</p>
 					{/if}
 				</div>
 

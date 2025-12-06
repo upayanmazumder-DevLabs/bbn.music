@@ -179,7 +179,8 @@
 				bind:value={searchQuery}
 				onkeydown={handleKeydown}
 				placeholder="Search users, drops, songs, wallets..."
-				class="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-red-500"
+				aria-label="Search users, drops, songs, wallets"
+				class="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
 			/>
 		</div>
 		<button

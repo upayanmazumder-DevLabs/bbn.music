@@ -89,25 +89,25 @@
 <div class="relative" data-app-switcher>
 	<button
 		onclick={toggleMenu}
-		class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors"
+		class="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
 		aria-expanded={showMenu}
 		aria-haspopup="menu"
 		aria-label="App switcher"
 	>
-		<GridPlusOutline class="w-5 h-5 text-white/80" />
+		<GridPlusOutline class="w-5 h-5 text-gray-600 dark:text-white/80" />
 		<img
 			src={currentApp.logo}
 			alt={currentApp.label}
-			class="h-5 w-auto brightness-0 invert hidden sm:block"
+			class="h-5 w-auto hidden sm:block brightness-0 dark:brightness-100"
 		/>
 	</button>
 
 	{#if showMenu}
 		<div
-			class="absolute left-0 top-full mt-2 w-56 bg-gray-800 rounded-xl shadow-xl border border-gray-700 py-2 z-50"
+			class="absolute left-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50"
 			role="menu"
 		>
-			<div class="px-3 py-1.5 text-xs font-bold text-gray-400 uppercase tracking-wide">
+			<div class="px-3 py-1.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
 				Switch to
 			</div>
 
@@ -116,13 +116,13 @@
 					href={getAppRoute(app)}
 					onclick={closeMenu}
 					role="menuitem"
-					class="flex items-center justify-between px-3 py-2.5 hover:bg-white/10 transition-colors group"
+					class="flex items-center justify-between px-3 py-2.5 hover:bg-black/5 dark:hover:bg-white/10 transition-colors group"
 				>
 					<div class="flex items-center gap-3">
-						<img src={app.logo} alt={app.label} class="h-5 w-auto brightness-0 invert opacity-90" />
+						<img src={app.logo} alt={app.label} class="h-5 w-auto opacity-90 brightness-0 dark:brightness-100" />
 					</div>
 					<ChevronRightOutline
-						class="w-4 h-4 text-gray-500 group-hover:text-gray-300 transition-colors"
+						class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors"
 					/>
 				</a>
 			{/each}

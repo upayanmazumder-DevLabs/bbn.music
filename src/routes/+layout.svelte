@@ -254,7 +254,7 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="min-h-screen flex flex-col bg-gradient-to-br from-gray-900 via-black to-gray-900">
+<div class="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-900">
 	<!-- Skip link for keyboard navigation (BFSG/WCAG 2.1 AA compliance) -->
 	<a
 		href="#main-content"
@@ -265,7 +265,7 @@
 
 	<!-- Modern Navigation Bar (hidden on share pages) -->
 	{#if !isSharePage}
-		<nav class="glass sticky top-0 z-50 border-b border-white/10">
+		<nav class="glass sticky top-0 z-50 border-b border-black/10 dark:border-white/10">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div class="flex items-center justify-between h-16">
 					<!-- Logo / App Switcher -->
@@ -283,11 +283,11 @@
 										href={item.href}
 										class="px-4 py-2 rounded-lg transition-all duration-200 {active
 											? currentApp === 'admin'
-												? 'bg-red-500/20 text-red-400'
+												? 'bg-red-500/20 text-red-600 dark:text-red-400'
 												: currentApp === 'wallet'
-													? 'bg-green-500/20 text-green-400'
-													: 'bg-orange-500/20 text-orange-400'
-											: 'text-gray-300 hover:text-white hover:bg-white/10'}"
+													? 'bg-green-500/20 text-green-600 dark:text-green-400'
+													: 'bg-orange-500/20 text-orange-600 dark:text-orange-400'
+											: 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10'}"
 									>
 										{item.label}
 									</a>
@@ -340,7 +340,7 @@
 								<!-- User dropdown menu -->
 								{#if showUserMenu}
 									<div
-										class="absolute right-0 mt-2 w-48 bg-gray-800 rounded-lg shadow-xl border border-gray-700 py-1"
+										class="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 py-1"
 										onclick={(e: MouseEvent) => e.stopPropagation()}
 										onkeydown={(e: KeyboardEvent) => {
 											if (e.key === 'Escape') showUserMenu = false;
@@ -349,24 +349,24 @@
 										aria-label="User menu"
 										tabindex="-1"
 									>
-										<div class="px-4 py-2 border-b border-gray-700">
-											<p class="text-sm text-white font-semibold">
+										<div class="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
+											<p class="text-sm text-gray-900 dark:text-white font-semibold">
 												{$auth.user?.profile.username || 'User'}
 											</p>
-											<p class="text-xs text-gray-400">{$auth.user?.profile.email || ''}</p>
+											<p class="text-xs text-gray-500 dark:text-gray-400">{$auth.user?.profile.email || ''}</p>
 										</div>
 										<a
 											href="/settings"
 											role="menuitem"
-											class="block px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-white"
+											class="block px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
 										>
 											Settings
 										</a>
-										<hr class="my-1 border-gray-700" aria-hidden="true" />
+										<hr class="my-1 border-gray-200 dark:border-gray-700" aria-hidden="true" />
 										<button
 											onclick={handleLogout}
 											role="menuitem"
-											class="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-gray-700 hover:text-red-300"
+											class="block w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-red-700 dark:hover:text-red-300"
 										>
 											Logout
 										</button>
@@ -378,7 +378,7 @@
 							<div class="hidden md:flex items-center space-x-2">
 								<a
 									href="/signin"
-									class="text-gray-300 hover:text-white px-3 py-1.5 text-sm transition-colors"
+									class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white px-3 py-1.5 text-sm transition-colors"
 								>
 									Sign In
 								</a>
@@ -395,7 +395,7 @@
 						{#if !isPublicRoute && $auth.isAuthenticated}
 							<button
 								onclick={toggle}
-								class="md:hidden p-2 text-gray-400 hover:text-white transition-colors"
+								class="md:hidden p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
 								aria-label={hidden ? 'Open menu' : 'Close menu'}
 							>
 								<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -430,27 +430,27 @@
 									href={item.href}
 									class="px-4 py-2 rounded-lg transition-all duration-200 {active
 										? currentApp === 'admin'
-											? 'bg-red-500/20 text-red-400'
+											? 'bg-red-500/20 text-red-600 dark:text-red-400'
 											: currentApp === 'wallet'
-												? 'bg-green-500/20 text-green-400'
-												: 'bg-orange-500/20 text-orange-400'
-										: 'text-gray-300 hover:text-white hover:bg-white/10'}"
+												? 'bg-green-500/20 text-green-600 dark:text-green-400'
+												: 'bg-orange-500/20 text-orange-600 dark:text-orange-400'
+										: 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10'}"
 								>
 									{item.label}
 								</a>
 							{/each}
 
 							<!-- Auth section for mobile -->
-							<hr class="my-2 border-gray-700" />
+							<hr class="my-2 border-gray-200 dark:border-gray-700" />
 							<a
 								href="/settings"
-								class="text-gray-300 hover:text-white hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-200"
+								class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-200"
 							>
 								Settings
 							</a>
 							<button
 								onclick={handleLogout}
-								class="text-left text-red-400 hover:text-red-300 hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-200"
+								class="text-left text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-black/5 dark:hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-200"
 							>
 								Logout
 							</button>
@@ -463,16 +463,16 @@
 
 	<!-- Email Verification Banner -->
 	{#if showVerificationBanner}
-		<div class="border-b border-red-500/30 bg-gradient-to-r from-red-950/80 to-red-900/60">
+		<div class="border-b border-red-500/30 bg-gradient-to-r from-red-100 to-red-50 dark:from-red-950/80 dark:to-red-900/60">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 				<div class="flex items-center justify-between py-3 gap-4">
-					<p class="text-sm font-semibold text-red-300">
+					<p class="text-sm font-semibold text-red-700 dark:text-red-300">
 						Your Email is not verified. Please check your Inbox/Spam folder.
 					</p>
 					<button
 						onclick={resendVerificationEmail}
 						disabled={sendingVerification}
-						class="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-500/20 text-red-200 hover:bg-red-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+						class="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-500/20 text-red-700 dark:text-red-200 hover:bg-red-500/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
 					>
 						{sendingVerification ? 'Sending...' : 'Resend Verify Email'}
 					</button>
@@ -507,19 +507,19 @@
 
 	<!-- Modern Footer (hidden on share pages) -->
 	{#if !isSharePage}
-		<footer class="glass border-t border-white/10 mt-auto">
+		<footer class="glass border-t border-black/10 dark:border-white/10 mt-auto">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 				<div class="flex flex-col space-y-6">
 					<!-- Legal Links -->
 					<div class="flex flex-wrap justify-center gap-6 text-sm">
-						<a href="/privacy" class="text-gray-400 hover:text-white transition-colors"
+						<a href="/privacy" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
 							>Privacy Policy</a
 						>
-						<a href="/terms" class="text-gray-400 hover:text-white transition-colors"
+						<a href="/terms" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
 							>Terms & Conditions</a
 						>
-						<a href="/imprint" class="text-gray-400 hover:text-white transition-colors">Imprint</a>
-						<a href="/accessibility" class="text-gray-400 hover:text-white transition-colors"
+						<a href="/imprint" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">Imprint</a>
+						<a href="/accessibility" class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
 							>Accessibility</a
 						>
 					</div>
@@ -527,7 +527,7 @@
 					<div
 						class="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0"
 					>
-						<div class="text-gray-400 text-sm">
+						<div class="text-gray-500 dark:text-gray-400 text-sm">
 							© {new Date().getFullYear()} BBN Music GmbH. All rights reserved.
 						</div>
 						<div class="flex space-x-6">
@@ -535,7 +535,7 @@
 								href="https://facebook.com"
 								target="_blank"
 								rel="noopener noreferrer"
-								class="text-gray-400 hover:text-white transition-colors"
+								class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
 								aria-label="Facebook"
 							>
 								<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -548,7 +548,7 @@
 								href="https://twitter.com"
 								target="_blank"
 								rel="noopener noreferrer"
-								class="text-gray-400 hover:text-white transition-colors"
+								class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
 								aria-label="Twitter"
 							>
 								<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
@@ -561,7 +561,7 @@
 								href="https://instagram.com"
 								target="_blank"
 								rel="noopener noreferrer"
-								class="text-gray-400 hover:text-white transition-colors"
+								class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
 								aria-label="Instagram"
 							>
 								<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">

@@ -83,7 +83,7 @@
 		<div
 			class="relative w-full {sizeClasses[
 				size
-			]} max-h-[calc(100vh-2rem)] bg-gray-800 rounded-xl shadow-2xl border border-gray-700 flex flex-col {className}"
+			]} max-h-[calc(100vh-2rem)] bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col {className}"
 			transition:fly={{ y: 20, duration: 200 }}
 			role="dialog"
 			aria-modal="true"
@@ -91,16 +91,16 @@
 		>
 			{#if title || dismissible}
 				<!-- Header -->
-				<div class="flex items-center justify-between p-6 border-b border-gray-700 flex-shrink-0">
+				<div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
 					{#if title}
-						<h3 id="modal-title" class="text-xl font-semibold text-white">
+						<h3 id="modal-title" class="text-xl font-semibold text-gray-900 dark:text-white">
 							{title}
 						</h3>
 					{/if}
 					{#if dismissible}
 						<button
 							type="button"
-							class="ml-auto p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+							class="ml-auto p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
 							onclick={close}
 							aria-label="Close modal"
 						>
@@ -124,7 +124,7 @@
 
 			{#if footer}
 				<!-- Footer -->
-				<div class="flex items-center justify-end gap-3 p-6 border-t border-gray-700 flex-shrink-0">
+				<div class="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
 					{@render footer()}
 				</div>
 			{/if}

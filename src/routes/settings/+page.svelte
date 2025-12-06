@@ -318,7 +318,7 @@
 </svelte:head>
 
 <div class="max-w-2xl mx-auto space-y-8">
-	<h1 class="text-3xl font-bold text-white">Settings</h1>
+	<h1 class="text-3xl font-bold text-gray-900 dark:text-white">Settings</h1>
 
 	{#if saved}
 		<div
@@ -339,8 +339,8 @@
 	{/if}
 
 	<!-- Profile Section -->
-	<section class="rounded-2xl p-6 bg-white/5 border border-white/10">
-		<h2 class="text-xl font-semibold text-white mb-6">Profile</h2>
+	<section class="rounded-2xl p-6 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
+		<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Profile</h2>
 
 		{#if avatarError}
 			<div
@@ -411,13 +411,13 @@
 			</div>
 			<div class="flex-1">
 				<div>
-					<label for="name" class="block text-sm font-medium text-gray-300 mb-2">Display Name</label
+					<label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Display Name</label
 					>
 					<input
 						id="name"
 						type="text"
 						bind:value={name}
-						class="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-colors"
+						class="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-colors"
 						placeholder="Your name"
 					/>
 				</div>
@@ -427,7 +427,7 @@
 		<div class="space-y-4">
 			<div>
 				<div class="flex items-center gap-2 mb-2">
-					<label for="email" class="block text-sm font-medium text-gray-300">Email</label>
+					<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
 					{#if emailVerified}
 						<span
 							class="flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-green-500/20 text-green-400 rounded"
@@ -448,7 +448,7 @@
 					id="email"
 					type="email"
 					bind:value={email}
-					class="w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-colors"
+					class="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-colors"
 					placeholder="your.email@example.com"
 				/>
 
@@ -479,7 +479,7 @@
 
 			<div>
 				<div class="flex items-center gap-2 mb-2">
-					<label for="phone-input" class="block text-sm font-medium text-gray-300"
+					<label for="phone-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300"
 						>Phone Number</label
 					>
 					{#if phone && phoneVerified}
@@ -518,13 +518,13 @@
 	</section>
 
 	<!-- Notifications Section -->
-	<section class="rounded-2xl p-6 bg-white/5 border border-white/10">
-		<h2 class="text-xl font-semibold text-white mb-6">Notifications</h2>
+	<section class="rounded-2xl p-6 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
+		<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Notifications</h2>
 
 		<div class="space-y-4">
 			<label class="flex items-center justify-between cursor-pointer group">
 				<div>
-					<p class="text-white font-medium group-hover:text-orange-400 transition-colors">
+					<p class="text-gray-900 dark:text-white font-medium group-hover:text-orange-400 transition-colors">
 						Drop Updates
 					</p>
 					<p class="text-sm text-gray-400">Status changes for your drops</p>
@@ -544,7 +544,7 @@
 
 			<label class="flex items-center justify-between cursor-pointer group">
 				<div>
-					<p class="text-white font-medium group-hover:text-orange-400 transition-colors">
+					<p class="text-gray-900 dark:text-white font-medium group-hover:text-orange-400 transition-colors">
 						Payout Alerts
 					</p>
 					<p class="text-sm text-gray-400">Earnings and payout notifications</p>
@@ -564,7 +564,7 @@
 
 			<label class="flex items-center justify-between cursor-pointer group">
 				<div>
-					<p class="text-white font-medium group-hover:text-orange-400 transition-colors">
+					<p class="text-gray-900 dark:text-white font-medium group-hover:text-orange-400 transition-colors">
 						Marketing
 					</p>
 					<p class="text-sm text-gray-400">News and tips from bbn.music</p>
@@ -583,19 +583,19 @@
 	</section>
 
 	<!-- Security Section -->
-	<section class="rounded-2xl p-6 bg-white/5 border border-white/10">
-		<h2 class="text-xl font-semibold text-white mb-6">Security</h2>
+	<section class="rounded-2xl p-6 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
+		<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Security</h2>
 
 		<div class="space-y-4">
 			<div>
 				<div class="flex items-center justify-between mb-4">
 					<div>
-						<p class="text-white font-medium">Password</p>
-						<p class="text-sm text-gray-400">Last changed: Never</p>
+						<p class="text-gray-900 dark:text-white font-medium">Password</p>
+						<p class="text-sm text-gray-500 dark:text-gray-400">Last changed: Never</p>
 					</div>
 					<button
 						onclick={togglePasswordChange}
-						class="px-4 py-2 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-colors text-sm font-medium"
+						class="px-4 py-2 rounded-lg bg-gray-200 dark:bg-white/10 text-gray-900 dark:text-white hover:bg-gray-300 dark:hover:bg-white/20 transition-colors text-sm font-medium"
 					>
 						{showPasswordChange ? 'Cancel' : 'Change Password'}
 					</button>
@@ -604,7 +604,7 @@
 				{#if showPasswordChange}
 					<form
 						onsubmit={changePassword}
-						class="mt-4 space-y-4 p-4 bg-white/5 rounded-lg border border-white/10"
+						class="mt-4 space-y-4 p-4 bg-white dark:bg-white/5 rounded-lg border border-gray-200 dark:border-white/10"
 					>
 						<!-- Hidden email field for password managers and accessibility -->
 						<input
@@ -637,7 +637,7 @@
 						{/if}
 
 						<div>
-							<label for="newPassword" class="block text-sm font-medium text-gray-300 mb-2">
+							<label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 								New Password
 							</label>
 							<div class="relative">
@@ -652,13 +652,13 @@
 									required
 									minlength="8"
 									autocomplete="new-password"
-									class="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-colors"
+									class="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-colors"
 								/>
 							</div>
 						</div>
 
 						<div>
-							<label for="confirmPassword" class="block text-sm font-medium text-gray-300 mb-2">
+							<label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
 								Confirm New Password
 							</label>
 							<div class="relative">
@@ -673,7 +673,7 @@
 									required
 									minlength="8"
 									autocomplete="new-password"
-									class="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-colors"
+									class="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-colors"
 								/>
 							</div>
 						</div>

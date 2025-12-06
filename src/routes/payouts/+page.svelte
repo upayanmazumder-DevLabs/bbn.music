@@ -131,18 +131,18 @@
 	<!-- Header -->
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
-			<h1 class="text-3xl font-bold text-white">Earnings</h1>
-			<p class="text-gray-400 mt-1">Track your streaming revenue and performance</p>
+			<h1 class="text-3xl font-bold text-gray-900 dark:text-white">Earnings</h1>
+			<p class="text-gray-500 dark:text-gray-400 mt-1">Track your streaming revenue and performance</p>
 		</div>
 		{#if payouts.length > 0}
-			<div class="flex items-center gap-1 p-1 bg-gray-800 rounded-lg">
+			<div class="flex items-center gap-1 p-1 bg-gray-200 dark:bg-gray-800 rounded-lg">
 				{#each availableTimeFrames as tf}
 					<button
 						onclick={() => (selectedMonths = tf.months)}
 						class="px-3 py-1.5 text-sm font-medium rounded-md transition-all {selectedMonths ===
 						tf.months
 							? 'bg-orange-500 text-white'
-							: 'text-gray-400 hover:text-white hover:bg-gray-700'}"
+							: 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-700'}"
 					>
 						{tf.label}
 					</button>
@@ -172,8 +172,8 @@
 				>
 					<CashSolid class="w-10 h-10 text-orange-500" />
 				</div>
-				<h3 class="text-xl font-semibold text-white mb-2">No Earnings Yet</h3>
-				<p class="text-gray-400 max-w-sm mx-auto">
+				<h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">No Earnings Yet</h3>
+				<p class="text-gray-500 dark:text-gray-400 max-w-sm mx-auto">
 					Once your music starts generating streams, your earnings will appear here.
 				</p>
 			</div>
@@ -229,11 +229,11 @@
 		<!-- Charts -->
 		{#if chartData.length > 0}
 			<div>
-				<h2 class="text-xl font-semibold text-white mb-4">Performance</h2>
+				<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Performance</h2>
 				<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden">
 					<!-- Revenue Chart -->
 					<Card variant="default" padding="lg" class="overflow-hidden">
-						<h3 class="text-lg font-semibold text-white mb-6">Revenue Trend</h3>
+						<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Revenue Trend</h3>
 						<div
 							class="grid items-end gap-1"
 							style="height: 200px; grid-template-columns: repeat({chartData.length}, minmax(0, 1fr));"
@@ -260,7 +260,7 @@
 
 					<!-- Streams Chart -->
 					<Card variant="default" padding="lg" class="overflow-hidden">
-						<h3 class="text-lg font-semibold text-white mb-6">Streams Trend</h3>
+						<h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">Streams Trend</h3>
 						<div
 							class="grid items-end gap-1"
 							style="height: 200px; grid-template-columns: repeat({chartData.length}, minmax(0, 1fr));"
@@ -290,7 +290,7 @@
 
 		<!-- Earnings History -->
 		<div>
-			<h2 class="text-xl font-semibold text-white mb-4">Earnings History</h2>
+			<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">Earnings History</h2>
 			<div class="space-y-3">
 				{#each payouts as payout}
 					{@const periodMatch = payout.period.match(/(\d{4})-(\d{2})/)}
@@ -305,7 +305,7 @@
 									{periodMatch ? periodMatch[2] : '??'}
 								</div>
 								<div>
-									<h3 class="font-semibold text-white">{monthNames[monthIndex]} {year}</h3>
+									<h3 class="font-semibold text-gray-900 dark:text-white">{monthNames[monthIndex]} {year}</h3>
 								</div>
 							</div>
 							<div class="flex items-center gap-8">

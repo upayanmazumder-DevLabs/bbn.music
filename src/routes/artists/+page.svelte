@@ -103,8 +103,8 @@
 	<!-- Header -->
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
-			<h1 class="text-3xl font-bold text-white">Your Artists</h1>
-			<p class="text-gray-400 mt-1">Manage your artist profiles</p>
+			<h1 class="text-3xl font-bold text-gray-900 dark:text-white">Your Artists</h1>
+			<p class="text-gray-500 dark:text-gray-400 mt-1">Manage your artist profiles</p>
 		</div>
 		<Button onclick={openAddModal}>
 			<PlusOutline class="w-4 h-4" /> Add Artist
@@ -119,7 +119,7 @@
 			placeholder="Search artists..."
 			aria-label="Search artists"
 			bind:value={searchTerm}
-			class="w-full pl-10 pr-4 py-3 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+			class="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
 		/>
 	</div>
 
@@ -143,7 +143,7 @@
 		<Card variant="default" padding="lg">
 			<div class="text-center py-12">
 				<div
-					class="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4"
+					class="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4"
 				>
 					<svg
 						class="w-10 h-10 text-gray-500"
@@ -159,10 +159,10 @@
 						/>
 					</svg>
 				</div>
-				<h3 class="text-xl font-semibold text-white mb-2">
+				<h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
 					{searchTerm ? 'No artists found' : 'No artists yet'}
 				</h3>
-				<p class="text-gray-400 mb-6">
+				<p class="text-gray-500 dark:text-gray-400 mb-6">
 					{searchTerm
 						? 'Try adjusting your search'
 						: 'Add your first artist to get started with distributing music.'}
@@ -203,7 +203,7 @@
 
 						<!-- Artist Info -->
 						<div class="text-center">
-							<h3 class="font-semibold text-white truncate">
+							<h3 class="font-semibold text-gray-900 dark:text-white truncate">
 								{artist.name || 'Unnamed Artist'}
 							</h3>
 							<div class="flex items-center justify-center gap-2 mt-1 text-xs text-gray-400">

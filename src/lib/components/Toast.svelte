@@ -13,28 +13,28 @@
 			icon: CheckCircleSolid,
 			bgColor: 'bg-green-500/10',
 			borderColor: 'border-green-500',
-			textColor: 'text-green-400',
+			textColor: 'text-green-600 dark:text-green-400',
 			iconBg: 'bg-green-500/20',
 		},
 		error: {
 			icon: ExclamationCircleOutline,
 			bgColor: 'bg-red-500/10',
 			borderColor: 'border-red-500',
-			textColor: 'text-red-400',
+			textColor: 'text-red-600 dark:text-red-400',
 			iconBg: 'bg-red-500/20',
 		},
 		warning: {
 			icon: ExclamationCircleOutline,
 			bgColor: 'bg-yellow-500/10',
 			borderColor: 'border-yellow-500',
-			textColor: 'text-yellow-400',
+			textColor: 'text-yellow-600 dark:text-yellow-400',
 			iconBg: 'bg-yellow-500/20',
 		},
 		info: {
 			icon: InfoCircleSolid,
 			bgColor: 'bg-blue-500/10',
 			borderColor: 'border-blue-500',
-			textColor: 'text-blue-400',
+			textColor: 'text-blue-600 dark:text-blue-400',
 			iconBg: 'bg-blue-500/20',
 		},
 	};
@@ -46,15 +46,15 @@
 		{@const Icon = config.icon}
 		<div
 			transition:fly={{ x: 300, duration: 300 }}
-			class="flex items-start gap-3 p-4 rounded-lg border {config.bgColor} {config.borderColor} backdrop-blur-sm shadow-xl"
+			class="flex items-start gap-3 p-4 rounded-lg border {config.bgColor} {config.borderColor} backdrop-blur-sm shadow-xl bg-white/80 dark:bg-gray-900/80"
 		>
 			<div class="flex-shrink-0 {config.iconBg} rounded-lg p-2">
 				<Icon class="w-5 h-5 {config.textColor}" />
 			</div>
-			<p class="flex-1 text-white text-sm leading-relaxed">{item.message}</p>
+			<p class="flex-1 text-gray-900 dark:text-white text-sm leading-relaxed">{item.message}</p>
 			<button
 				onclick={() => toast.dismiss(item.id)}
-				class="flex-shrink-0 p-1 text-gray-400 hover:text-white transition-colors rounded"
+				class="flex-shrink-0 p-1 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors rounded"
 				aria-label="Dismiss"
 			>
 				<CloseOutline class="w-4 h-4" />

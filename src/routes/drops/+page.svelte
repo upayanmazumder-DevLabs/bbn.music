@@ -199,7 +199,7 @@
 	<!-- Header -->
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
-			<h1 class="text-3xl md:text-4xl font-bold text-white">
+			<h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white">
 				Hi {$auth.user?.profile.username || 'there'} 👋
 			</h1>
 		</div>
@@ -218,12 +218,12 @@
 				onclick={() => setTab(tab.id)}
 				class="px-4 py-2 rounded-lg font-medium transition-all whitespace-nowrap {isActive
 					? 'bg-gradient-to-r from-orange-500 to-orange-400 text-white shadow-lg shadow-orange-500/25'
-					: 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'}"
+					: 'bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white'}"
 			>
 				{tab.label}
 				{#if count > 0}
 					<span
-						class="ml-2 px-2 py-0.5 rounded-full text-xs {isActive ? 'bg-white/20' : 'bg-gray-700'}"
+						class="ml-2 px-2 py-0.5 rounded-full text-xs {isActive ? 'bg-white/20' : 'bg-gray-300 dark:bg-gray-700'}"
 					>
 						{count}
 					</span>
@@ -250,7 +250,7 @@
 		<Card variant="default" padding="lg">
 			<div class="text-center py-12">
 				<div
-					class="w-20 h-20 rounded-full bg-gray-800 flex items-center justify-center mx-auto mb-4"
+					class="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-800 flex items-center justify-center mx-auto mb-4"
 				>
 					<svg
 						class="w-10 h-10 text-gray-500"
@@ -266,10 +266,10 @@
 						/>
 					</svg>
 				</div>
-				<h3 class="text-xl font-semibold text-white mb-2">
+				<h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">
 					No {tabs.find((t) => t.id === activeTab)?.label.toLowerCase()} drops
 				</h3>
-				<p class="text-gray-400 mb-6">
+				<p class="text-gray-500 dark:text-gray-400 mb-6">
 					{#if activeTab === 'drafts'}
 						Start creating your first drop to get started.
 					{:else if activeTab === 'unpublished'}
@@ -297,11 +297,11 @@
 					<Card
 						variant="default"
 						padding="none"
-						class="hover:bg-gray-800/80 transition-colors cursor-pointer"
+						class="hover:bg-gray-100 dark:hover:bg-gray-800/80 transition-colors cursor-pointer"
 					>
 						<div class="flex items-center gap-4 p-4">
 							<!-- Artwork -->
-							<div class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-800">
+							<div class="w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-800">
 								{#if drop.artwork && drop._id && artworkUrls[drop._id]}
 									<img
 										src={artworkUrls[drop._id]}
@@ -322,10 +322,10 @@
 							<!-- Info -->
 							<div class="flex-1 min-w-0">
 								<div class="flex items-center gap-2 mb-1">
-									<h3 class="font-semibold text-white truncate">{drop.title}</h3>
+									<h3 class="font-semibold text-gray-900 dark:text-white truncate">{drop.title}</h3>
 									<Badge color={status.color} size="sm">{status.label}</Badge>
 								</div>
-								<p class="text-gray-400 text-sm truncate">{getArtistNames(drop.artists)}</p>
+								<p class="text-gray-500 dark:text-gray-400 text-sm truncate">{getArtistNames(drop.artists)}</p>
 								<div class="flex items-center gap-4 mt-1 text-xs text-gray-500">
 									<span>{formatDate(drop.release)}</span>
 									<span>{drop.primaryGenre}</span>

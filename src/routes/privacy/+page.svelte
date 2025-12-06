@@ -7,11 +7,11 @@
 </svelte:head>
 
 <div class="max-w-4xl mx-auto space-y-6">
-	<Heading tag="h1" class="text-white">Privacy Policy</Heading>
+	<Heading tag="h1" class="text-gray-900 dark:text-white">Privacy Policy</Heading>
 
-	<div class="prose prose-invert max-w-none space-y-6 text-gray-300">
+	<div class="prose dark:prose-invert max-w-none space-y-6 text-gray-600 dark:text-gray-300">
 		<section>
-			<Heading tag="h2" class="text-white text-xl font-bold">Privacy Policy</Heading>
+			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Privacy Policy</Heading>
 			<p>
 				BBN Music GmbH ("BBN") responsible for this website, including its mobile versions, and we
 				are committed to respecting the privacy of visitors to both. BBN has implemented technical,
@@ -315,7 +315,7 @@
 		</section>
 
 		<section>
-			<Heading tag="h2" class="text-white text-xl font-bold">How can you contact BBN?</Heading>
+			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">How can you contact BBN?</Heading>
 			<p>
 				If you have any comments or questions, or if there are other things we can do to maximize
 				the value of this website to you, please email support@bbn.music. If you wish to access,

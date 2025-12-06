@@ -24,10 +24,10 @@
 	let visible = $state(true);
 
 	const variantClasses: Record<Variant, string> = {
-		info: 'bg-blue-500/10 border-blue-500/50 text-blue-400',
-		success: 'bg-green-500/10 border-green-500/50 text-green-400',
-		warning: 'bg-yellow-500/10 border-yellow-500/50 text-yellow-400',
-		error: 'bg-red-500/10 border-red-500/50 text-red-400',
+		info: 'bg-blue-500/10 border-blue-500/50 text-blue-600 dark:text-blue-400',
+		success: 'bg-green-500/10 border-green-500/50 text-green-600 dark:text-green-400',
+		warning: 'bg-yellow-500/10 border-yellow-500/50 text-yellow-600 dark:text-yellow-400',
+		error: 'bg-red-500/10 border-red-500/50 text-red-600 dark:text-red-400',
 	};
 
 	const iconPaths: Record<Variant, string> = {

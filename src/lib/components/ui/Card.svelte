@@ -11,9 +11,9 @@
 	const { variant = 'default', padding = 'md', class: className = '', children }: Props = $props();
 
 	const variantClasses = {
-		default: 'bg-gray-800 border-gray-700',
-		glass: 'bg-gradient-to-br from-gray-800/80 to-gray-900/80 backdrop-blur border-gray-700/50',
-		outline: 'bg-transparent border-gray-700 hover:border-gray-600',
+		default: 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700',
+		glass: 'bg-gradient-to-br from-white/80 to-gray-100/80 dark:from-gray-800/80 dark:to-gray-900/80 backdrop-blur border-gray-200/50 dark:border-gray-700/50',
+		outline: 'bg-transparent border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600',
 	};
 
 	const paddingClasses = {

@@ -52,8 +52,8 @@
 				>
 					<span class="text-white font-bold text-3xl">B</span>
 				</div>
-				<h1 class="text-3xl font-bold text-white">Reset Password</h1>
-				<p class="mt-2 text-gray-400">
+				<h1 class="text-3xl font-bold text-gray-900 dark:text-white">Reset Password</h1>
+				<p class="mt-2 text-gray-500 dark:text-gray-400">
 					{#if success}
 						Check your email for reset instructions
 					{:else}
@@ -69,8 +69,8 @@
 						<CheckCircleSolid class="w-8 h-8 text-green-400" />
 					</div>
 					<div class="text-center space-y-2">
-						<p class="text-white font-medium">Email sent successfully!</p>
-						<p class="text-gray-400 text-sm">
+						<p class="text-gray-900 dark:text-white font-medium">Email sent successfully!</p>
+						<p class="text-gray-500 dark:text-gray-400 text-sm">
 							We've sent a password reset link to <span class="text-orange-400">{email}</span>.
 							Please check your inbox and spam folder.
 						</p>
@@ -109,7 +109,7 @@
 				<!-- Reset Form -->
 				<form onsubmit={handleSubmit} class="space-y-5">
 					<div>
-						<label for="email" class="block text-sm font-medium text-gray-300 mb-2">Email</label>
+						<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
 						<div class="relative">
 							<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
 								<EnvelopeSolid class="w-5 h-5 text-gray-500" />
@@ -122,7 +122,7 @@
 								placeholder="you@example.com"
 								required
 								autocomplete="email"
-								class="w-full pl-10 pr-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 hover:border-white/20 transition-all"
+								class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 hover:border-gray-400 dark:hover:border-white/20 transition-all"
 							/>
 						</div>
 					</div>
@@ -143,9 +143,9 @@
 				</form>
 
 				<!-- Back to Sign In Link -->
-				<p class="text-center text-sm text-gray-400">
+				<p class="text-center text-sm text-gray-500 dark:text-gray-400">
 					Remember your password?
-					<a href="/signin" class="font-medium text-orange-400 hover:text-orange-300">Sign in</a>
+					<a href="/signin" class="font-medium text-orange-500 dark:text-orange-400 hover:text-orange-600 dark:hover:text-orange-300">Sign in</a>
 				</p>
 			{/if}
 		</div>

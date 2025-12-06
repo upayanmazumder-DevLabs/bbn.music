@@ -7,11 +7,11 @@
 </svelte:head>
 
 <div class="max-w-4xl mx-auto space-y-6">
-	<Heading tag="h1" class="text-white">Terms and Conditions</Heading>
+	<Heading tag="h1" class="text-gray-900 dark:text-white">Terms and Conditions</Heading>
 
-	<div class="prose prose-invert max-w-none space-y-6 text-gray-300">
+	<div class="prose dark:prose-invert max-w-none space-y-6 text-gray-600 dark:text-gray-300">
 		<section>
-			<Heading tag="h2" class="text-white text-xl font-bold">Definitions</Heading>
+			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Definitions</Heading>
 			<p>
 				To facilitate the understanding of these Terms of Use, the following principal expressions
 				will have these meanings:
@@ -204,7 +204,7 @@
 		</section>
 
 		<section>
-			<Heading tag="h2" class="text-white text-xl font-bold">Fees</Heading>
+			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Fees</Heading>
 			<p>
 				<strong>4.1</strong> By using the Service, You shall pay to Us the fees corresponding to the Services
 				contracted, which can be found at any time in the "My Account > Pricing" section of your Account.
@@ -268,7 +268,7 @@
 		</section>
 
 		<section>
-			<Heading tag="h2" class="text-white text-xl font-bold">Duration and Termination</Heading>
+			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Duration and Termination</Heading>
 			<p>
 				<strong>5.1</strong> The duration of our contractual relationship is initially undetermined. It
 				shall begin when registering at the Platform and upon the explicit acceptance of these Terms of
@@ -305,7 +305,7 @@
 		</section>
 
 		<section>
-			<Heading tag="h2" class="text-white text-xl font-bold">Intellectual Property Rights</Heading>
+			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Intellectual Property Rights</Heading>
 			<p>
 				<strong>6.1</strong> Nothing contained herein shall be construed as granting or conferring any
 				property rights in the Platform or any part thereof to You; therefore, We are not granting to
@@ -337,7 +337,7 @@
 		</section>
 
 		<section>
-			<Heading tag="h2" class="text-white text-xl font-bold">Fraud</Heading>
+			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Fraud</Heading>
 			<p>
 				<strong>7.1</strong> We work very hard and invest extensive resources to avoid automated and fraudulent
 				behaviors. For this reason, we have created a specific Anti-Fraud Policy. When you accept these
@@ -353,7 +353,7 @@
 		</section>
 
 		<section>
-			<Heading tag="h2" class="text-white text-xl font-bold">Privacy</Heading>
+			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Privacy</Heading>
 			<p>
 				<strong>8.1</strong> Our data protection policy is described in the Privacy Policy. The Privacy
 				Policy is part of our relationship and, therefore, when you accept these Terms of Use, you are
@@ -390,7 +390,7 @@
 		</section>
 
 		<section>
-			<Heading tag="h2" class="text-white text-xl font-bold">Miscellaneous</Heading>
+			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Miscellaneous</Heading>
 			<p>
 				<strong>10.1</strong> Non-assignment: You may not assign your account or any interest therein
 				to any third party, without our express prior written consent.
@@ -444,7 +444,7 @@
 		</section>
 
 		<section>
-			<Heading tag="h2" class="text-white text-xl font-bold">Dispute Resolution</Heading>
+			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Dispute Resolution</Heading>
 			<p>
 				<strong>12.1</strong> Any dispute arising out of or relating to these Terms of Use shall first
 				be submitted to Our internal resolution process described in Section 11.3. You agree to cooperate

@@ -64,7 +64,7 @@
 <div class="space-y-6">
 	<!-- Header -->
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-		<h1 class="text-3xl font-bold text-white">Your Wallet</h1>
+		<h1 class="text-3xl font-bold text-gray-900 dark:text-white">Your Wallet</h1>
 		<Button onclick={requestPayout}>Request Payout</Button>
 	</div>
 
@@ -87,12 +87,12 @@
 			<!-- Balance -->
 			<Card variant="default" padding="lg">
 				<div class="space-y-1">
-					<p class="text-4xl font-bold text-white">
+					<p class="text-4xl font-bold text-gray-900 dark:text-white">
 						{formatCurrency(
 							(wallet.balance?.unrestrained ?? 0) + (wallet.balance?.restrained ?? 0),
 						)}
 					</p>
-					<p class="text-gray-400 font-medium">Balance</p>
+					<p class="text-gray-500 dark:text-gray-400 font-medium">Balance</p>
 					{#if wallet.balance?.restrained && wallet.balance.restrained > 0}
 						<p class="text-sm text-gray-500">
 							({formatCurrency(wallet.balance.restrained)} pending)
@@ -104,52 +104,52 @@
 			<!-- Subscription -->
 			<Card variant="default" padding="lg">
 				<div class="space-y-1">
-					<p class="text-4xl font-bold text-white">
+					<p class="text-4xl font-bold text-gray-900 dark:text-white">
 						{getAccountTypeLabel(wallet.accountType)}
 					</p>
-					<p class="text-gray-400 font-medium">Your Subscription</p>
+					<p class="text-gray-500 dark:text-gray-400 font-medium">Your Subscription</p>
 				</div>
 			</Card>
 
 			<!-- Cut -->
 			<Card variant="default" padding="lg">
 				<div class="space-y-1">
-					<p class="text-4xl font-bold text-white">{wallet.cut}%</p>
-					<p class="text-gray-400 font-medium">Your Cut</p>
+					<p class="text-4xl font-bold text-gray-900 dark:text-white">{wallet.cut}%</p>
+					<p class="text-gray-500 dark:text-gray-400 font-medium">Your Cut</p>
 				</div>
 			</Card>
 		</div>
 
 		<!-- Transactions -->
 		<Card variant="default" padding="none">
-			<div class="p-4 border-b border-gray-700">
-				<h2 class="text-lg font-semibold text-white">Transaction History</h2>
+			<div class="p-4 border-b border-gray-200 dark:border-gray-700">
+				<h2 class="text-lg font-semibold text-gray-900 dark:text-white">Transaction History</h2>
 			</div>
 
 			{#if wallet.transactions.length === 0}
-				<div class="p-8 text-center text-gray-400">No transactions yet</div>
+				<div class="p-8 text-center text-gray-500 dark:text-gray-400">No transactions yet</div>
 			{:else}
 				<div class="overflow-x-auto">
 					<table class="w-full">
 						<thead>
-							<tr class="border-b border-gray-700">
-								<th class="text-left p-4 text-gray-400 font-medium">Amount</th>
-								<th class="text-left p-4 text-gray-400 font-medium">Description</th>
-								<th class="text-left p-4 text-gray-400 font-medium">Date</th>
-								<th class="text-left p-4 text-gray-400 font-medium">Counterparty</th>
+							<tr class="border-b border-gray-200 dark:border-gray-700">
+								<th class="text-left p-4 text-gray-500 dark:text-gray-400 font-medium">Amount</th>
+								<th class="text-left p-4 text-gray-500 dark:text-gray-400 font-medium">Description</th>
+								<th class="text-left p-4 text-gray-500 dark:text-gray-400 font-medium">Date</th>
+								<th class="text-left p-4 text-gray-500 dark:text-gray-400 font-medium">Counterparty</th>
 							</tr>
 						</thead>
 						<tbody>
 							{#each wallet.transactions as tx}
-								<tr class="border-b border-gray-800 hover:bg-gray-800/50 transition-colors">
+								<tr class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
 									<td class="p-4">
-										<span class="{tx.amount >= 0 ? 'text-green-400' : 'text-red-400'} font-medium">
+										<span class="{tx.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'} font-medium">
 											{tx.amount >= 0 ? '+' : ''}{formatCurrency(tx.amount)}
 										</span>
 									</td>
-									<td class="p-4 text-white">{tx.description}</td>
-									<td class="p-4 text-gray-400">{formatDate(tx.timestamp)}</td>
-									<td class="p-4 text-gray-400">{tx.counterParty}</td>
+									<td class="p-4 text-gray-900 dark:text-white">{tx.description}</td>
+									<td class="p-4 text-gray-500 dark:text-gray-400">{formatDate(tx.timestamp)}</td>
+									<td class="p-4 text-gray-500 dark:text-gray-400">{tx.counterParty}</td>
 								</tr>
 							{/each}
 						</tbody>

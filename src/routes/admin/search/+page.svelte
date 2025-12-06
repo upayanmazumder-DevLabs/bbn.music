@@ -168,7 +168,7 @@
 </script>
 
 <div>
-	<h1 class="text-2xl font-bold text-white mb-6">Search</h1>
+	<h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Search</h1>
 
 	<!-- Search Input -->
 	<div class="flex gap-4 mb-6">
@@ -180,7 +180,7 @@
 				onkeydown={handleKeydown}
 				placeholder="Search users, drops, songs, wallets..."
 				aria-label="Search users, drops, songs, wallets"
-				class="w-full pl-10 pr-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
+				class="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
 			/>
 		</div>
 		<button
@@ -194,8 +194,8 @@
 
 	<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 		<!-- Search Results -->
-		<div class="bg-gray-800/50 border border-gray-700 rounded-xl p-4">
-			<h2 class="text-lg font-semibold text-white mb-4">Results ({results.length})</h2>
+		<div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+			<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Results ({results.length})</h2>
 
 			{#if results.length === 0}
 				<p class="text-gray-500 text-center py-8">
@@ -209,36 +209,36 @@
 							selectedItem?._source._id === result._source._id && selectedType === result._index}
 						<button
 							onclick={() => selectItem(result)}
-							class="w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left cursor-pointer hover:bg-gray-700 {isSelected
-								? 'bg-gray-700 ring-1 ring-red-500'
-								: 'bg-gray-700/50'}"
+							class="w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 {isSelected
+								? 'bg-gray-100 dark:bg-gray-700 ring-1 ring-red-500'
+								: 'bg-gray-50 dark:bg-gray-700/50'}"
 						>
 							<div class="p-2 rounded-lg {getIndexBgColor(result._index)}">
 								<Icon class="w-5 h-5 {getIndexColor(result._index)}" />
 							</div>
 							<div class="flex-1 min-w-0">
 								{#if result._index === 'users'}
-									<p class="text-white font-medium truncate">{result._source.profile?.username}</p>
-									<p class="text-gray-400 text-sm truncate">{result._source.profile?.email}</p>
+									<p class="text-gray-900 dark:text-white font-medium truncate">{result._source.profile?.username}</p>
+									<p class="text-gray-500 dark:text-gray-400 text-sm truncate">{result._source.profile?.email}</p>
 								{:else if result._index === 'drops'}
-									<p class="text-white font-medium truncate">{result._source.title}</p>
-									<p class="text-gray-400 text-sm truncate">
+									<p class="text-gray-900 dark:text-white font-medium truncate">{result._source.title}</p>
+									<p class="text-gray-500 dark:text-gray-400 text-sm truncate">
 										{result._source.type} • {result._source.artists
 											?.map((a: any) => a.name)
 											.join(', ') || 'Unknown Artist'}
 									</p>
 								{:else if result._index === 'songs'}
-									<p class="text-white font-medium truncate">{result._source.title}</p>
-									<p class="text-gray-400 text-sm truncate">
+									<p class="text-gray-900 dark:text-white font-medium truncate">{result._source.title}</p>
+									<p class="text-gray-500 dark:text-gray-400 text-sm truncate">
 										ISRC: {result._source.isrc || 'None'} • {result._source.artists
 											?.map((a: any) => a.name)
 											.join(', ') || 'Unknown Artist'}
 									</p>
 								{:else if result._index === 'wallets'}
-									<p class="text-white font-medium truncate">
+									<p class="text-gray-900 dark:text-white font-medium truncate">
 										{result._source.userName || result._source.email || 'Unknown'}
 									</p>
-									<p class="text-gray-400 text-sm truncate">
+									<p class="text-gray-500 dark:text-gray-400 text-sm truncate">
 										Balance: {formatCurrency(
 											(result._source.balance?.unrestrained || 0) +
 												(result._source.balance?.restrained || 0),
@@ -260,8 +260,8 @@
 		</div>
 
 		<!-- Details Panel -->
-		<div class="bg-gray-800/50 border border-gray-700 rounded-xl p-4">
-			<h2 class="text-lg font-semibold text-white mb-4">
+		<div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+			<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
 				{#if selectedType === 'users'}User Details
 				{:else if selectedType === 'songs'}Song Details
 				{:else if selectedType === 'wallets'}Wallet Details
@@ -279,16 +279,16 @@
 			{:else if selectedType === 'users'}
 				<!-- User Details -->
 				<div class="space-y-4">
-					<div class="p-4 bg-gray-700/50 rounded-lg">
-						<h3 class="text-sm font-medium text-gray-400 mb-2">Profile</h3>
-						<p class="text-white font-medium">{selectedItem._source.profile?.username}</p>
-						<p class="text-gray-400 text-sm">{selectedItem._source.profile?.email}</p>
+					<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
+						<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Profile</h3>
+						<p class="text-gray-900 dark:text-white font-medium">{selectedItem._source.profile?.username}</p>
+						<p class="text-gray-500 dark:text-gray-400 text-sm">{selectedItem._source.profile?.email}</p>
 						<p class="text-gray-500 text-xs mt-1">ID: {selectedItem._source._id}</p>
 					</div>
 
 					{#if selectedItem._source.groups?.length > 0}
-						<div class="p-4 bg-gray-700/50 rounded-lg">
-							<h3 class="text-sm font-medium text-gray-400 mb-2">Groups</h3>
+						<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
+							<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Groups</h3>
 							<div class="flex flex-wrap gap-2">
 								{#each selectedItem._source.groups as group}
 									<span class="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded"
@@ -301,18 +301,18 @@
 
 					{#if wallet}
 						<div class="p-4 bg-gray-700/50 rounded-lg space-y-3">
-							<h3 class="text-sm font-medium text-gray-400 mb-2">Wallet</h3>
+							<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Wallet</h3>
 
 							<div class="grid grid-cols-2 gap-4">
 								<div>
 									<p class="text-xs text-gray-500">Unrestrained</p>
-									<p class="text-white font-medium">
+									<p class="text-gray-900 dark:text-white font-medium">
 										{formatCurrency(wallet.balance?.unrestrained || 0)}
 									</p>
 								</div>
 								<div>
 									<p class="text-xs text-gray-500">Restrained</p>
-									<p class="text-white font-medium">
+									<p class="text-gray-900 dark:text-white font-medium">
 										{formatCurrency(wallet.balance?.restrained || 0)}
 									</p>
 								</div>
@@ -326,7 +326,7 @@
 									id="user-account-type"
 									value={wallet.accountType}
 									onchange={(e) => updateWallet('accountType', e.currentTarget.value)}
-									class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white text-sm"
+									class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
 								>
 									<option value="DEFAULT">Default</option>
 									<option value="SUBSCRIBED">Subscribed</option>
@@ -341,7 +341,7 @@
 									type="number"
 									value={wallet.cut}
 									onchange={(e) => updateWallet('cut', e.currentTarget.value)}
-									class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white text-sm"
+									class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
 								/>
 							</div>
 
@@ -364,17 +364,17 @@
 						</div>
 
 						{#if wallet.transactions && wallet.transactions.length > 0}
-							<div class="p-4 bg-gray-700/50 rounded-lg">
+							<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
 								<h3 class="text-sm font-medium text-gray-400 mb-3">
 									Transactions ({wallet.transactions.length})
 								</h3>
 								<div class="space-y-2 max-h-64 overflow-y-auto">
 									{#each wallet.transactions as tx}
 										<div
-											class="flex items-center justify-between p-2 bg-gray-800/50 rounded text-sm"
+											class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded text-sm"
 										>
 											<div class="flex-1 min-w-0">
-												<p class="text-white truncate">{tx.description || tx.type}</p>
+												<p class="text-gray-900 dark:text-white truncate">{tx.description || tx.type}</p>
 												<p class="text-gray-500 text-xs">
 													{new Date(Number(tx.timestamp)).toLocaleDateString('de-DE')}
 													{#if tx.counterParty}
@@ -401,26 +401,26 @@
 			{:else if selectedType === 'songs'}
 				<!-- Song Details -->
 				<div class="space-y-4">
-					<div class="p-4 bg-gray-700/50 rounded-lg">
-						<h3 class="text-sm font-medium text-gray-400 mb-2">Song Info</h3>
-						<p class="text-white font-medium text-lg">{selectedItem._source.title}</p>
-						<p class="text-gray-400 text-sm mt-1">
+					<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
+						<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Song Info</h3>
+						<p class="text-gray-900 dark:text-white font-medium text-lg">{selectedItem._source.title}</p>
+						<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
 							{selectedItem._source.artists?.map((a: any) => a.name).join(', ') || 'Unknown Artist'}
 						</p>
 						<p class="text-gray-500 text-xs mt-2">ID: {selectedItem._source._id}</p>
 					</div>
 
 					{#if selectedItem._source.isrc}
-						<div class="p-4 bg-gray-700/50 rounded-lg">
-							<h3 class="text-sm font-medium text-gray-400 mb-2">ISRC</h3>
-							<p class="text-white font-mono">{selectedItem._source.isrc}</p>
+						<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
+							<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">ISRC</h3>
+							<p class="text-gray-900 dark:text-white font-mono">{selectedItem._source.isrc}</p>
 						</div>
 					{/if}
 
 					{#if selectedItem._source.duration}
-						<div class="p-4 bg-gray-700/50 rounded-lg">
-							<h3 class="text-sm font-medium text-gray-400 mb-2">Duration</h3>
-							<p class="text-white">
+						<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
+							<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Duration</h3>
+							<p class="text-gray-900 dark:text-white">
 								{Math.floor(selectedItem._source.duration / 60)}:{String(
 									selectedItem._source.duration % 60,
 								).padStart(2, '0')}
@@ -441,35 +441,35 @@
 			{:else if selectedType === 'wallets'}
 				<!-- Wallet Details -->
 				<div class="space-y-4">
-					<div class="p-4 bg-gray-700/50 rounded-lg">
-						<h3 class="text-sm font-medium text-gray-400 mb-2">Owner</h3>
-						<p class="text-white font-medium">{selectedItem._source.userName || 'Unknown'}</p>
-						<p class="text-gray-400 text-sm">{selectedItem._source.email || 'No email'}</p>
+					<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
+						<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Owner</h3>
+						<p class="text-gray-900 dark:text-white font-medium">{selectedItem._source.userName || 'Unknown'}</p>
+						<p class="text-gray-500 dark:text-gray-400 text-sm">{selectedItem._source.email || 'No email'}</p>
 						<p class="text-gray-500 text-xs mt-1">Wallet ID: {selectedItem._source._id}</p>
 						{#if selectedItem._source.user}
 							<p class="text-gray-500 text-xs">User ID: {selectedItem._source.user}</p>
 						{/if}
 					</div>
 
-					<div class="p-4 bg-gray-700/50 rounded-lg">
-						<h3 class="text-sm font-medium text-gray-400 mb-2">Balance</h3>
+					<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
+						<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Balance</h3>
 						<div class="grid grid-cols-2 gap-4">
 							<div>
 								<p class="text-xs text-gray-500">Unrestrained</p>
-								<p class="text-white font-medium text-lg">
+								<p class="text-gray-900 dark:text-white font-medium text-lg">
 									{formatCurrency(selectedItem._source.balance?.unrestrained || 0)}
 								</p>
 							</div>
 							<div>
 								<p class="text-xs text-gray-500">Restrained</p>
-								<p class="text-white font-medium text-lg">
+								<p class="text-gray-900 dark:text-white font-medium text-lg">
 									{formatCurrency(selectedItem._source.balance?.restrained || 0)}
 								</p>
 							</div>
 						</div>
-						<div class="mt-3 pt-3 border-t border-gray-600">
+						<div class="mt-3 pt-3 border-t border-gray-300 dark:border-gray-600">
 							<p class="text-xs text-gray-500">Total</p>
-							<p class="text-green-400 font-bold text-xl">
+							<p class="text-green-600 dark:text-green-400 font-bold text-xl">
 								{formatCurrency(
 									(selectedItem._source.balance?.unrestrained || 0) +
 										(selectedItem._source.balance?.restrained || 0),
@@ -490,7 +490,7 @@
 									id="wallet-account-type"
 									value={wallet.accountType}
 									onchange={(e) => updateWallet('accountType', e.currentTarget.value)}
-									class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white text-sm"
+									class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
 								>
 									<option value="DEFAULT">Default</option>
 									<option value="SUBSCRIBED">Subscribed</option>
@@ -505,7 +505,7 @@
 									type="number"
 									value={wallet.cut}
 									onchange={(e) => updateWallet('cut', e.currentTarget.value)}
-									class="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded text-white text-sm"
+									class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
 								/>
 							</div>
 
@@ -529,17 +529,17 @@
 					{/if}
 
 					{#if selectedItem._source.transactions && selectedItem._source.transactions.length > 0}
-						<div class="p-4 bg-gray-700/50 rounded-lg">
+						<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
 							<h3 class="text-sm font-medium text-gray-400 mb-3">
 								Transactions ({selectedItem._source.transactions.length})
 							</h3>
 							<div class="space-y-2 max-h-64 overflow-y-auto">
 								{#each selectedItem._source.transactions as tx}
 									<div
-										class="flex items-center justify-between p-2 bg-gray-800/50 rounded text-sm"
+										class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded text-sm"
 									>
 										<div class="flex-1 min-w-0">
-											<p class="text-white truncate">{tx.description || tx.type}</p>
+											<p class="text-gray-900 dark:text-white truncate">{tx.description || tx.type}</p>
 											<p class="text-gray-500 text-xs">
 												{new Date(Number(tx.timestamp)).toLocaleDateString('de-DE')}
 												{#if tx.counterParty}

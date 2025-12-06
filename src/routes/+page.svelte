@@ -108,24 +108,24 @@
 		<div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
 			<!-- Free Plan -->
 			<div
-				class="rounded-2xl p-8 bg-gradient-to-br from-orange-900/20 to-orange-800/10 border border-orange-500/20"
+				class="rounded-2xl p-8 bg-white dark:bg-gradient-to-br dark:from-orange-900/20 dark:to-orange-800/10 border border-gray-200 dark:border-orange-500/20 shadow-lg dark:shadow-none"
 			>
 				<span
-					class="inline-block px-3 py-1 rounded-md bg-gradient-to-r from-orange-600/50 to-orange-500/50 text-white font-bold text-sm mb-6"
+					class="inline-block px-3 py-1 rounded-md bg-gradient-to-r from-orange-600 to-orange-500 text-white font-bold text-sm mb-6"
 				>
 					Free Plan
 				</span>
 
 				<div class="mb-4">
-					<p class="text-gray-400 text-lg font-semibold">Your Revenue</p>
-					<p class="text-7xl font-black text-white">97%</p>
+					<p class="text-gray-500 dark:text-gray-400 text-lg font-semibold">Your Revenue</p>
+					<p class="text-7xl font-black text-gray-900 dark:text-white">97%</p>
 				</div>
 
-				<p class="text-3xl font-bold text-white/60 mb-8">No Extra Cost</p>
+				<p class="text-3xl font-bold text-gray-400 dark:text-white/60 mb-8">No Extra Cost</p>
 
 				<ul class="space-y-4 mb-8">
 					{#each freePlanFeatures as feature}
-						<li class="flex items-center gap-3 text-white text-lg font-semibold">
+						<li class="flex items-center gap-3 text-gray-900 dark:text-white text-lg font-semibold">
 							<CheckCircleSolid class="w-6 h-6 text-orange-500" />
 							{feature}
 						</li>
@@ -176,7 +176,7 @@
 
 	<!-- Platform Logos Carousel -->
 	<section>
-		<p class="text-center text-gray-400 font-semibold text-lg mb-8">
+		<p class="text-center text-gray-500 dark:text-gray-400 font-semibold text-lg mb-8">
 			Let your fans enjoy your Drops where they feel home.
 		</p>
 
@@ -198,8 +198,8 @@
 
 	<!-- Make it. Drop it. -->
 	<section class="text-center py-12">
-		<h2 class="text-5xl md:text-6xl font-black text-white mb-4">Make it. Drop it.</h2>
-		<p class="text-xl text-gray-400 font-semibold">
+		<h2 class="text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-4">Make it. Drop it.</h2>
+		<p class="text-xl text-gray-500 dark:text-gray-400 font-semibold">
 			Distributing music should be accessible without any credit card.
 		</p>
 	</section>
@@ -207,10 +207,10 @@
 	<!-- Why bbn.music -->
 	<section>
 		<div
-			class="rounded-2xl p-8 md:p-12 bg-gradient-to-br from-orange-900/20 to-orange-800/10 border border-orange-500/20"
+			class="rounded-2xl p-8 md:p-12 bg-white dark:bg-gradient-to-br dark:from-orange-900/20 dark:to-orange-800/10 border border-gray-200 dark:border-orange-500/20 shadow-lg dark:shadow-none"
 		>
 			<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-10">
-				<h2 class="text-3xl font-bold text-white">Why bbn.music?</h2>
+				<h2 class="text-3xl font-bold text-gray-900 dark:text-white">Why bbn.music?</h2>
 				<Button
 					href="/drops/new"
 					class="w-fit bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-full px-6"
@@ -225,8 +225,8 @@
 						<div class="{feature.color} w-12 h-12 rounded-xl flex items-center justify-center">
 							<feature.icon class="w-6 h-6 text-white" />
 						</div>
-						<h3 class="text-xl font-bold text-white">{feature.title}</h3>
-						<p class="text-gray-400">{feature.description}</p>
+						<h3 class="text-xl font-bold text-gray-900 dark:text-white">{feature.title}</h3>
+						<p class="text-gray-500 dark:text-gray-400">{feature.description}</p>
 					</div>
 				{/each}
 			</div>
@@ -236,14 +236,14 @@
 	<!-- Testimonials -->
 	<section>
 		<div class="text-center mb-12">
-			<h2 class="text-5xl md:text-6xl font-black text-white mb-4">Loved by Artists</h2>
-			<p class="text-xl text-gray-400 font-semibold">See how our Artists value bbn.music</p>
+			<h2 class="text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-4">Loved by Artists</h2>
+			<p class="text-xl text-gray-500 dark:text-gray-400 font-semibold">See how our Artists value bbn.music</p>
 		</div>
 
 		<div class="max-w-3xl mx-auto space-y-12">
 			{#each testimonials as testimonial, i}
 				<div class={i % 2 === 0 ? 'text-left' : 'text-right ml-auto'}>
-					<p class="text-lg md:text-xl text-white font-semibold italic mb-6 leading-relaxed">
+					<p class="text-lg md:text-xl text-gray-900 dark:text-white font-semibold italic mb-6 leading-relaxed">
 						"{testimonial.quote}"
 					</p>
 					<div class="flex items-center gap-4 {i % 2 === 0 ? '' : 'flex-row-reverse'}">
@@ -252,7 +252,7 @@
 							alt={testimonial.name}
 							class="w-10 h-10 rounded-full object-cover"
 						/>
-						<span class="text-xl font-bold text-white">{testimonial.name}</span>
+						<span class="text-xl font-bold text-gray-900 dark:text-white">{testimonial.name}</span>
 					</div>
 				</div>
 			{/each}
@@ -330,6 +330,12 @@
 	}
 
 	.platform-logo {
-		filter: brightness(0) invert(1);
+		filter: brightness(0);
+	}
+
+	@media (prefers-color-scheme: dark) {
+		.platform-logo {
+			filter: brightness(0) invert(1);
+		}
 	}
 </style>

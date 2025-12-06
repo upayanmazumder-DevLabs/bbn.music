@@ -12,12 +12,12 @@
 	const { tag = 'h2', class: className = '', children }: Props = $props();
 
 	const tagClasses: Record<Tag, string> = {
-		h1: 'text-4xl font-bold text-white',
-		h2: 'text-3xl font-bold text-white',
-		h3: 'text-2xl font-semibold text-white',
-		h4: 'text-xl font-semibold text-white',
-		h5: 'text-lg font-semibold text-white',
-		h6: 'text-base font-semibold text-white',
+		h1: 'text-4xl font-bold text-gray-900 dark:text-white',
+		h2: 'text-3xl font-bold text-gray-900 dark:text-white',
+		h3: 'text-2xl font-semibold text-gray-900 dark:text-white',
+		h4: 'text-xl font-semibold text-gray-900 dark:text-white',
+		h5: 'text-lg font-semibold text-gray-900 dark:text-white',
+		h6: 'text-base font-semibold text-gray-900 dark:text-white',
 	};
 
 	const classes = $derived(`${tagClasses[tag]} ${className}`);

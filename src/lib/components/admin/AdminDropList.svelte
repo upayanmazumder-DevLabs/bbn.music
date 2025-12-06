@@ -13,23 +13,6 @@
 
 	const { drops, loading, loadingMore = false, error, hasMore, onLoadMore }: Props = $props();
 
-	function getStatusColor(type: string | undefined): string {
-		switch (type) {
-			case 'PUBLISHED':
-				return 'bg-green-500/20 text-green-400';
-			case 'PUBLISHING':
-				return 'bg-blue-500/20 text-blue-400';
-			case 'UNDER_REVIEW':
-				return 'bg-yellow-500/20 text-yellow-400';
-			case 'TAKEDOWN_REQUESTED':
-				return 'bg-red-500/20 text-red-400';
-			case 'REVIEW_DECLINED':
-				return 'bg-red-500/20 text-red-400';
-			default:
-				return 'bg-gray-500/20 text-gray-400';
-		}
-	}
-
 	function getAccountTypeColor(type: string | undefined): string {
 		switch (type) {
 			case 'VIP':
@@ -67,7 +50,7 @@
 				<tr>
 					<th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Title</th>
 					<th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">GTIN</th>
-					<th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Type</th>
+					<th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Release Date</th>
 					<th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Account</th>
 				</tr>
 			</thead>
@@ -81,11 +64,7 @@
 							<p class="text-white font-medium">{drop.title || 'Untitled'}</p>
 						</td>
 						<td class="px-4 py-3 text-gray-400 text-sm font-mono">{drop.gtin || '-'}</td>
-						<td class="px-4 py-3">
-							<span class="px-2 py-1 rounded text-xs font-medium {getStatusColor(drop.type)}"
-								>{drop.type}</span
-							>
-						</td>
+						<td class="px-4 py-3 text-gray-400 text-sm">{drop.release || '-'}</td>
 						<td class="px-4 py-3">
 							<span
 								class="px-2 py-1 rounded text-xs font-medium {getAccountTypeColor(

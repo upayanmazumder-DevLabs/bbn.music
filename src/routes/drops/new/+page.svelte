@@ -55,7 +55,7 @@
 		postDropByDropsByMusic,
 		postTypeByTypeByDropByMusic,
 	} from '$lib/api/sdk.gen';
-	import { getAuthHeaders, getBaseUrl } from '$lib/api';
+	import { getAuthHeaders, getBaseUrl } from '$lib/apiClient';
 	import { auth } from '$lib/stores/auth';
 	import type {
 		FullDrop,

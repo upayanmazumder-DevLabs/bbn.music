@@ -10,7 +10,7 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import { APITools } from '$lib/api';
+	import { APITools } from '$lib/apiClient';
 	import {
 		getTokenByFromUserInteractionByAuth,
 		postTokenByValidateByMailByUser,

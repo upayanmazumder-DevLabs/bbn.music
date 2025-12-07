@@ -39,7 +39,7 @@
 		postShareByDropsByMusic,
 		getIdByShareByDropsByMusic,
 		deleteIdByShareByDropsByMusic,
-	} from '$lib/api';
+	} from '$lib/api/sdk.gen.ts';
 	import { getAuthHeaders, auth } from '$lib/stores/auth';
 	import type { FullDrop, DropType, Song, ArtistRef, Share } from '$lib/api/types.gen';
 	import { artistTypes, type ArtistType } from '$lib/types/drop';

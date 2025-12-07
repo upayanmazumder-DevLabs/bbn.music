@@ -11,7 +11,7 @@
 		postResendVerifyEmailByMailByUser,
 		getPictureByUserByUser,
 	} from '$lib/api/sdk.gen';
-	import { getAuthHeaders, getBaseUrl } from '$lib/api';
+	import { getAuthHeaders, getBaseUrl } from '$lib/apiClient';
 	import PhoneInput from '$lib/components/PhoneInput.svelte';
 
 	let name = $state($auth.user?.profile.username || '');

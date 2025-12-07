@@ -4,7 +4,7 @@
 	import { SearchOutline, PlusOutline } from 'flowbite-svelte-icons';
 	import type { Artist } from '$lib/api/types.gen';
 	import { getArtistsByMusic, postArtistsByMusic } from '$lib/api/sdk.gen';
-	import { getAuthHeaders } from '$lib/api';
+	import { getAuthHeaders } from '$lib/apiClient';
 	import { toast } from '$lib/stores/toast';
 
 	let artists = $state<Artist[]>([]);

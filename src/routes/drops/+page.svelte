@@ -7,7 +7,7 @@
 	import type { Drop, Artist, ArtistRef } from '$lib/api/types.gen';
 	import { auth } from '$lib/stores/auth';
 	import { getDropsByMusic, getArtworkByDropByMusic, postMusic, getArtistsByMusic } from '$lib/api/sdk.gen';
-	import { getAuthHeaders } from '$lib/api';
+	import { getAuthHeaders } from '$lib/apiClient';
 
 	// Tab configuration matching the old app
 	const tabs = [

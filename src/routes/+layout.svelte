@@ -8,7 +8,7 @@
 	import NotificationCenter from '$lib/components/NotificationCenter.svelte';
 	import Toast from '$lib/components/Toast.svelte';
 	import { page } from '$app/stores';
-	import { initApiClient, getAuthHeaders } from '$lib/api';
+	import { initApiClient, getAuthHeaders } from '$lib/apiClient';
 	import { postResendVerifyEmailByMailByUser, getPictureByUserByUser } from '$lib/api/sdk.gen';
 	import { initPostHog, trackPageView, identifyUser } from '$lib/analytics/posthog';
 

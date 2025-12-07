@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { Artist } from '$lib/api/types.gen';
 	import { getArtistsByMusic } from '$lib/api/sdk.gen';
-	import { getAuthHeaders } from '$lib/api';
+	import { getAuthHeaders } from '$lib/apiClient';
 	import { onMount } from 'svelte';
 	import { UserSolid, PlusOutline, SearchOutline, CloseOutline } from 'flowbite-svelte-icons';
 

@@ -3,7 +3,7 @@
 	import { Button, Card } from '$lib/components/ui';
 	import type { Wallet } from '$lib/api/types.gen';
 	import { getWallet } from '$lib/api/sdk.gen';
-	import { getAuthHeaders } from '$lib/api';
+	import { getAuthHeaders } from '$lib/apiClient';
 	import { toast } from '$lib/stores/toast';
 
 	let wallet = $state<Wallet | null>(null);

@@ -4,7 +4,7 @@
 	import { ChartPieSolid, CashSolid, PlaySolid } from 'flowbite-svelte-icons';
 	import type { PayoutResponse } from '$lib/api/types.gen';
 	import { getPayoutsByPayment } from '$lib/api/sdk.gen';
-	import { getAuthHeaders } from '$lib/api';
+	import { getAuthHeaders } from '$lib/apiClient';
 
 	let payouts = $state<PayoutResponse[]>([]);
 	let isLoading = $state(true);

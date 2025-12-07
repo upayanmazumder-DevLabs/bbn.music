@@ -8,7 +8,7 @@
 	} from 'flowbite-svelte-icons';
 	import { auth } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
-	import { APITools } from '$lib/api';
+	import { APITools } from '$lib/apiClient';
 
 	let name = $state('');
 	let email = $state('');

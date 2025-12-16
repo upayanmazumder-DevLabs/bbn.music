@@ -254,7 +254,7 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<div class="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-900">
+<div class="min-h-screen flex flex-col bg-gradient-to-br from-gray-50 via-white to-gray-100 dark:from-gray-900 dark:via-black dark:to-gray-900 overflow-x-hidden">
 	<!-- Skip link for keyboard navigation (BFSG/WCAG 2.1 AA compliance) -->
 	<a
 		href="#main-content"

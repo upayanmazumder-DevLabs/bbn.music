@@ -61,12 +61,14 @@
 				'The thing I love the most is the flexibility and the contactability of the entire bbn.music team. It is also just great to develop concepts and plans with motivated and very friendly people.',
 			name: 'Redz',
 			avatar: '/landing/redz.jpg',
+			link: 'https://open.spotify.com/artist/2V0Z2KWSK8h7ttrKOuteuk',
 		},
 		{
 			quote:
 				'There is pretty much no other digital distributor that offers more and at the same time, works so closely with artists and who artists are so valued by and feel so understood by.',
 			name: 'Criticz',
 			avatar: '/landing/criticz.jpg',
+			link: 'https://open.spotify.com/artist/4ZlkFIOahypZ3Xi8SzeNaQ',
 		},
 	];
 </script>
@@ -180,18 +182,35 @@
 			Let your fans enjoy your Drops where they feel home.
 		</p>
 
-		<div class="carousel-container">
-			<!-- Scrolling logos -->
-			<div class="flex gap-10 animate-scroll">
-				{#each [...platforms, ...platforms, ...platforms, ...platforms] as platform}
-					<div class="flex-shrink-0 w-12 h-12 flex items-center justify-center">
-						<img
-							src={platform.logo}
-							alt={platform.name}
-							class="w-12 h-12 max-w-12 max-h-12 object-contain platform-logo"
-						/>
-					</div>
-				{/each}
+		<div class="space-y-8">
+			<!-- First carousel - scrolling right -->
+			<div class="carousel-container">
+				<div class="flex gap-16 animate-scroll-reverse">
+					{#each [...platforms, ...platforms, ...platforms, ...platforms] as platform}
+						<div class="flex-shrink-0 w-24 h-24 flex items-center justify-center">
+							<img
+								src={platform.logo}
+								alt={platform.name}
+								class="w-24 h-24 max-w-24 max-h-24 object-contain platform-logo"
+							/>
+						</div>
+					{/each}
+				</div>
+			</div>
+
+			<!-- Second carousel - scrolling left -->
+			<div class="carousel-container">
+				<div class="flex gap-16 animate-scroll">
+					{#each [...platforms, ...platforms, ...platforms, ...platforms] as platform}
+						<div class="flex-shrink-0 w-24 h-24 flex items-center justify-center">
+							<img
+								src={platform.logo}
+								alt={platform.name}
+								class="w-24 h-24 max-w-24 max-h-24 object-contain platform-logo"
+							/>
+						</div>
+					{/each}
+				</div>
 			</div>
 		</div>
 	</section>
@@ -246,14 +265,21 @@
 					<p class="text-lg md:text-xl text-gray-900 dark:text-white font-semibold italic mb-6 leading-relaxed">
 						"{testimonial.quote}"
 					</p>
-					<div class="flex items-center gap-4 {i % 2 === 0 ? '' : 'flex-row-reverse'}">
+					<a
+						href={testimonial.link}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="flex items-center gap-4 {i % 2 === 0 ? '' : 'flex-row-reverse'} group"
+					>
 						<img
 							src={testimonial.avatar}
 							alt={testimonial.name}
-							class="w-10 h-10 rounded-full object-cover"
+							class="w-10 h-10 rounded-full object-cover group-hover:ring-2 group-hover:ring-orange-500 transition-all"
 						/>
-						<span class="text-xl font-bold text-gray-900 dark:text-white">{testimonial.name}</span>
-					</div>
+						<span class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors">
+							{testimonial.name}
+						</span>
+					</a>
 				</div>
 			{/each}
 		</div>
@@ -316,8 +342,17 @@
 			transform: translateX(0);
 		}
 		100% {
-			/* (48px + 40px gap) * 9 icons */
-			transform: translateX(calc(-88px * 9));
+			/* (96px + 64px gap) * 9 icons */
+			transform: translateX(calc(-160px * 9));
+		}
+	}
+
+	@keyframes scroll-reverse {
+		0% {
+			transform: translateX(calc(-160px * 9));
+		}
+		100% {
+			transform: translateX(0);
 		}
 	}
 
@@ -325,8 +360,8 @@
 		animation: scroll 30s linear infinite;
 	}
 
-	.animate-scroll:hover {
-		animation-play-state: paused;
+	.animate-scroll-reverse {
+		animation: scroll-reverse 30s linear infinite;
 	}
 
 	.platform-logo {

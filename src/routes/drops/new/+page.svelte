@@ -951,12 +951,12 @@
 		<!-- Minimal Stepper -->
 		<div class="mb-10">
 			<div class="flex items-center justify-between relative max-w-2xl mx-auto">
-				<!-- Background progress line -->
-				<div class="absolute top-4 left-0 right-0 h-0.5 bg-gray-700"></div>
+				<!-- Background progress line (offset by half circle width to align with circle centers) -->
+				<div class="absolute top-4 left-4 right-4 h-0.5 bg-gray-700"></div>
 				<!-- Active progress line -->
 				<div
-					class="absolute top-4 left-0 h-0.5 bg-orange-500 transition-all duration-500"
-					style="width: {((formState.currentStep - 1) / 3) * 100}%"
+					class="absolute top-4 left-4 h-0.5 bg-orange-500 transition-all duration-500"
+					style="width: calc({((formState.currentStep - 1) / 3) * 100}% - {(formState.currentStep - 1) / 3 * 2}rem)"
 				></div>
 
 				{#each steps as step}

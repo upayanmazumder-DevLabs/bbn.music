@@ -1,21 +1,21 @@
 <script lang="ts">
-	import { Button, Spinner } from '$lib/components/ui';
-	import {
-		EnvelopeSolid,
-		LockSolid,
-		ExclamationCircleOutline,
-		CheckCircleSolid,
-	} from 'flowbite-svelte-icons';
-	import { auth } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
-	import { APITools } from '$lib/apiClient';
 	import {
 		getTokenByFromUserInteractionByAuth,
 		postTokenByValidateByMailByUser,
 		putUserByUser,
 	} from '$lib/api/sdk.gen';
+	import { APITools } from '$lib/apiClient';
+	import { Button, Spinner } from '$lib/components/ui';
+	import { auth } from '$lib/stores/auth';
+	import {
+		CheckCircleSolid,
+		EnvelopeSolid,
+		ExclamationCircleOutline,
+		LockSolid,
+	} from 'flowbite-svelte-icons';
+	import { onMount } from 'svelte';
 
 	type ViewState = 'login' | 'processing' | 'reset-password' | 'email-verified';
 
@@ -45,6 +45,7 @@
 			const success = await auth.oauthLogin(type, code);
 
 			if (success) {
+				localStorage.removeItem('goal');
 				goto(redirectUrl);
 			} else {
 				error = 'OAuth login failed. Please try again.';

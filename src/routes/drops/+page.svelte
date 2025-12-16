@@ -180,9 +180,16 @@
 				headers: getAuthHeaders(),
 			});
 
-			// API returns { id: string } with the new drop ID
-			const { id } = response.data as { id: string };
-			goto(`/drops/new?id=${id}`);
+			if (response.error) {
+				throw new Error((response.error as any)?.message || 'Failed to create drop');
+			}
+
+			const data = response.data as { id?: string } | undefined;
+			if (!data?.id) {
+				throw new Error('Invalid response from server');
+			}
+
+			goto(`/drops/new?id=${data.id}`);
 		} catch (err: any) {
 			console.error('Failed to create drop:', err);
 			error = err?.error?.message || err?.message || 'Failed to create drop';

@@ -267,15 +267,15 @@
 	{#if !isSharePage}
 		<nav class="glass sticky top-0 z-50 border-b border-black/10 dark:border-white/10">
 			<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div class="flex items-center justify-between h-16">
+				<div class="flex items-center justify-between h-16 relative">
 					<!-- Logo / App Switcher -->
 					<div class="flex items-center">
 						<AppSwitcher />
 					</div>
 
 					{#if !isPublicRoute && $auth.isAuthenticated}
-						<!-- Desktop Navigation (only shown when authenticated on protected routes) -->
-						<div class="hidden md:block">
+						<!-- Desktop Navigation (absolutely centered) -->
+						<div class="hidden md:block absolute left-1/2 -translate-x-1/2">
 							<div class="flex items-center space-x-1">
 								{#each navItems as item}
 									{@const active = isActive(item.href, item.exact)}

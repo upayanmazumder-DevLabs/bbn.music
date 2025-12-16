@@ -223,7 +223,7 @@ function createAuthStore() {
 			try {
 				// Step 1: Register to get refresh token
 				const response = await postRegisterByAuth({
-					body: { email, password, username: name },
+					body: { email, password, name },
 				});
 
 				const responseData = response.data as { token?: string } | undefined;

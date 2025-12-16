@@ -2,7 +2,7 @@ name: Deploy to Prod
 
 on:
   push:
-    branches: [release]
+    branches: [svelte]
 
 jobs:
   build:
@@ -51,7 +51,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: "ghcr.io/bbn-music/bbnmusic:latest"
+          tags: "ghcr.io/bbn-music/bbnmusic-svelte:latest"
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -62,4 +62,4 @@ jobs:
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
-          script: cd bbn/ && docker compose up -d --pull always frontend
+          script: cd bbn/ && docker compose up -d --pull always frontend-svelte

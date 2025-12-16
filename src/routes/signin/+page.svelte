@@ -81,7 +81,7 @@
 					throw new Error('Failed to authenticate');
 				}
 			} catch (err: any) {
-				error = err.message || 'Invalid or expired reset link. Please request a new one.';
+				error = err?.error?.message || err?.message || 'Invalid or expired reset link. Please request a new one.';
 				viewState = 'login';
 			}
 			isLoading = false;
@@ -108,7 +108,7 @@
 				await auth.refreshToken();
 				viewState = 'email-verified';
 			} catch (err: any) {
-				error = err.message || 'Invalid or expired verification link.';
+				error = err?.error?.message || err?.message || 'Invalid or expired verification link.';
 				viewState = 'login';
 			}
 			isLoading = false;
@@ -145,7 +145,7 @@
 			// Password updated, redirect to drops
 			goto('/drops');
 		} catch (err: any) {
-			error = err.message || 'Failed to update password. Please try again.';
+			error = err?.error?.message || err?.message || 'Failed to update password. Please try again.';
 		}
 
 		isLoading = false;

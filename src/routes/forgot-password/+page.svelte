@@ -31,7 +31,7 @@
 			success = true;
 		} catch (err: any) {
 			console.error('Password reset error:', err);
-			error = err.message || 'Failed to send reset email. Please try again.';
+			error = err?.error?.message || err?.message || 'Failed to send reset email. Please try again.';
 		}
 
 		isLoading = false;

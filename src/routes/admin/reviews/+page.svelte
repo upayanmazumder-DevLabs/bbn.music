@@ -40,8 +40,8 @@
 				}
 				hasMore = newDrops.length === LIMIT;
 			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load drops';
+		} catch (e: any) {
+			error = e?.error?.message || e?.message || 'Failed to load drops';
 		} finally {
 			loading = false;
 			loadingMore = false;

@@ -21,8 +21,8 @@
 			if (response.data) {
 				payouts = response.data as PayoutList[];
 			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load payouts';
+		} catch (e: any) {
+			error = e?.error?.message || e?.message || 'Failed to load payouts';
 		} finally {
 			loading = false;
 		}

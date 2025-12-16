@@ -46,28 +46,25 @@ for (const file of files) {
         "export { createClient } from './client.ts';"
     );
 
+    // Fix validator type annotations (arrow functions without block body)
     contents = contents.replaceAll(
-        "requestValidator: async (data) => {",
-        "requestValidator: async (data: any) => {"
+        "requestValidator: async (data) =>",
+        "requestValidator: async (data: any) =>"
     );
     contents = contents.replaceAll(
-        "responseValidator: async (data) => {",
-        "responseValidator: async (data: any) => {"
+        "responseValidator: async (data) =>",
+        "responseValidator: async (data: any) =>"
     );
 
+    // Fix client imports - replace ./client.ts with ./client/index.ts
     contents = contents.replaceAll(
-        " Client } from './client.ts';",
-        " Client } from './client/index.ts';"
+        "from './client.ts'",
+        "from './client/index.ts'"
     );
 
     contents = contents.replaceAll(
         "query: z.optional(z.never())",
         "query: z.optional(z.any())"
-    );
-
-    contents = contents.replaceAll(
-        "createConfig } from './client.ts'",
-        "createConfig } from './client/index.ts'"
     );
 
     await writeFile(filePath, contents);

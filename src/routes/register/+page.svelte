@@ -73,7 +73,9 @@
 		const success = await auth.register(email, password, name);
 
 		if (!success) {
-			error = 'Registration failed. Email might already be in use.';
+			// Get error from auth state, or use fallback
+			const authState = $auth;
+			error = authState.error || 'Registration failed';
 		}
 		isLoading = false;
 	}

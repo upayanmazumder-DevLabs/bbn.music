@@ -158,8 +158,8 @@
 					loadUserDrops();
 				}
 			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load drop';
+		} catch (e: any) {
+			error = e?.error?.message || e?.message || 'Failed to load drop';
 		} finally {
 			loading = false;
 		}
@@ -281,8 +281,9 @@
 			showResponseDialog = false;
 			// Reload the page to reflect changes
 			await loadDrop();
-		} catch (e) {
+		} catch (e: any) {
 			console.error('Failed to submit response:', e);
+			toast.show(e?.error?.message || e?.message || 'Failed to submit response', 'error');
 		} finally {
 			submittingResponse = false;
 		}
@@ -297,8 +298,9 @@
 
 			showTypeDialog = false;
 			await loadDrop();
-		} catch (e) {
+		} catch (e: any) {
 			console.error('Failed to change type:', e);
+			toast.show(e?.error?.message || e?.message || 'Failed to change drop type', 'error');
 		}
 	}
 
@@ -335,10 +337,10 @@
 
 			toast.show('Drop published successfully: ' + JSON.stringify(response.data), 'success', 6000);
 			showPublishDialog = false;
-		} catch (e) {
+		} catch (e: any) {
 			console.error('Publish failed:', e);
 			toast.show(
-				'Publish failed: ' + (e instanceof Error ? e.message : 'Unknown error'),
+				'Publish failed: ' + (e?.error?.message || e?.message || 'Unknown error'),
 				'error',
 				6000,
 			);

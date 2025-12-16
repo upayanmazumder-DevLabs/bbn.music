@@ -26,8 +26,8 @@
 			if (response.data) {
 				apps = response.data as OAuthApp[];
 			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load OAuth apps';
+		} catch (e: any) {
+			error = e?.error?.message || e?.message || 'Failed to load OAuth apps';
 		} finally {
 			loading = false;
 		}
@@ -50,9 +50,9 @@
 			});
 			await loadApps();
 			toast.show('OAuth application deleted successfully', 'success');
-		} catch (e) {
+		} catch (e: any) {
 			console.error('Delete failed:', e);
-			toast.show('Failed to delete OAuth application', 'error');
+			toast.show(e?.error?.message || e?.message || 'Failed to delete OAuth application', 'error');
 		} finally {
 			appToDelete = null;
 		}

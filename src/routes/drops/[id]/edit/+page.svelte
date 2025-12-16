@@ -87,11 +87,17 @@
 
 	// Derived values
 	const secondaryGenreOptions = $derived(getSecondaryGenres(primaryGenre));
-	const isEditable = $derived(drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE');
+	const isEditable = $derived(
+		drop?.type === 'UNSUBMITTED' ||
+			drop?.type === 'PRIVATE' ||
+			drop?.type === 'PUBLISHED' ||
+			drop?.type === 'EDIT_UNDER_REVIEW'
+	);
 	const canSubmitForReview = $derived(drop?.type === 'UNSUBMITTED');
 	const canCancelReview = $derived(drop?.type === 'UNDER_REVIEW');
-	const canRequestTakedown = $derived(drop?.type === 'PUBLISHED');
+	const canRequestTakedown = $derived(drop?.type === 'PUBLISHED' || drop?.type === 'EDIT_UNDER_REVIEW');
 	const canCancelTakedown = $derived(drop?.type === 'TAKEDOWN_REQUESTED');
+	const canCancelEditReview = $derived(drop?.type === 'EDIT_UNDER_REVIEW');
 	const isAdmin = $derived($auth.user?.isAdmin ?? false);
 
 	onMount(async () => {
@@ -125,13 +131,13 @@
 					loadArtwork(drop._id);
 				}
 
-				// Load share link only for published drops
-				if (drop.type === 'PUBLISHED') {
+				// Load share link for published/edit under review drops
+				if (drop.type === 'PUBLISHED' || drop.type === 'EDIT_UNDER_REVIEW') {
 					await loadShare();
 				}
 			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load drop';
+		} catch (e: any) {
+			error = e?.error?.message || e?.message || 'Failed to load drop';
 		} finally {
 			loading = false;
 		}
@@ -180,8 +186,8 @@
 				successMessage = 'Share link created successfully!';
 				setTimeout(() => (successMessage = null), 3000);
 			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to create share link';
+		} catch (e: any) {
+			error = e?.error?.message || e?.message || 'Failed to create share link';
 		} finally {
 			shareLoading = false;
 		}
@@ -199,8 +205,8 @@
 			share = null;
 			successMessage = 'Share link deleted successfully!';
 			setTimeout(() => (successMessage = null), 3000);
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to delete share link';
+		} catch (e: any) {
+			error = e?.error?.message || e?.message || 'Failed to delete share link';
 		} finally {
 			shareLoading = false;
 		}
@@ -220,6 +226,7 @@
 		error = null;
 		successMessage = null;
 		try {
+			// Save drop data
 			await patchIdByDropsByMusic({
 				path: { id: dropId },
 				body: {
@@ -236,11 +243,21 @@
 				},
 				headers: getAuthHeaders(),
 			});
-			successMessage = 'Drop saved successfully';
+
+			// For published drops, automatically submit for review via type endpoint
+			if (drop.type === 'PUBLISHED') {
+				await postTypeByTypeByDropByMusic({
+					path: { dropId, type: 'EDIT_UNDER_REVIEW' },
+					headers: getAuthHeaders(),
+				});
+				successMessage = 'Changes saved and submitted for review';
+			} else {
+				successMessage = 'Drop saved successfully';
+			}
 			hasChanges = false;
 			await loadDrop();
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to save drop';
+		} catch (e: any) {
+			error = e?.error?.message || e?.message || 'Failed to save drop';
 		} finally {
 			saving = false;
 		}
@@ -265,16 +282,21 @@
 			});
 			await loadDrop();
 			successMessage = 'Status updated successfully';
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to update status';
+		} catch (e: any) {
+			error = e?.error?.message || e?.message || 'Failed to update status';
 		} finally {
 			saving = false;
 			pendingStatusChange = null;
 		}
 	}
 
-	function getStatusChangeMessage(type: DropType | null): string {
+	function getStatusChangeMessage(type: DropType | null, currentType?: DropType): string {
 		if (!type) return '';
+
+		// Special case: canceling edit review goes back to PUBLISHED
+		if (type === 'PUBLISHED' && currentType === 'EDIT_UNDER_REVIEW') {
+			return 'Cancel the edit review? Your changes will be kept but the review will be cancelled. Your release remains live on all platforms.';
+		}
 
 		const messages: Record<string, string> = {
 			UNDER_REVIEW:
@@ -348,6 +370,8 @@
 				return 'bg-blue-500/20 text-blue-400 border-blue-500/30';
 			case 'UNDER_REVIEW':
 				return 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30';
+			case 'EDIT_UNDER_REVIEW':
+				return 'bg-orange-500/20 text-orange-400 border-orange-500/30';
 			case 'TAKEDOWN_REQUESTED':
 				return 'bg-red-500/20 text-red-400 border-red-500/30';
 			case 'REVIEW_DECLINED':
@@ -365,6 +389,8 @@
 				return 'Draft';
 			case 'UNDER_REVIEW':
 				return 'Under Review';
+			case 'EDIT_UNDER_REVIEW':
+				return 'Edit Under Review';
 			case 'PUBLISHED':
 				return 'Published';
 			case 'PUBLISHING':
@@ -433,7 +459,7 @@
 			</div>
 		{/if}
 
-		<!-- Non-editable notice -->
+		<!-- Status-specific notices -->
 		{#if !isEditable}
 			<div
 				class="mb-6 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-xl flex items-start gap-3"
@@ -445,12 +471,34 @@
 						{#if drop.type === 'UNDER_REVIEW'}
 							This drop is currently under review. You cannot make changes until the review is
 							complete.
-						{:else if drop.type === 'PUBLISHED'}
-							This drop has been published. To make changes, you'll need to request a takedown
-							first.
 						{:else}
 							This drop cannot be edited in its current status.
 						{/if}
+					</p>
+				</div>
+			</div>
+		{:else if drop.type === 'PUBLISHED'}
+			<div
+				class="mb-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl flex items-start gap-3"
+			>
+				<ExclamationCircleOutline class="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
+				<div>
+					<p class="text-blue-400 font-medium">Published Release</p>
+					<p class="text-blue-400/70 text-sm">
+						Your release is live on streaming platforms. You can make edits, but saving will automatically submit them for review before going live.
+					</p>
+				</div>
+			</div>
+		{:else if drop.type === 'EDIT_UNDER_REVIEW'}
+			<div
+				class="mb-6 p-4 bg-orange-500/10 border border-orange-500/20 rounded-xl flex items-start gap-3"
+			>
+				<ExclamationCircleOutline class="w-5 h-5 text-orange-400 mt-0.5 flex-shrink-0" />
+				<div>
+					<p class="text-orange-400 font-medium">Edit Under Review</p>
+					<p class="text-orange-400/70 text-sm">
+						Your changes are being reviewed. Your release remains live on streaming platforms with the original metadata.
+						You can continue making edits or cancel the review.
 					</p>
 				</div>
 			</div>
@@ -512,6 +560,16 @@
 								disabled={saving}
 							>
 								<CloseCircleSolid class="w-4 h-4" /> Cancel Review
+							</Button>
+						{/if}
+							{#if canCancelEditReview}
+							<Button
+								variant="secondary"
+								class="w-full"
+								onclick={() => requestStatusChange('PUBLISHED')}
+								disabled={saving}
+							>
+								<CloseCircleSolid class="w-4 h-4" /> Cancel Edit Review
 							</Button>
 						{/if}
 						{#if canRequestTakedown}
@@ -729,8 +787,8 @@
 					</div>
 				</Card>
 
-				<!-- Share & Distribution (Only for Published Drops) -->
-				{#if drop?.type === 'PUBLISHED'}
+				<!-- Share & Distribution (For Published/Edit Under Review Drops) -->
+				{#if drop?.type === 'PUBLISHED' || drop?.type === 'EDIT_UNDER_REVIEW'}
 					<Card variant="glass" padding="md">
 						<div class="flex items-center justify-between mb-4">
 							<h3 class="text-lg font-semibold text-white">Share & Distribution</h3>
@@ -856,7 +914,7 @@
 	<div class="space-y-4">
 		<div class="flex items-start gap-3 p-4 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
 			<ExclamationCircleOutline class="w-6 h-6 text-yellow-400 mt-0.5 flex-shrink-0" />
-			<p class="text-white">{getStatusChangeMessage(pendingStatusChange)}</p>
+			<p class="text-white">{getStatusChangeMessage(pendingStatusChange, drop?.type)}</p>
 		</div>
 	</div>
 

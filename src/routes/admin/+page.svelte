@@ -33,8 +33,8 @@
 					bbnRevenue = Object.values(bbnWallet.balance).reduce((a, b) => a + b, 0);
 				}
 			}
-		} catch (e) {
-			error = e instanceof Error ? e.message : 'Failed to load overview data';
+		} catch (e: any) {
+			error = e?.error?.message || e?.message || 'Failed to load overview data';
 		} finally {
 			loading = false;
 		}

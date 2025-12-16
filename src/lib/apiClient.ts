@@ -14,7 +14,7 @@ export const APITools = {
 	oauthRedirect: (provider: 'discord' | 'google' | 'microsoft') => {
 		const baseUrl = APITools.baseUrl();
 		const goal =
-			typeof window !== 'undefined' ? (localStorage.getItem('goal') ?? '/music') : '/music';
+			typeof window === 'undefined' ? '/music' : (localStorage.getItem('goal') ?? '/music');
 		return `${baseUrl}api/@bbn/auth/redirect/${provider}?goal=${encodeURIComponent(goal)}`;
 	},
 };

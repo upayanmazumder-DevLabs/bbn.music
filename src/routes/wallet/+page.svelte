@@ -19,8 +19,8 @@
 			if (response.data) {
 				wallet = response.data as Wallet;
 			}
-		} catch (err) {
-			error = 'Failed to load wallet. Please try again later.';
+		} catch (err: any) {
+			error = err?.error?.message || err?.message || 'Failed to load wallet';
 			console.error('Error loading wallet:', err);
 		} finally {
 			isLoading = false;

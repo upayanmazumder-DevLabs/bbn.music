@@ -129,7 +129,7 @@
 			saved = true;
 			setTimeout(() => (saved = false), 3000);
 		} catch (e: any) {
-			error = e.message || 'Failed to save settings';
+			error = e?.error?.message || e?.message || 'Failed to save settings';
 		} finally {
 			saving = false;
 		}
@@ -173,7 +173,7 @@
 				showPasswordChange = false;
 			}, 3000);
 		} catch (e: any) {
-			passwordError = e.message || 'Failed to change password';
+			passwordError = e?.error?.message || e?.message || 'Failed to change password';
 		} finally {
 			passwordSaving = false;
 		}
@@ -198,7 +198,7 @@
 			verificationEmailSent = true;
 			setTimeout(() => (verificationEmailSent = false), 5000);
 		} catch (e: any) {
-			error = e.message || 'Failed to send verification email';
+			error = e?.error?.message || e?.message || 'Failed to send verification email';
 		} finally {
 			sendingVerification = false;
 		}
@@ -246,7 +246,7 @@
 			await auth.refreshToken();
 			await loadAvatar();
 		} catch (e: any) {
-			avatarError = e.message || 'Failed to upload profile picture';
+			avatarError = e?.error?.message || e?.message || 'Failed to upload profile picture';
 			console.error('Avatar upload error:', e);
 		} finally {
 			uploadingAvatar = false;

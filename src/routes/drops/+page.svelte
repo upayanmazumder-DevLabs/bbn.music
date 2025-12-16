@@ -101,8 +101,8 @@
 					}
 				}
 			}
-		} catch (err) {
-			error = 'Failed to load drops. Please try again later.';
+		} catch (err: any) {
+			error = err?.error?.message || err?.message || 'Failed to load drops';
 			console.error('Error loading drops:', err);
 		} finally {
 			isLoading = false;
@@ -183,9 +183,9 @@
 			// API returns { id: string } with the new drop ID
 			const { id } = response.data as { id: string };
 			goto(`/drops/new?id=${id}`);
-		} catch (err) {
+		} catch (err: any) {
 			console.error('Failed to create drop:', err);
-			error = 'Failed to create drop. Please try again.';
+			error = err?.error?.message || err?.message || 'Failed to create drop';
 			isCreating = false;
 		}
 	}

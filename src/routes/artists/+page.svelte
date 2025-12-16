@@ -30,8 +30,8 @@
 				artists = response.data as Artist[];
 				filteredArtists = artists;
 			}
-		} catch (err) {
-			error = 'Failed to load artists. Please try again later.';
+		} catch (err: any) {
+			error = err?.error?.message || err?.message || 'Failed to load artists';
 			console.error('Error loading artists:', err);
 		} finally {
 			isLoading = false;
@@ -87,9 +87,9 @@
 				toast.show('Artist created successfully', 'success');
 				showAddModal = false;
 			}
-		} catch (err) {
+		} catch (err: any) {
 			console.error('Failed to create artist:', err);
-			toast.show('Failed to create artist', 'error');
+			toast.show(err?.error?.message || err?.message || 'Failed to create artist', 'error');
 		} finally {
 			isCreating = false;
 		}

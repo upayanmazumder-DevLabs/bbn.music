@@ -32,8 +32,8 @@
 			if (response.data) {
 				payouts = response.data as PayoutResponse[];
 			}
-		} catch (err) {
-			error = 'Failed to load earnings. Please try again later.';
+		} catch (err: any) {
+			error = err?.error?.message || err?.message || 'Failed to load earnings';
 			console.error('Error loading earnings:', err);
 		} finally {
 			isLoading = false;

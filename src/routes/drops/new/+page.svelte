@@ -211,8 +211,8 @@
 					}
 				}
 			}
-		} catch (e) {
-			loadError = e instanceof Error ? e.message : 'Failed to load drop data';
+		} catch (e: any) {
+			loadError = e?.error?.message || e?.message || 'Failed to load drop data';
 		} finally {
 			initialLoading = false;
 		}
@@ -356,10 +356,10 @@
 				headers: getAuthHeaders(),
 				body,
 			});
-		} catch (e) {
+		} catch (e: any) {
 			console.error('Failed to save drop:', e);
 			console.error('Error details:', JSON.stringify(e, null, 2));
-			const errorMessage = e instanceof Error ? e.message : 'Unknown error';
+			const errorMessage = e?.error?.message || e?.message || 'Unknown error';
 			toast.show(`Failed to save progress: ${errorMessage}`, 'error');
 			throw e; // Re-throw to prevent navigation
 		}
@@ -692,9 +692,9 @@
 			songFileUploaded = true;
 			uploadedSongFilename = file.name;
 			toast.show('Song uploaded successfully', 'success');
-		} catch (e) {
+		} catch (e: any) {
 			console.error('Song upload failed:', e);
-			const errorMsg = e instanceof Error ? e.message : 'Failed to upload song';
+			const errorMsg = e?.error?.message || e?.message || 'Failed to upload song';
 			toast.show(errorMsg, 'error');
 		} finally {
 			uploadingSong = false;
@@ -789,9 +789,9 @@
 			const artworkId = await uploadViaWebSocket(file, dropId);
 			formState.artwork = artworkId;
 			toast.show('Artwork uploaded successfully', 'success');
-		} catch (e) {
+		} catch (e: any) {
 			console.error('Artwork upload failed:', e);
-			const errorMsg = e instanceof Error ? e.message : 'Failed to upload artwork';
+			const errorMsg = e?.error?.message || e?.message || 'Failed to upload artwork';
 			toast.show(errorMsg, 'error');
 			formState.artworkPreview = '';
 			formState.artwork = '';
@@ -892,9 +892,9 @@
 
 			toast.show('Drop submitted for review!', 'success');
 			goto('/drops');
-		} catch (e) {
+		} catch (e: any) {
 			console.error('Submit failed:', e);
-			const errorMsg = e instanceof Error ? e.message : 'Failed to submit drop';
+			const errorMsg = e?.error?.message || e?.message || 'Failed to submit drop';
 			formState.errors['submit'] = errorMsg;
 			toast.show(errorMsg, 'error');
 		} finally {

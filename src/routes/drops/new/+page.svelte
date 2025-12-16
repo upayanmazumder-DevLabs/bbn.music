@@ -1062,7 +1062,7 @@
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
 							{#each formState.artists as artist, index}
 								<div
-									class="group flex items-center gap-4 p-4 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl border border-gray-700/50 hover:border-orange-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10"
+									class="group flex items-center gap-4 p-4 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl border border-gray-700/50 hover:border-orange-500/50 focus-within:border-orange-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10 focus-within:shadow-lg focus-within:shadow-orange-500/10"
 								>
 									<div
 										class="w-12 h-12 rounded-xl bg-gradient-to-br from-{getArtistTypeColor(
@@ -1081,10 +1081,10 @@
 											{getArtistTypeLabel(artist.type)}
 										</p>
 									</div>
-									<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+									<div class="flex gap-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
 										<button
 											onclick={() => openEditArtist(index)}
-											class="p-2 hover:bg-white/10 rounded-lg transition-colors"
+											class="p-2 hover:bg-white/10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white/10"
 											aria-label="Edit artist"
 										>
 											<EditOutline
@@ -1093,7 +1093,7 @@
 										</button>
 										<button
 											onclick={() => removeArtist(index)}
-											class="p-2 hover:bg-red-500/10 rounded-lg transition-colors"
+											class="p-2 hover:bg-red-500/10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-red-500/10"
 											aria-label="Remove artist"
 										>
 											<TrashBinOutline
@@ -1352,7 +1352,7 @@
 					<div class="space-y-3">
 						{#each formState.songs as song, index}
 							<div
-								class="group flex items-center gap-4 p-5 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl border border-gray-700/50 hover:border-orange-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10"
+								class="group flex items-center gap-4 p-5 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl border border-gray-700/50 hover:border-orange-500/50 focus-within:border-orange-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10 focus-within:shadow-lg focus-within:shadow-orange-500/10"
 							>
 								<div
 									class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500/30 to-orange-600/30 flex items-center justify-center text-orange-400 font-bold text-lg shadow-lg border border-orange-500/20 flex-shrink-0"
@@ -1380,18 +1380,18 @@
 									{/if}
 								</div>
 								<div
-									class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+									class="flex gap-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex-shrink-0"
 								>
 									<button
 										onclick={() => openEditSong(index)}
-										class="p-2 hover:bg-white/10 rounded-lg transition-colors"
+										class="p-2 hover:bg-white/10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white/10"
 										aria-label="Edit song"
 									>
 										<EditOutline class="w-4 h-4 text-gray-400 hover:text-white transition-colors" />
 									</button>
 									<button
 										onclick={() => removeSong(index)}
-										class="p-2 hover:bg-red-500/10 rounded-lg transition-colors"
+										class="p-2 hover:bg-red-500/10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-red-500/10"
 										aria-label="Remove song"
 									>
 										<TrashBinOutline

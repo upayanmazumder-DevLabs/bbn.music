@@ -27,12 +27,14 @@
 			</div>
 
 			<div class="font-semibold text-gray-900 dark:text-white">Address:</div>
-			<div class="whitespace-pre-line">
-				BBN Music GmbH Rosa-Luxemburg-Str. 37 14482 Potsdam Germany
-			</div>
+			<div class="whitespace-pre-line">BBN Music GmbH
+Rosa-Luxemburg-Str. 37
+14482 Potsdam
+Germany</div>
 
 			<div class="font-semibold text-gray-900 dark:text-white">Commercial register:</div>
-			<div class="whitespace-pre-line">Potsdam Local Court HRB 39134 P</div>
+			<div class="whitespace-pre-line">Potsdam Local Court
+HRB 39134 P</div>
 
 			<div class="font-semibold text-gray-900 dark:text-white">EUID:</div>
 			<div>DEG1312.HRB39134P</div>
@@ -41,12 +43,14 @@
 			<div>DE370194161</div>
 
 			<div class="font-semibold text-gray-900 dark:text-white">Managing Directors:</div>
-			<div class="whitespace-pre-line">Maximilian Arzberger Gregor Bigalke</div>
+			<div class="whitespace-pre-line">Maximilian Arzberger
+Gregor Bigalke</div>
 
 			<div class="font-semibold text-gray-900 dark:text-white">Responsible for content:</div>
-			<div class="whitespace-pre-line">
-				Maximilian Arzberger, Gregor Bigalke Rosa-Luxemburg-Str. 37 14482 Potsdam Germany
-			</div>
+			<div class="whitespace-pre-line">Maximilian Arzberger, Gregor Bigalke
+Rosa-Luxemburg-Str. 37
+14482 Potsdam
+Germany</div>
 		</div>
 
 		<section class="mt-8">

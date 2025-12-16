@@ -72,7 +72,9 @@
 		isLoading = true;
 		const success = await auth.register(email, password, name);
 
-		if (!success) {
+		if (success) {
+			goto('/drops');
+		} else {
 			// Get error from auth state, or use fallback
 			const authState = $auth;
 			error = authState.error || 'Registration failed';

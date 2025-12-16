@@ -21,10 +21,9 @@ FROM oven/bun:1-slim
 
 WORKDIR /app
 
-# Copy built app and dependencies
+# Copy built app
 COPY --from=builder /app/build ./build
 COPY --from=builder /app/package.json ./
-COPY --from=builder /app/node_modules ./node_modules
 
 # Expose port
 EXPOSE 3000

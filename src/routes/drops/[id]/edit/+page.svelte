@@ -748,7 +748,7 @@
 				<Card variant="glass" padding="md">
 					<div class="flex items-center justify-between mb-4">
 						<h3 class="text-lg font-semibold text-white">Songs</h3>
-						<Badge color="gray">{drop.songs.length} track{drop.songs.length !== 1 ? 's' : ''}</Badge
+						<Badge color="gray">{drop.songs.length} song{drop.songs.length !== 1 ? 's' : ''}</Badge
 						>
 					</div>
 

@@ -75,7 +75,7 @@
 				id: '5',
 				title: 'Submission Rejected',
 				message:
-					'Your drop "Untitled Album" was rejected due to metadata issues. Please review and resubmit.',
+					'Your drop "Untitled Drop" was rejected due to metadata issues. Please review and resubmit.',
 				timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), // 3 days ago
 				read: true,
 				type: 'error',

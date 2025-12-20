@@ -8,6 +8,7 @@
 	import { auth } from '$lib/stores/auth';
 	import { getDropsByMusic, getArtworkByDropByMusic, postMusic, getArtistsByMusic } from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
+	import { imageCache } from '$lib/stores/imageCache';
 
 	// Tab configuration matching the old app
 	const tabs = [
@@ -60,9 +61,18 @@
 		return filtered;
 	});
 
-	// Fetch artwork blob and create object URL
+	// Fetch artwork blob and create object URL (with OPFS caching)
 	async function loadArtwork(dropId: string) {
-		if (artworkUrls[dropId]) return; // Already loaded
+		if (artworkUrls[dropId]) return; // Already in memory
+
+		// Check OPFS cache first
+		const cached = await imageCache.get(dropId);
+		if (cached) {
+			artworkUrls[dropId] = cached;
+			return;
+		}
+
+		// Fetch from API and cache
 		try {
 			const response = await getArtworkByDropByMusic({
 				path: { dropId },
@@ -70,6 +80,7 @@
 			});
 			if (response.data) {
 				const blob = response.data as Blob;
+				await imageCache.set(dropId, blob);
 				artworkUrls[dropId] = URL.createObjectURL(blob);
 			}
 		} catch {
@@ -343,7 +354,7 @@
 									<p class="truncate">{drop.primaryGenre || '-'}</p>
 								</div>
 								<div class="w-16 text-center">
-									<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">Tracks</p>
+									<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">Songs</p>
 									<p>{drop.songs?.length || 0}</p>
 								</div>
 							</div>

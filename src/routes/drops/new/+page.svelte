@@ -224,10 +224,10 @@
 			id: 1,
 			label: 'Details',
 			icon: ClipboardListSolid,
-			description: 'Album info & artists',
+			description: 'Drop info & artists',
 		},
-		{ id: 2, label: 'Artwork', icon: ImageOutline, description: 'Cover image' },
-		{ id: 3, label: 'Songs', icon: MusicSolid, description: 'Track list' },
+		{ id: 2, label: 'Artwork', icon: ImageOutline, description: 'Artwork' },
+		{ id: 3, label: 'Songs', icon: MusicSolid, description: 'Songs' },
 		{
 			id: 4,
 			label: 'Review',
@@ -256,6 +256,8 @@
 
 	// Temp artist/song for editing
 	let tempArtist = $state<ArtistRef>({ type: 'PRIMARY', _id: null, name: '' });
+	let tempArtistFirstName = $state('');
+	let tempArtistLastName = $state('');
 	let tempSong = $state<Partial<Song> & { year?: number; language?: string }>({
 		_id: crypto.randomUUID(),
 		title: '',
@@ -470,26 +472,56 @@
 	// Artist management
 	function openAddArtist() {
 		tempArtist = { type: 'PRIMARY', _id: null, name: '' };
+		tempArtistFirstName = '';
+		tempArtistLastName = '';
 		editingArtistIndex = null;
 		showArtistModal = true;
 	}
 
 	function openEditArtist(index: number) {
-		tempArtist = { ...formState.artists[index] };
+		const artist = formState.artists[index];
+		tempArtist = { ...artist };
+
+		// For producer/songwriter, split the name at the last space
+		if ((artist.type === 'PRODUCER' || artist.type === 'SONGWRITER') && artist.name) {
+			const lastSpaceIndex = artist.name.lastIndexOf(' ');
+			if (lastSpaceIndex > 0) {
+				tempArtistFirstName = artist.name.substring(0, lastSpaceIndex);
+				tempArtistLastName = artist.name.substring(lastSpaceIndex + 1);
+			} else {
+				// No space found, put everything in first name
+				tempArtistFirstName = artist.name;
+				tempArtistLastName = '';
+			}
+		} else {
+			tempArtistFirstName = '';
+			tempArtistLastName = '';
+		}
+
 		editingArtistIndex = index;
 		showArtistModal = true;
 	}
 
 	function saveArtist() {
+		// For producer/songwriter, merge first and last name
+		const artistToSave = { ...tempArtist };
+		if (tempArtist.type === 'PRODUCER' || tempArtist.type === 'SONGWRITER') {
+			const fullName = [tempArtistFirstName.trim(), tempArtistLastName.trim()]
+				.filter(Boolean)
+				.join(' ');
+			artistToSave.name = fullName;
+			artistToSave._id = null; // Producer/songwriter don't use artist refs
+		}
+
 		// Check for duplicates (same artist with same type)
 		const isDuplicate = formState.artists.some((artist, index) => {
 			// Skip the current artist if we're editing
 			if (editingArtistIndex !== null && index === editingArtistIndex) return false;
 
 			// Check if same type and same artist (by _id or name)
-			if (artist.type === tempArtist.type) {
-				if (tempArtist._id && artist._id === tempArtist._id) return true;
-				if (tempArtist.name && artist.name?.toLowerCase() === tempArtist.name.toLowerCase())
+			if (artist.type === artistToSave.type) {
+				if (artistToSave._id && artist._id === artistToSave._id) return true;
+				if (artistToSave.name && artist.name?.toLowerCase() === artistToSave.name.toLowerCase())
 					return true;
 			}
 			return false;
@@ -497,16 +529,16 @@
 
 		if (isDuplicate) {
 			toast.show(
-				`This artist is already added as a ${getArtistTypeLabel(tempArtist.type).toLowerCase()}`,
+				`This artist is already added as a ${getArtistTypeLabel(artistToSave.type).toLowerCase()}`,
 				'warning',
 			);
 			return;
 		}
 
 		if (editingArtistIndex !== null) {
-			formState.artists[editingArtistIndex] = { ...tempArtist };
+			formState.artists[editingArtistIndex] = { ...artistToSave };
 		} else {
-			formState.artists = [...formState.artists, { ...tempArtist }];
+			formState.artists = [...formState.artists, { ...artistToSave }];
 		}
 		showArtistModal = false;
 	}
@@ -610,22 +642,40 @@
 		_id: string | null;
 		name: string;
 	}>({ type: 'PRIMARY', _id: null, name: '' });
+	let tempSongArtistFirstName = $state('');
+	let tempSongArtistLastName = $state('');
 
 	function openAddSongArtist() {
 		tempSongArtist = { type: 'PRIMARY', _id: null, name: '' };
+		tempSongArtistFirstName = '';
+		tempSongArtistLastName = '';
 		showSongArtistModal = true;
 	}
 
 	function saveSongArtist() {
-		if (!tempSongArtist.name && !tempSongArtist._id) {
+		let artistName = tempSongArtist.name;
+		let artistId = tempSongArtist._id;
+
+		// For producer/songwriter, merge first and last name
+		if (tempSongArtist.type === 'PRODUCER' || tempSongArtist.type === 'SONGWRITER') {
+			artistName = [tempSongArtistFirstName.trim(), tempSongArtistLastName.trim()]
+				.filter(Boolean)
+				.join(' ');
+			artistId = null; // Producer/songwriter don't use artist refs
+
+			if (!artistName) {
+				toast.show('Please enter first and last name', 'error');
+				return;
+			}
+		} else if (!artistName && !artistId) {
 			toast.show('Please select or enter an artist name', 'error');
 			return;
 		}
 
 		const newArtist: ArtistRef = {
 			type: tempSongArtist.type,
-			_id: tempSongArtist._id,
-			name: tempSongArtist.name,
+			_id: artistId,
+			name: artistName,
 		};
 
 		tempSong.artists = [...(tempSong.artists || []), newArtist];
@@ -1017,8 +1067,8 @@
 				<!-- Step 1: Basic Details -->
 				<div class="space-y-8">
 					<div>
-						<h2 class="text-2xl font-bold text-white mb-1">Album Details</h2>
-						<p class="text-gray-400">Tell us about your release</p>
+						<h2 class="text-2xl font-bold text-white mb-1">Drop Details</h2>
+						<p class="text-gray-400">Tell us about your drop</p>
 					</div>
 
 					<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -1026,7 +1076,7 @@
 							<Input
 								bind:value={formState.title}
 								label="Title"
-								placeholder="Your album or single title"
+								placeholder="Drop title"
 								required
 								error={formState.errors['title']}
 							/>
@@ -1225,8 +1275,8 @@
 				<!-- Step 2: Artwork -->
 				<div class="space-y-8">
 					<div class="text-center">
-						<h2 class="text-3xl font-bold text-white mb-2">Album Artwork</h2>
-						<p class="text-gray-400 text-lg">Upload a square, high-quality cover image</p>
+						<h2 class="text-3xl font-bold text-white mb-2">Artwork</h2>
+						<p class="text-gray-400 text-lg">Upload a square, high-quality image</p>
 						<p class="text-gray-500 text-sm mt-1">Recommended: 3000×3000px, JPG or PNG format</p>
 					</div>
 
@@ -1261,7 +1311,7 @@
 							{:else if formState.artworkPreview}
 								<img
 									src={formState.artworkPreview}
-									alt="Album artwork preview"
+									alt="Artwork preview"
 									class="w-full h-full object-cover"
 								/>
 								<div
@@ -1337,9 +1387,9 @@
 				<div class="space-y-6">
 					<div class="flex items-center justify-between">
 						<div>
-							<h2 class="text-2xl font-bold text-white mb-1">Track List</h2>
+							<h2 class="text-2xl font-bold text-white mb-1">Songs</h2>
 							<p class="text-gray-400">
-								Add your songs ({formState.songs.length} track{formState.songs.length !== 1
+								Add your songs ({formState.songs.length} song{formState.songs.length !== 1
 									? 's'
 									: ''})
 							</p>
@@ -1362,7 +1412,7 @@
 								<MusicSolid class="w-5 h-5 text-gray-500 flex-shrink-0" />
 								<div class="flex-1 min-w-0">
 									<p class="text-white font-semibold truncate text-lg">
-										{song.title || 'Untitled Track'}
+										{song.title || 'Untitled Song'}
 									</p>
 									<p class="text-sm text-gray-400 truncate">
 										{song.artists
@@ -1411,7 +1461,7 @@
 								>
 									<MusicSolid class="w-10 h-10 text-gray-500" />
 								</div>
-								<p class="text-white font-bold text-lg mb-2">No tracks yet</p>
+								<p class="text-white font-bold text-lg mb-2">No songs yet</p>
 								<p class="text-gray-400 text-sm mb-6 max-w-sm mx-auto">
 									Add your first song to start building your drop
 								</p>
@@ -1465,8 +1515,8 @@
 							<Card variant="default" padding="md">
 								<div class="flex items-center gap-3 pb-3 border-b border-gray-700 mb-4">
 									<MusicSolid class="w-5 h-5 text-orange-500" />
-									<h3 class="font-semibold text-white">Track List</h3>
-									<Badge color="gray">{formState.songs.length} tracks</Badge>
+									<h3 class="font-semibold text-white">Songs</h3>
+									<Badge color="gray">{formState.songs.length} songs</Badge>
 								</div>
 								<div class="space-y-2 max-h-48 overflow-y-auto">
 									{#each formState.songs as song, index}
@@ -1487,7 +1537,7 @@
 								<div class="flex justify-center lg:justify-start">
 									<img
 										src={formState.artworkPreview}
-										alt="Album artwork"
+										alt="Artwork"
 										class="w-48 h-48 object-cover rounded-xl shadow-xl"
 									/>
 								</div>
@@ -1553,24 +1603,47 @@
 			{/each}
 		</Select>
 
-		<ArtistSearch
-			selectedArtist={{ _id: tempArtist._id, name: tempArtist.name ?? '' }}
-			onselect={(artist) => {
-				tempArtist._id = artist._id;
-				tempArtist.name = artist.name;
-			}}
-			label={tempArtist.type === 'SONGWRITER' || tempArtist.type === 'PRODUCER'
-				? 'Full Name (First Last)'
-				: 'Artist Name'}
-			placeholder={tempArtist.type === 'SONGWRITER' || tempArtist.type === 'PRODUCER'
-				? 'Search or enter full name...'
-				: 'Search existing artists or create new...'}
-		/>
+		{#if tempArtist.type === 'SONGWRITER' || tempArtist.type === 'PRODUCER'}
+			<div class="grid grid-cols-2 gap-4">
+				<Input
+					bind:value={tempArtistFirstName}
+					label="First Name"
+					placeholder="John"
+					required
+				/>
+				<Input
+					bind:value={tempArtistLastName}
+					label="Last Name"
+					placeholder="Doe"
+					required
+				/>
+			</div>
+			<p class="text-xs text-gray-500">
+				Enter the legal name of the {tempArtist.type.toLowerCase()}. This will be displayed as "{tempArtistFirstName || 'First'} {tempArtistLastName || 'Last'}".
+			</p>
+		{:else}
+			<ArtistSearch
+				selectedArtist={{ _id: tempArtist._id, name: tempArtist.name ?? '' }}
+				onselect={(artist) => {
+					tempArtist._id = artist._id;
+					tempArtist.name = artist.name;
+				}}
+				label="Artist Name"
+				placeholder="Search existing artists or create new..."
+			/>
+		{/if}
 	</div>
 
 	{#snippet footer()}
 		<Button variant="secondary" onclick={() => (showArtistModal = false)}>Cancel</Button>
-		<Button onclick={saveArtist} disabled={!tempArtist.name}>Save Artist</Button>
+		<Button
+			onclick={saveArtist}
+			disabled={(tempArtist.type === 'SONGWRITER' || tempArtist.type === 'PRODUCER')
+				? !tempArtistFirstName.trim() || !tempArtistLastName.trim()
+				: !tempArtist.name}
+		>
+			Save Artist
+		</Button>
 	{/snippet}
 </Modal>
 
@@ -1599,7 +1672,7 @@
 						{/if}
 					</h3>
 					<p class="text-sm text-gray-400">
-						Upload your track in WAV or FLAC format (16-bit/44.1kHz minimum)
+						Upload your song in WAV or FLAC format (16-bit/44.1kHz minimum)
 					</p>
 				</div>
 			</div>
@@ -1710,7 +1783,7 @@
 						<Toggle bind:checked={tempSong.instrumental} label="Instrumental" color="blue" />
 					</div>
 					<p class="text-xs text-gray-500 mt-2">
-						Mark if this track contains explicit lyrics or is purely instrumental (mutually
+						Mark if this song contains explicit lyrics or is purely instrumental (mutually
 						exclusive)
 					</p>
 				</div>
@@ -1789,7 +1862,7 @@
 						}}
 						label="Recording Year"
 						placeholder="YYYY"
-						hint="Year when this track was originally recorded"
+						hint="Year when this song was originally recorded"
 					/>
 					<Select
 						bind:value={tempSong.language}
@@ -1849,24 +1922,47 @@
 			{/each}
 		</Select>
 
-		<ArtistSearch
-			selectedArtist={{ _id: tempSongArtist._id, name: tempSongArtist.name }}
-			onselect={(artist) => {
-				tempSongArtist._id = artist._id;
-				tempSongArtist.name = artist.name;
-			}}
-			label={tempSongArtist.type === 'SONGWRITER' || tempSongArtist.type === 'PRODUCER'
-				? 'Full Name (First Last)'
-				: 'Artist Name'}
-			placeholder={tempSongArtist.type === 'SONGWRITER' || tempSongArtist.type === 'PRODUCER'
-				? 'Search or enter full name...'
-				: 'Search existing artists or create new...'}
-		/>
+		{#if tempSongArtist.type === 'SONGWRITER' || tempSongArtist.type === 'PRODUCER'}
+			<div class="grid grid-cols-2 gap-4">
+				<Input
+					bind:value={tempSongArtistFirstName}
+					label="First Name"
+					placeholder="John"
+					required
+				/>
+				<Input
+					bind:value={tempSongArtistLastName}
+					label="Last Name"
+					placeholder="Doe"
+					required
+				/>
+			</div>
+			<p class="text-xs text-gray-500">
+				Enter the legal name of the {tempSongArtist.type.toLowerCase()}. This will be displayed as "{tempSongArtistFirstName || 'First'} {tempSongArtistLastName || 'Last'}".
+			</p>
+		{:else}
+			<ArtistSearch
+				selectedArtist={{ _id: tempSongArtist._id, name: tempSongArtist.name }}
+				onselect={(artist) => {
+					tempSongArtist._id = artist._id;
+					tempSongArtist.name = artist.name;
+				}}
+				label="Artist Name"
+				placeholder="Search existing artists or create new..."
+			/>
+		{/if}
 	</div>
 
 	{#snippet footer()}
 		<Button variant="secondary" onclick={() => (showSongArtistModal = false)}>Cancel</Button>
-		<Button onclick={saveSongArtist} disabled={!tempSongArtist.name}>Add Artist</Button>
+		<Button
+			onclick={saveSongArtist}
+			disabled={(tempSongArtist.type === 'SONGWRITER' || tempSongArtist.type === 'PRODUCER')
+				? !tempSongArtistFirstName.trim() || !tempSongArtistLastName.trim()
+				: !tempSongArtist.name}
+		>
+			Add Artist
+		</Button>
 	{/snippet}
 </Modal>
 

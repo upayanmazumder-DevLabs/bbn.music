@@ -50,7 +50,7 @@
 				<tr>
 					<th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Title</th>
 					<th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">User</th>
-					<th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Release Date</th>
+					<th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Release</th>
 					<th class="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase">Account</th>
 				</tr>
 			</thead>

@@ -69,7 +69,7 @@
 	<title>{shareData?.title || 'Share'} - bbn.music</title>
 	<meta
 		name="description"
-		content="Listen to {shareData?.title || 'this track'} by {shareData?.artistNames?.join(', ') ||
+		content="Listen to {shareData?.title || 'this song'} by {shareData?.artistNames?.join(', ') ||
 			'various artists'} on your favorite streaming platform"
 	/>
 
@@ -78,7 +78,7 @@
 	<meta property="og:title" content="{shareData?.title || 'Share'} - bbn.music" />
 	<meta
 		property="og:description"
-		content="Listen to {shareData?.title || 'this track'} by {shareData?.artistNames?.join(', ') ||
+		content="Listen to {shareData?.title || 'this song'} by {shareData?.artistNames?.join(', ') ||
 			'various artists'}"
 	/>
 	{#if artworkUrl}
@@ -90,7 +90,7 @@
 	<meta name="twitter:title" content="{shareData?.title || 'Share'} - bbn.music" />
 	<meta
 		name="twitter:description"
-		content="Listen to {shareData?.title || 'this track'} by {shareData?.artistNames?.join(', ') ||
+		content="Listen to {shareData?.title || 'this song'} by {shareData?.artistNames?.join(', ') ||
 			'various artists'}"
 	/>
 </svelte:head>

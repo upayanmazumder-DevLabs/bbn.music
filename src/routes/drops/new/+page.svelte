@@ -1377,7 +1377,7 @@
 							</div>
 							<div class="flex items-center gap-2 text-gray-400">
 								<CheckCircleSolid class="w-4 h-4 text-green-400" />
-								<span>No text or logos</span>
+								<span>No URLs or promo text</span>
 							</div>
 						</div>
 					</div>

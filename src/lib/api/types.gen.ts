@@ -421,6 +421,22 @@ export type NotificationTemplate = {
 	active: boolean;
 };
 
+export type Notification = {
+	_id: string;
+	user: string;
+	event: MessageEvent;
+	title: string;
+	content: string;
+	data?: {
+		[key: string]: string;
+	};
+	read: boolean;
+	platforms: {
+		sent: Array<Platform>;
+		failed: Array<Platform>;
+	};
+};
+
 export type WaEvent = {
 	_id: string;
 	changes: {
@@ -1305,6 +1321,92 @@ export type GetIdByMyConversationsByMessagingResponses = {
 
 export type GetIdByMyConversationsByMessagingResponse =
 	GetIdByMyConversationsByMessagingResponses[keyof GetIdByMyConversationsByMessagingResponses];
+
+export type GetNotificationsByMessagingData = {
+	body?: never;
+	path?: never;
+	query?: {
+		_lastId?: string;
+		_offset?: number;
+		_limit?: number;
+	};
+	url: '/api/@bbn/messaging/notifications';
+};
+
+export type GetNotificationsByMessagingResponses = {
+	/**
+	 * Successful operation
+	 */
+	200: Array<Notification>;
+};
+
+export type GetNotificationsByMessagingResponse =
+	GetNotificationsByMessagingResponses[keyof GetNotificationsByMessagingResponses];
+
+export type GetIdByNotificationsByMessagingData = {
+	body?: never;
+	path: {
+		id: string;
+	};
+	query?: never;
+	url: '/api/@bbn/messaging/notifications/{id}';
+};
+
+export type GetIdByNotificationsByMessagingResponses = {
+	/**
+	 * Successful operation
+	 */
+	200: {
+		_id: string;
+		user: string;
+		event: MessageEvent;
+		title: string;
+		content: string;
+		data?: {
+			[key: string]: string;
+		};
+		read: boolean;
+		platforms: {
+			sent: Array<Platform>;
+			failed: Array<Platform>;
+		};
+	};
+};
+
+export type GetIdByNotificationsByMessagingResponse =
+	GetIdByNotificationsByMessagingResponses[keyof GetIdByNotificationsByMessagingResponses];
+
+export type PatchIdByNotificationsByMessagingData = {
+	body?: {
+		read: boolean;
+	};
+	path: {
+		id: string;
+	};
+	query?: never;
+	url: '/api/@bbn/messaging/notifications/{id}';
+};
+
+export type PutReadAllByNotificationsByMessagingData = {
+	body?: {
+		[key: string]: unknown;
+	};
+	path?: never;
+	query?: never;
+	url: '/api/@bbn/messaging/notifications/read-all';
+};
+
+export type PutReadAllByNotificationsByMessagingResponses = {
+	/**
+	 * Successful operation
+	 */
+	200: {
+		updated: number;
+	};
+};
+
+export type PutReadAllByNotificationsByMessagingResponse =
+	PutReadAllByNotificationsByMessagingResponses[keyof PutReadAllByNotificationsByMessagingResponses];
 
 export type PutPreferencesByMessagingData = {
 	body?: {

@@ -458,6 +458,20 @@ export const zNotificationTemplate = z.object({
 	active: z.boolean().default(true),
 });
 
+export const zNotification = z.object({
+	_id: z.string(),
+	user: z.string(),
+	event: zMessageEvent,
+	title: z.string(),
+	content: z.string(),
+	data: z.optional(z.record(z.string(), z.string())),
+	read: z.boolean().default(false),
+	platforms: z.object({
+		sent: z.array(zPlatform),
+		failed: z.array(zPlatform),
+	}),
+});
+
 export const zWaEvent = z.object({
 	_id: z.string(),
 	changes: z.object({
@@ -1305,6 +1319,73 @@ export const zGetIdByMyConversationsByMessagingResponse = z.object({
 			phone: z.optional(z.string()),
 		}),
 	),
+});
+
+export const zGetNotificationsByMessagingData = z.object({
+	body: z.optional(z.never()),
+	path: z.optional(z.never()),
+	query: z.optional(
+		z.object({
+			_lastId: z.optional(z.string()),
+			_offset: z.optional(z.number()),
+			_limit: z.optional(z.number()),
+		}),
+	),
+});
+
+/**
+ * Successful operation
+ */
+export const zGetNotificationsByMessagingResponse = z.array(zNotification);
+
+export const zGetIdByNotificationsByMessagingData = z.object({
+	body: z.optional(z.never()),
+	path: z.object({
+		id: z.string(),
+	}),
+	query: z.optional(z.any()),
+});
+
+/**
+ * Successful operation
+ */
+export const zGetIdByNotificationsByMessagingResponse = z.object({
+	_id: z.string(),
+	user: z.string(),
+	event: zMessageEvent,
+	title: z.string(),
+	content: z.string(),
+	data: z.optional(z.record(z.string(), z.string())),
+	read: z.boolean().default(false),
+	platforms: z.object({
+		sent: z.array(zPlatform),
+		failed: z.array(zPlatform),
+	}),
+});
+
+export const zPatchIdByNotificationsByMessagingData = z.object({
+	body: z.optional(
+		z.object({
+			read: z.boolean(),
+		}),
+	),
+	path: z.object({
+		id: z.string(),
+	}),
+	query: z.optional(z.any()),
+});
+
+export const zPutReadAllByNotificationsByMessagingData = z.object({
+	body: z.optional(z.record(z.string(), z.unknown())),
+	path: z.optional(z.never()),
+	query: z.optional(z.any()),
+});
+
+/**
+ * Successful operation
+ */
+export const zPutReadAllByNotificationsByMessagingResponse = z.object({
+	updated: z.number(),
 });
 
 export const zPutPreferencesByMessagingData = z.object({

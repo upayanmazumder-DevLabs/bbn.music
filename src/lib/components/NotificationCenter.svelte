@@ -5,22 +5,23 @@
 		CheckCircleSolid,
 		ExclamationCircleOutline,
 		InfoCircleSolid,
+		EnvelopeSolid,
 	} from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
 	import { scale, fly } from 'svelte/transition';
+	import {
+		getNotificationsByMessaging,
+		patchIdByNotificationsByMessaging,
+		putReadAllByNotificationsByMessaging,
+	} from '$lib/api/sdk.gen';
+	import { getAuthHeaders } from '$lib/apiClient';
+	import type { Notification, MessageEvent } from '$lib/api/types.gen';
 
 	let showDropdown = $state(false);
 	let unreadCount = $state(0);
-	let notifications = $state<
-		Array<{
-			id: string;
-			title: string;
-			message: string;
-			timestamp: Date;
-			read: boolean;
-			type: 'info' | 'success' | 'warning' | 'error';
-		}>
-	>([]);
+	let notifications = $state<Notification[]>([]);
+	let loading = $state(true);
+	let error = $state<string | null>(null);
 
 	// Close dropdown when clicking outside
 	function handleClickOutside(event: MouseEvent) {
@@ -30,58 +31,29 @@
 		}
 	}
 
+	async function loadNotifications() {
+		loading = true;
+		error = null;
+		try {
+			const response = await getNotificationsByMessaging({
+				headers: getAuthHeaders(),
+				query: { _limit: 20 },
+			});
+			if (response.data) {
+				notifications = response.data as Notification[];
+				unreadCount = notifications.filter((n) => !n.read).length;
+			}
+		} catch (e: any) {
+			console.error('Failed to load notifications:', e);
+			error = e?.message || 'Failed to load notifications';
+		} finally {
+			loading = false;
+		}
+	}
+
 	onMount(() => {
 		document.addEventListener('click', handleClickOutside);
-		// TODO: Fetch notifications from API when endpoint is available
-		// loadNotifications();
-
-		// Mock notifications for development
-		notifications = [
-			{
-				id: '1',
-				title: 'Drop Published Successfully',
-				message: 'Your drop "Summer Vibes EP" has been published to all stores and is now live.',
-				timestamp: new Date(Date.now() - 1000 * 60 * 5), // 5 minutes ago
-				read: false,
-				type: 'success',
-			},
-			{
-				id: '2',
-				title: 'Review Completed',
-				message: 'Your submission "Midnight Dreams" has passed review and is ready for publishing.',
-				timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2), // 2 hours ago
-				read: false,
-				type: 'info',
-			},
-			{
-				id: '3',
-				title: 'Artwork Issue Detected',
-				message:
-					'The artwork for "Neon Lights" does not meet the minimum resolution requirements. Please upload a higher quality image.',
-				timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24), // 1 day ago
-				read: true,
-				type: 'warning',
-			},
-			{
-				id: '4',
-				title: 'Payout Processed',
-				message:
-					'Your payout of $127.50 for October has been processed and will arrive in 2-3 business days.',
-				timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2), // 2 days ago
-				read: true,
-				type: 'success',
-			},
-			{
-				id: '5',
-				title: 'Submission Rejected',
-				message:
-					'Your drop "Untitled Drop" was rejected due to metadata issues. Please review and resubmit.',
-				timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24 * 3), // 3 days ago
-				read: true,
-				type: 'error',
-			},
-		];
-		unreadCount = notifications.filter((n) => !n.read).length;
+		loadNotifications();
 
 		return () => {
 			document.removeEventListener('click', handleClickOutside);
@@ -92,33 +64,87 @@
 		showDropdown = !showDropdown;
 	}
 
-	function markAsRead(id: string) {
-		const notification = notifications.find((n) => n.id === id);
+	async function markAsRead(id: string) {
+		const notification = notifications.find((n) => n._id === id);
 		if (notification && !notification.read) {
+			// Optimistic update
 			notification.read = true;
 			unreadCount = Math.max(0, unreadCount - 1);
-			// TODO: Send read status to API
+
+			try {
+				await patchIdByNotificationsByMessaging({
+					path: { id },
+					body: { read: true },
+					headers: getAuthHeaders(),
+				});
+			} catch (e) {
+				// Revert on error
+				notification.read = false;
+				unreadCount++;
+				console.error('Failed to mark notification as read:', e);
+			}
 		}
 	}
 
-	function markAllAsRead() {
+	async function markAllAsRead() {
+		// Optimistic update
+		const previousStates = notifications.map((n) => ({ id: n._id, read: n.read }));
 		notifications.forEach((n) => (n.read = true));
 		unreadCount = 0;
-		// TODO: Send batch read status to API
+
+		try {
+			await putReadAllByNotificationsByMessaging({
+				headers: getAuthHeaders(),
+			});
+		} catch (e) {
+			// Revert on error
+			previousStates.forEach((state) => {
+				const notification = notifications.find((n) => n._id === state.id);
+				if (notification) notification.read = state.read;
+			});
+			unreadCount = notifications.filter((n) => !n.read).length;
+			console.error('Failed to mark all notifications as read:', e);
+		}
 	}
 
-	function formatTimestamp(date: Date): string {
-		const now = new Date();
-		const diff = now.getTime() - date.getTime();
-		const minutes = Math.floor(diff / 60000);
-		const hours = Math.floor(diff / 3600000);
-		const days = Math.floor(diff / 86400000);
+	function formatTimestamp(id: string): string {
+		// Extract timestamp from MongoDB ObjectId (first 8 chars are hex timestamp)
+		try {
+			const timestamp = parseInt(id.substring(0, 8), 16) * 1000;
+			const date = new Date(timestamp);
+			const now = new Date();
+			const diff = now.getTime() - date.getTime();
+			const minutes = Math.floor(diff / 60000);
+			const hours = Math.floor(diff / 3600000);
+			const days = Math.floor(diff / 86400000);
 
-		if (minutes < 1) return 'Just now';
-		if (minutes < 60) return `${minutes}m ago`;
-		if (hours < 24) return `${hours}h ago`;
-		if (days < 7) return `${days}d ago`;
-		return date.toLocaleDateString();
+			if (minutes < 1) return 'Just now';
+			if (minutes < 60) return `${minutes}m ago`;
+			if (hours < 24) return `${hours}h ago`;
+			if (days < 7) return `${days}d ago`;
+			return date.toLocaleDateString();
+		} catch {
+			return '';
+		}
+	}
+
+	// Map MessageEvent to display type
+	function getNotificationType(event: MessageEvent): 'info' | 'success' | 'warning' | 'error' {
+		switch (event) {
+			case 'drop-approved':
+			case 'drop-published':
+			case 'payout-processed':
+				return 'success';
+			case 'drop-declined':
+				return 'error';
+			case 'drop-update':
+			case 'royalty-payout':
+				return 'warning';
+			case 'newsletter':
+			case 'message-from-support':
+			default:
+				return 'info';
+		}
 	}
 
 	const typeConfig = {
@@ -203,7 +229,30 @@
 
 			<!-- Notifications List -->
 			<div class="max-h-[480px] overflow-y-auto custom-scrollbar">
-				{#if notifications.length === 0}
+				{#if loading}
+					<div class="p-12 text-center">
+						<div
+							class="w-8 h-8 mx-auto mb-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"
+						></div>
+						<p class="text-gray-500 text-sm">Loading notifications...</p>
+					</div>
+				{:else if error}
+					<div class="p-12 text-center">
+						<div
+							class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-red-200 to-red-300 dark:from-red-700 dark:to-red-800 rounded-2xl flex items-center justify-center"
+						>
+							<ExclamationCircleOutline class="w-8 h-8 text-red-500" />
+						</div>
+						<p class="text-gray-600 dark:text-gray-400 font-medium mb-1">Failed to load</p>
+						<p class="text-sm text-gray-500">{error}</p>
+						<button
+							onclick={loadNotifications}
+							class="mt-3 text-sm font-medium text-orange-600 dark:text-orange-400 hover:text-orange-500"
+						>
+							Try again
+						</button>
+					</div>
+				{:else if notifications.length === 0}
 					<div class="p-12 text-center">
 						<div
 							class="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-700 dark:to-gray-800 rounded-2xl flex items-center justify-center"
@@ -214,12 +263,13 @@
 						<p class="text-sm text-gray-500">No new notifications</p>
 					</div>
 				{:else}
-					{#each notifications as notification (notification.id)}
-						{@const config = typeConfig[notification.type]}
+					{#each notifications as notification (notification._id)}
+						{@const notificationType = getNotificationType(notification.event)}
+						{@const config = typeConfig[notificationType]}
 						{@const Icon = config.icon}
 						<div class="relative group" transition:fly={{ x: 20, duration: 200 }}>
 							<button
-								onclick={() => markAsRead(notification.id)}
+								onclick={() => markAsRead(notification._id)}
 								class="w-full p-4 text-left transition-all duration-200 border-b border-gray-200 dark:border-gray-700 last:border-b-0 {notification.read
 									? 'hover:bg-black/5 dark:hover:bg-white/5'
 									: 'bg-orange-500/5 hover:bg-orange-500/10'}"
@@ -239,13 +289,13 @@
 												{notification.title}
 											</h4>
 											<span class="text-xs text-gray-500 whitespace-nowrap font-medium">
-												{formatTimestamp(notification.timestamp)}
+												{formatTimestamp(notification._id)}
 											</span>
 										</div>
 										<p
 											class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2"
 										>
-											{notification.message}
+											{notification.content}
 										</p>
 									</div>
 

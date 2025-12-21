@@ -43,6 +43,8 @@ import type {
 	GetIdByDropsByMusicResponses,
 	GetIdByMyConversationsByMessagingData,
 	GetIdByMyConversationsByMessagingResponses,
+	GetIdByNotificationsByMessagingData,
+	GetIdByNotificationsByMessagingResponses,
 	GetIdByPayoutsByPaymentData,
 	GetIdByPayoutsByPaymentResponses,
 	GetIdByPreferencesByMessagingData,
@@ -61,6 +63,8 @@ import type {
 	GetIdByWalletsByAdminResponses,
 	GetMyConversationsByMessagingData,
 	GetMyConversationsByMessagingResponses,
+	GetNotificationsByMessagingData,
+	GetNotificationsByMessagingResponses,
 	GetPayoutsByAdminData,
 	GetPayoutsByAdminResponses,
 	GetPayoutsByPaymentData,
@@ -89,6 +93,7 @@ import type {
 	GetWebhookByStatuspageByIntegrationData,
 	PatchIdByApplicationsByOauthData,
 	PatchIdByDropsByMusicData,
+	PatchIdByNotificationsByMessagingData,
 	PatchIdByUsersByUserData,
 	PatchIdByWalletsByAdminData,
 	PostApplicationsByOauthData,
@@ -125,6 +130,8 @@ import type {
 	PutPlaceholderByTasksResponses,
 	PutPreferencesByMessagingData,
 	PutPreferencesByMessagingResponses,
+	PutReadAllByNotificationsByMessagingData,
+	PutReadAllByNotificationsByMessagingResponses,
 	PutSendByConversationsByMessagingData,
 	PutSendByConversationsByMessagingResponses,
 	PutStatusByConversationsByMessagingData,
@@ -175,6 +182,8 @@ import {
 	zGetIdByDropsByMusicResponse,
 	zGetIdByMyConversationsByMessagingData,
 	zGetIdByMyConversationsByMessagingResponse,
+	zGetIdByNotificationsByMessagingData,
+	zGetIdByNotificationsByMessagingResponse,
 	zGetIdByPayoutsByPaymentData,
 	zGetIdByPayoutsByPaymentResponse,
 	zGetIdByPreferencesByMessagingData,
@@ -193,6 +202,8 @@ import {
 	zGetIdByWalletsByAdminResponse,
 	zGetMyConversationsByMessagingData,
 	zGetMyConversationsByMessagingResponse,
+	zGetNotificationsByMessagingData,
+	zGetNotificationsByMessagingResponse,
 	zGetPayoutsByAdminData,
 	zGetPayoutsByAdminResponse,
 	zGetPayoutsByPaymentData,
@@ -221,6 +232,7 @@ import {
 	zGetWebhookByStatuspageByIntegrationData,
 	zPatchIdByApplicationsByOauthData,
 	zPatchIdByDropsByMusicData,
+	zPatchIdByNotificationsByMessagingData,
 	zPatchIdByUsersByUserData,
 	zPatchIdByWalletsByAdminData,
 	zPostApplicationsByOauthData,
@@ -256,6 +268,8 @@ import {
 	zPutPlaceholderByTasksResponse,
 	zPutPreferencesByMessagingData,
 	zPutPreferencesByMessagingResponse,
+	zPutReadAllByNotificationsByMessagingData,
+	zPutReadAllByNotificationsByMessagingResponse,
 	zPutSendByConversationsByMessagingData,
 	zPutSendByConversationsByMessagingResponse,
 	zPutStatusByConversationsByMessagingData,
@@ -696,6 +710,64 @@ export const getIdByMyConversationsByMessaging = <ThrowOnError extends boolean =
 			...options,
 		},
 	);
+
+export const getNotificationsByMessaging = <ThrowOnError extends boolean = false>(
+	options?: Options<GetNotificationsByMessagingData, ThrowOnError>,
+) =>
+	(options?.client ?? client).get<GetNotificationsByMessagingResponses, unknown, ThrowOnError>({
+		requestValidator: async (data: any) => await zGetNotificationsByMessagingData.parseAsync(data),
+		responseValidator: async (data: any) => await zGetNotificationsByMessagingResponse.parseAsync(data),
+		security: [{ scheme: 'bearer', type: 'http' }],
+		url: '/api/@bbn/messaging/notifications',
+		...options,
+	});
+
+export const getIdByNotificationsByMessaging = <ThrowOnError extends boolean = false>(
+	options: Options<GetIdByNotificationsByMessagingData, ThrowOnError>,
+) =>
+	(options.client ?? client).get<GetIdByNotificationsByMessagingResponses, unknown, ThrowOnError>({
+		requestValidator: async (data: any) => await zGetIdByNotificationsByMessagingData.parseAsync(data),
+		responseValidator: async (data: any) =>
+			await zGetIdByNotificationsByMessagingResponse.parseAsync(data),
+		security: [{ scheme: 'bearer', type: 'http' }],
+		url: '/api/@bbn/messaging/notifications/{id}',
+		...options,
+	});
+
+export const patchIdByNotificationsByMessaging = <ThrowOnError extends boolean = false>(
+	options: Options<PatchIdByNotificationsByMessagingData, ThrowOnError>,
+) =>
+	(options.client ?? client).patch<unknown, unknown, ThrowOnError>({
+		requestValidator: async (data: any) => await zPatchIdByNotificationsByMessagingData.parseAsync(data),
+		security: [{ scheme: 'bearer', type: 'http' }],
+		url: '/api/@bbn/messaging/notifications/{id}',
+		...options,
+		headers: {
+			'Content-Type': 'application/json',
+			...options.headers,
+		},
+	});
+
+export const putReadAllByNotificationsByMessaging = <ThrowOnError extends boolean = false>(
+	options?: Options<PutReadAllByNotificationsByMessagingData, ThrowOnError>,
+) =>
+	(options?.client ?? client).put<
+		PutReadAllByNotificationsByMessagingResponses,
+		unknown,
+		ThrowOnError
+	>({
+		requestValidator: async (data: any) =>
+			await zPutReadAllByNotificationsByMessagingData.parseAsync(data),
+		responseValidator: async (data: any) =>
+			await zPutReadAllByNotificationsByMessagingResponse.parseAsync(data),
+		security: [{ scheme: 'bearer', type: 'http' }],
+		url: '/api/@bbn/messaging/notifications/read-all',
+		...options,
+		headers: {
+			'Content-Type': 'application/json',
+			...options?.headers,
+		},
+	});
 
 export const putPreferencesByMessaging = <ThrowOnError extends boolean = false>(
 	options?: Options<PutPreferencesByMessagingData, ThrowOnError>,

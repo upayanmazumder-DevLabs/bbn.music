@@ -15,6 +15,7 @@ await createClient({
     output: {
         path: "src/lib/api",
         indexFile: false,
+        format: "prettier"
     },
     plugins: [
         "zod",

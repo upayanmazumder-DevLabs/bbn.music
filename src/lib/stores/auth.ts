@@ -10,6 +10,54 @@ import {
 import type { User as ApiUser } from '$lib/api/types.gen';
 import { resetUser } from '$lib/analytics/posthog';
 
+// Audio service worker for injecting auth headers
+let audioServiceWorker: ServiceWorkerRegistration | null = null;
+
+async function registerAudioServiceWorker() {
+	if (!browser || !('serviceWorker' in navigator)) return;
+
+	try {
+		audioServiceWorker = await navigator.serviceWorker.register('/audio-sw.js', {
+			scope: '/',
+		});
+	} catch (error) {
+		console.error('Failed to register audio service worker:', error);
+	}
+}
+
+function sendTokenToServiceWorker(token: string | null) {
+	if (!browser || !('serviceWorker' in navigator)) return;
+
+	const controller = navigator.serviceWorker.controller;
+	if (controller) {
+		if (token) {
+			controller.postMessage({
+				type: 'SET_TOKEN',
+				pattern: '/api/@bbn/music/',
+				token,
+			});
+		} else {
+			controller.postMessage({
+				type: 'CLEAR_TOKEN',
+				pattern: '/api/@bbn/music/',
+			});
+		}
+	}
+}
+
+// Initialize service worker on load
+if (browser) {
+	registerAudioServiceWorker().then(() => {
+		// Wait for controller to be ready, then send existing token
+		navigator.serviceWorker.ready.then(() => {
+			const token = localStorage.getItem('access-token');
+			if (token) {
+				sendTokenToServiceWorker(token);
+			}
+		});
+	});
+}
+
 // Decode base64 unicode (like the old webgen code)
 function b64DecodeUnicode(value: string): string {
 	return decodeURIComponent(
@@ -40,14 +88,6 @@ function isTokenExpired(token: string): boolean {
 	} catch {
 		return true;
 	}
-}
-
-// Get auth headers using access-token
-export function getAuthHeaders(): Record<string, string> {
-	if (!browser) return {};
-	const token = localStorage.getItem('access-token');
-	if (!token) return {};
-	return { Authorization: `JWT ${token}` };
 }
 
 // Frontend User type - matches JWT structure
@@ -186,6 +226,7 @@ function createAuthStore() {
 				if (browser) {
 					localStorage.setItem('refresh-token', refreshToken);
 					localStorage.setItem('access-token', accessToken);
+					sendTokenToServiceWorker(accessToken);
 				}
 
 				// Step 4: Decode user from access token
@@ -244,6 +285,7 @@ function createAuthStore() {
 				if (browser) {
 					localStorage.setItem('refresh-token', refreshToken);
 					localStorage.setItem('access-token', accessToken);
+					sendTokenToServiceWorker(accessToken);
 				}
 
 				// Step 4: Decode user from access token
@@ -302,6 +344,7 @@ function createAuthStore() {
 				if (browser) {
 					localStorage.setItem('refresh-token', refreshToken);
 					localStorage.setItem('access-token', accessToken);
+					sendTokenToServiceWorker(accessToken);
 				}
 
 				// Decode user from access token
@@ -346,6 +389,7 @@ function createAuthStore() {
 				if (browser) {
 					localStorage.setItem('refresh-token', refreshToken);
 					localStorage.setItem('access-token', accessToken);
+					sendTokenToServiceWorker(accessToken);
 				}
 
 				// Decode user from access token
@@ -386,6 +430,7 @@ function createAuthStore() {
 
 				if (browser) {
 					localStorage.setItem('access-token', accessToken);
+					sendTokenToServiceWorker(accessToken);
 				}
 
 				const apiUser = getUserFromToken(accessToken);
@@ -437,6 +482,7 @@ function createAuthStore() {
 			if (browser) {
 				localStorage.removeItem('access-token');
 				localStorage.removeItem('refresh-token');
+				sendTokenToServiceWorker(null);
 			}
 
 			// Reset PostHog user

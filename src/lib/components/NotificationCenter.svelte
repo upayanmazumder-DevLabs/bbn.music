@@ -177,7 +177,9 @@
 			transition:fly={{ y: -10, duration: 250, opacity: 0 }}
 		>
 			<!-- Header -->
-			<div class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700">
+			<div
+				class="flex items-center justify-between px-5 py-4 border-b border-gray-200 dark:border-gray-700"
+			>
 				<div class="flex items-center gap-2">
 					<BellSolid class="w-5 h-5 text-orange-500 dark:text-orange-400" />
 					<h3 class="text-lg font-bold text-gray-900 dark:text-white">Notifications</h3>
@@ -240,7 +242,9 @@
 												{formatTimestamp(notification.timestamp)}
 											</span>
 										</div>
-										<p class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2">
+										<p
+											class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed line-clamp-2"
+										>
 											{notification.message}
 										</p>
 									</div>

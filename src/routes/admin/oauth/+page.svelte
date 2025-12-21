@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getApplicationsByOauth, deleteIdByApplicationsByOauth } from '$lib/api/sdk.gen';
-	import { getAuthHeaders } from '$lib/stores/auth';
+	import { getAuthHeaders } from '$lib/apiClient';
 	import type { OAuthApp } from '$lib/api/types.gen';
-	import { Modal, Button } from '$lib/components/ui';
+	import { Modal, Button, Spinner } from '$lib/components/ui';
 	import { toast } from '$lib/stores/toast';
 
 	let apps = $state<OAuthApp[]>([]);
@@ -64,9 +64,7 @@
 
 	{#if loading}
 		<div class="flex items-center justify-center py-12">
-			<div
-				class="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin"
-			></div>
+			<Spinner size="lg" color="red" />
 		</div>
 	{:else if error}
 		<div class="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400">{error}</div>

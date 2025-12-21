@@ -14,10 +14,32 @@
 		getIdByProviderByPublishByMusic,
 		postTypeByTypeByDropByMusic,
 	} from '$lib/api/sdk.gen';
-	import { getAuthHeaders, auth } from '$lib/stores/auth';
+	import { getAuthHeaders } from '$lib/apiClient';
+	import { auth } from '$lib/stores/auth';
 	import { toast } from '$lib/stores/toast';
-	import type { SingleAdminDrop, AdminDrop, DropType, ShazamResults } from '$lib/api/types.gen';
-	import { Card, Badge, Button } from '$lib/components/ui';
+	import type { SingleAdminDrop, AdminDrop, DropType, ShazamResults, ArtistRef, Song } from '$lib/api/types.gen';
+
+// Merged type for admin drop view (combines admin data with drop data)
+type MergedAdminDrop = SingleAdminDrop & {
+	title?: string;
+	gtin?: string;
+	artists?: Array<ArtistRef>;
+	release?: string;
+	language?: string;
+	primaryGenre?: string;
+	secondaryGenre?: string;
+	compositionCopyright?: string;
+	soundRecordingCopyright?: string;
+	artwork?: string;
+	songs?: Array<Song>;
+	comments?: string;
+	_id?: string;
+	user?: string;
+	type?: DropType;
+	copyrightEditable?: boolean;
+};
+	import { Card, Badge, Button, IconButton, Spinner } from '$lib/components/ui';
+	import AudioPlayer from '$lib/components/AudioPlayer.svelte';
 	import {
 		ArrowLeftOutline,
 		UserOutline,
@@ -44,7 +66,7 @@
 		| 'Takedown Declined';
 
 	// State
-	let drop = $state<SingleAdminDrop | null>(null);
+	let drop = $state<MergedAdminDrop | null>(null);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let artworkUrl = $state<string | null>(null);
@@ -139,8 +161,8 @@
 			// Merge admin data (userInfo, events) with drop data (title, songs, etc.)
 			if (adminResponse.data || dropResponse.data) {
 				drop = {
-					...(dropResponse.data as SingleAdminDrop),
-					...(adminResponse.data as SingleAdminDrop),
+					...(dropResponse.data as MergedAdminDrop),
+					...(adminResponse.data as MergedAdminDrop),
 				};
 
 				// Load artwork
@@ -377,11 +399,11 @@
 		});
 	}
 
-	function getArtistNames(artists: SingleAdminDrop['artists']) {
+	function getArtistNames(artists: MergedAdminDrop['artists']) {
 		if (!artists) return 'Unknown';
 		return artists
-			.filter((a) => a.type === 'PRIMARY')
-			.map((a) => ('name' in a ? a.name : a._id))
+			.filter((a: ArtistRef) => a.type === 'PRIMARY')
+			.map((a: ArtistRef) => ('name' in a ? a.name : a._id))
 			.join(', ');
 	}
 </script>
@@ -393,12 +415,9 @@
 <div class="space-y-6">
 	<!-- Header -->
 	<div class="flex items-center gap-4">
-		<button
-			onclick={() => history.back()}
-			class="p-2 hover:bg-gray-800 rounded-lg transition-colors"
-		>
-			<ArrowLeftOutline class="w-5 h-5 text-gray-400" />
-		</button>
+		<IconButton onclick={() => history.back()} variant="ghost" aria-label="Go back">
+			<ArrowLeftOutline class="w-5 h-5" />
+		</IconButton>
 		<div class="flex-1">
 			<h1 class="text-2xl font-bold text-white">Admin Review</h1>
 			<p class="text-gray-400 text-sm">Review and manage drop submission</p>
@@ -410,9 +429,7 @@
 
 	{#if loading}
 		<div class="flex items-center justify-center py-12">
-			<div
-				class="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"
-			></div>
+			<Spinner size="lg" color="primary" />
 		</div>
 	{:else if error}
 		<Card variant="default" padding="lg">
@@ -551,6 +568,7 @@
 							{#each drop.songs as song, i}
 								<div class="flex items-center gap-4 p-3 bg-gray-800/50 rounded-lg">
 									<span class="text-gray-500 w-6 text-center">{i + 1}</span>
+									<AudioPlayer songId={song._id} size="sm" />
 									<div class="flex-1 min-w-0">
 										<p class="text-white font-medium truncate">{song.title}</p>
 										<p class="text-gray-400 text-sm truncate">
@@ -559,7 +577,6 @@
 									</div>
 									<div class="text-right text-sm">
 										<p class="text-gray-400">{song.isrc || 'No ISRC'}</p>
-										<p class="text-gray-500 text-xs">{song.filename}</p>
 									</div>
 									<div class="flex gap-2">
 										{#if song.explicit}
@@ -687,13 +704,15 @@
 							{/each}
 						</div>
 						{#if hasMoreUserDrops}
-							<button
+							<Button
 								onclick={() => loadUserDrops(userDrops.length)}
 								disabled={loadingUserDrops}
-								class="w-full mt-3 py-2 text-sm text-gray-400 hover:text-white transition-colors"
+								variant="ghost"
+								size="sm"
+								class="w-full mt-3"
 							>
 								{loadingUserDrops ? 'Loading...' : 'Load more'}
-							</button>
+							</Button>
 						{/if}
 					{:else if loadingUserDrops}
 						<p class="text-gray-500 text-center py-4">Loading...</p>

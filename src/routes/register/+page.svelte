@@ -1,11 +1,6 @@
 <script lang="ts">
-	import { Button, Spinner } from '$lib/components/ui';
-	import {
-		EnvelopeSolid,
-		LockSolid,
-		UserCircleOutline,
-		ExclamationCircleOutline,
-	} from 'flowbite-svelte-icons';
+	import { Alert, Button, Spinner } from '$lib/components/ui';
+	import { EnvelopeSolid, LockSolid, UserCircleOutline } from 'flowbite-svelte-icons';
 	import { auth } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
 	import { APITools } from '$lib/apiClient';
@@ -104,26 +99,7 @@
 			</div>
 
 			{#if error}
-				<div
-					class="flex items-center gap-3 p-4 rounded-lg bg-red-500/20 border border-red-500/30 text-red-300"
-				>
-					<ExclamationCircleOutline class="w-5 h-5 flex-shrink-0" />
-					<span class="text-sm font-medium">{error}</span>
-					<button
-						type="button"
-						onclick={() => (error = '')}
-						class="ml-auto text-red-300 hover:text-red-200 transition-colors"
-						aria-label="Dismiss error"
-					>
-						<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-							<path
-								fill-rule="evenodd"
-								d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-								clip-rule="evenodd"
-							/>
-						</svg>
-					</button>
-				</div>
+				<Alert variant="error" dismissible ondismiss={() => (error = '')}>{error}</Alert>
 			{/if}
 
 			<!-- Registration Form -->

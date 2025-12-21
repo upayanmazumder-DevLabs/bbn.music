@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Button, Card, Modal, Input } from '$lib/components/ui';
+	import { Button, Card, Modal, Input, Spinner } from '$lib/components/ui';
 	import { SearchOutline, PlusOutline } from 'flowbite-svelte-icons';
 	import type { Artist } from '$lib/api/types.gen';
 	import { getArtistsByMusic, postArtistsByMusic } from '$lib/api/sdk.gen';
@@ -127,9 +127,7 @@
 	<!-- Loading State -->
 	{#if isLoading}
 		<div class="flex justify-center items-center h-64">
-			<div
-				class="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin"
-			></div>
+			<Spinner size="xl" />
 		</div>
 	{:else if error}
 		<!-- Error State -->

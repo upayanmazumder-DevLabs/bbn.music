@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { auth } from '$lib/stores/auth';
+	import { Badge, Toggle } from '$lib/components/ui';
 	import {
 		ExclamationCircleOutline,
 		CheckCircleSolid,
@@ -429,19 +430,11 @@
 				<div class="flex items-center gap-2 mb-2">
 					<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
 					{#if emailVerified}
-						<span
-							class="flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-green-500/20 text-green-400 rounded"
-						>
-							<CheckCircleSolid class="w-3 h-3" />
-							Verified
-						</span>
+						<Badge color="green" size="sm"><CheckCircleSolid class="w-3 h-3 mr-1" />Verified</Badge>
 					{:else}
-						<span
-							class="flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-orange-500/20 text-orange-400 rounded"
+						<Badge color="orange" size="sm"
+							><ExclamationCircleOutline class="w-3 h-3 mr-1" />Not Verified</Badge
 						>
-							<ExclamationCircleOutline class="w-3 h-3" />
-							Not Verified
-						</span>
 					{/if}
 				</div>
 				<input
@@ -483,19 +476,11 @@
 						>Phone Number</label
 					>
 					{#if phone && phoneVerified}
-						<span
-							class="flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-green-500/20 text-green-400 rounded"
-						>
-							<CheckCircleSolid class="w-3 h-3" />
-							Verified
-						</span>
+						<Badge color="green" size="sm"><CheckCircleSolid class="w-3 h-3 mr-1" />Verified</Badge>
 					{:else if phone && !phoneVerified}
-						<span
-							class="flex items-center gap-1 px-2 py-0.5 text-xs font-medium bg-orange-500/20 text-orange-400 rounded"
+						<Badge color="orange" size="sm"
+							><ExclamationCircleOutline class="w-3 h-3 mr-1" />Not Verified</Badge
 						>
-							<ExclamationCircleOutline class="w-3 h-3" />
-							Not Verified
-						</span>
 					{/if}
 				</div>
 				<PhoneInput id="phone-input" bind:value={phone} bind:error={phoneError} />
@@ -522,63 +507,33 @@
 		<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Notifications</h2>
 
 		<div class="space-y-4">
-			<label class="flex items-center justify-between cursor-pointer group">
+			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-gray-900 dark:text-white font-medium group-hover:text-orange-400 transition-colors">
-						Drop Updates
-					</p>
+					<p class="text-gray-900 dark:text-white font-medium">Drop Updates</p>
 					<p class="text-sm text-gray-400">Status changes for your drops</p>
 				</div>
-				<div class="relative">
-					<input type="checkbox" bind:checked={notifications.dropUpdates} class="sr-only peer" />
-					<div
-						class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-orange-500 transition-colors"
-					></div>
-					<div
-						class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"
-					></div>
-				</div>
-			</label>
+				<Toggle bind:checked={notifications.dropUpdates} />
+			</div>
 
 			<div class="border-t border-white/10"></div>
 
-			<label class="flex items-center justify-between cursor-pointer group">
+			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-gray-900 dark:text-white font-medium group-hover:text-orange-400 transition-colors">
-						Payout Alerts
-					</p>
+					<p class="text-gray-900 dark:text-white font-medium">Payout Alerts</p>
 					<p class="text-sm text-gray-400">Earnings and payout notifications</p>
 				</div>
-				<div class="relative">
-					<input type="checkbox" bind:checked={notifications.payoutAlerts} class="sr-only peer" />
-					<div
-						class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-orange-500 transition-colors"
-					></div>
-					<div
-						class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"
-					></div>
-				</div>
-			</label>
+				<Toggle bind:checked={notifications.payoutAlerts} />
+			</div>
 
 			<div class="border-t border-white/10"></div>
 
-			<label class="flex items-center justify-between cursor-pointer group">
+			<div class="flex items-center justify-between">
 				<div>
-					<p class="text-gray-900 dark:text-white font-medium group-hover:text-orange-400 transition-colors">
-						Marketing
-					</p>
+					<p class="text-gray-900 dark:text-white font-medium">Marketing</p>
 					<p class="text-sm text-gray-400">News and tips from bbn.music</p>
 				</div>
-				<div class="relative">
-					<input type="checkbox" bind:checked={notifications.marketing} class="sr-only peer" />
-					<div
-						class="w-11 h-6 bg-white/10 rounded-full peer peer-checked:bg-orange-500 transition-colors"
-					></div>
-					<div
-						class="absolute left-0.5 top-0.5 w-5 h-5 bg-white rounded-full transition-transform peer-checked:translate-x-5"
-					></div>
-				</div>
-			</label>
+				<Toggle bind:checked={notifications.marketing} />
+			</div>
 		</div>
 	</section>
 
@@ -695,9 +650,7 @@
 				<div>
 					<div class="flex items-center gap-2">
 						<p class="text-gray-400 font-medium">Passkey</p>
-						<span class="px-2 py-0.5 text-xs font-medium bg-orange-500/20 text-orange-400 rounded">
-							Coming Soon
-						</span>
+						<Badge color="orange" size="sm">Coming Soon</Badge>
 					</div>
 					<p class="text-sm text-gray-500">Sign in with biometrics or security keys</p>
 				</div>

@@ -3,11 +3,19 @@ import { z } from 'zod';
 export const artistTypes = ['PRIMARY', 'FEATURING', 'SONGWRITER', 'PRODUCER'] as const;
 export type ArtistType = (typeof artistTypes)[number];
 
-export const artistRefSchema = z.object({
-	type: z.enum(artistTypes),
-	_id: z.string().nullable(),
-	name: z.string().optional(),
+// PRIMARY/FEATURING have _id (reference to existing artist)
+const artistRefWithIdSchema = z.object({
+	type: z.enum(['PRIMARY', 'FEATURING'] as const),
+	_id: z.string(),
 });
+
+// SONGWRITER/PRODUCER have name only (no artist reference)
+const artistRefWithNameSchema = z.object({
+	type: z.enum(['SONGWRITER', 'PRODUCER'] as const),
+	name: z.string(),
+});
+
+export const artistRefSchema = z.union([artistRefWithIdSchema, artistRefWithNameSchema]);
 
 export type ArtistRef = z.infer<typeof artistRefSchema>;
 
@@ -66,8 +74,8 @@ export const stepOneSchema = z.object({
 		.array()
 		.min(1, 'At least one artist is required')
 		.refine(
-			(arr) => arr.some((a) => a.type === 'PRIMARY' && (a.name || a._id)),
-			'At least one primary artist with a name is required',
+			(arr) => arr.some((a) => a.type === 'PRIMARY'),
+			'At least one primary artist is required',
 		),
 	compositionCopyright: z.string().min(1, 'Composition copyright is required').max(100),
 	soundRecordingCopyright: z.string().min(1, 'Sound recording copyright is required').max(100),

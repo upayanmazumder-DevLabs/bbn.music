@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { getDropsByAdmin } from '$lib/api/sdk.gen';
-	import { getAuthHeaders } from '$lib/stores/auth';
+	import { getAuthHeaders } from '$lib/apiClient';
 	import type { AdminDrop } from '$lib/api/types.gen';
 	import AdminDropList from '$lib/components/admin/AdminDropList.svelte';
 

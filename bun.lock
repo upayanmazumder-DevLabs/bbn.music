@@ -6,8 +6,8 @@
       "name": "bbn.music",
       "dependencies": {
         "flowbite-svelte-icons": "^3.0.1",
-        "libphonenumber-js": "^1.12.31",
-        "posthog-js": "^1.306.2",
+        "libphonenumber-js": "^1.12.33",
+        "posthog-js": "^1.309.1",
         "zod": "^4.2.1",
       },
       "devDependencies": {
@@ -22,7 +22,7 @@
         "prettier": "^3.7.4",
         "prettier-plugin-svelte": "^3.4.1",
         "svelte": "^5.46.0",
-        "svelte-check": "^4.3.4",
+        "svelte-check": "^4.3.5",
         "tailwindcss": "^4.1.18",
         "typescript": "^5.9.3",
         "vite": "^7.3.0",

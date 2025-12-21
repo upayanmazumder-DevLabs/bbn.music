@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { Badge, Spinner } from '$lib/components/ui';
 	import type { AdminDrop } from '$lib/api/types.gen';
 	import { goto } from '$app/navigation';
 
@@ -13,14 +14,14 @@
 
 	const { drops, loading, loadingMore = false, error, hasMore, onLoadMore }: Props = $props();
 
-	function getAccountTypeColor(type: string | undefined): string {
+	function getAccountTypeBadgeColor(type: string | undefined): 'purple' | 'blue' | 'gray' {
 		switch (type) {
 			case 'VIP':
-				return 'bg-purple-500/20 text-purple-400';
+				return 'purple';
 			case 'SUBSCRIBED':
-				return 'bg-blue-500/20 text-blue-400';
+				return 'blue';
 			default:
-				return 'bg-gray-500/20 text-gray-400';
+				return 'gray';
 		}
 	}
 
@@ -33,9 +34,7 @@
 
 {#if loading && drops.length === 0}
 	<div class="flex items-center justify-center py-12">
-		<div
-			class="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin"
-		></div>
+		<Spinner size="lg" color="red" />
 	</div>
 {:else if error}
 	<div class="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400">
@@ -63,14 +62,12 @@
 						<td class="px-4 py-3">
 							<p class="text-white font-medium">{drop.title || 'Untitled'}</p>
 						</td>
-						<td class="px-4 py-3 text-gray-400 text-sm font-mono truncate max-w-32">{drop.user || '-'}</td>
+						<td class="px-4 py-3 text-gray-400 text-sm font-mono truncate max-w-32"
+							>{drop.user || '-'}</td
+						>
 						<td class="px-4 py-3 text-gray-400 text-sm">{drop.release || '-'}</td>
 						<td class="px-4 py-3">
-							<span
-								class="px-2 py-1 rounded text-xs font-medium {getAccountTypeColor(
-									drop.accountType,
-								)}">{drop.accountType}</span
-							>
+							<Badge color={getAccountTypeBadgeColor(drop.accountType)}>{drop.accountType}</Badge>
 						</td>
 					</tr>
 				{/each}
@@ -86,9 +83,7 @@
 				class="px-6 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 disabled:cursor-not-allowed text-white rounded-lg inline-flex items-center gap-2"
 			>
 				{#if loadingMore}
-					<div
-						class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
-					></div>
+					<Spinner size="sm" color="white" />
 					Loading...
 				{:else}
 					Load More

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
+	import { Button, Spinner } from '$lib/components/ui';
 	import { getPayoutsByAdmin, postSyncMappingByAdmin } from '$lib/api/sdk.gen';
-	import { getAuthHeaders } from '$lib/stores/auth';
+	import { getAuthHeaders } from '$lib/apiClient';
 	import type { PayoutList } from '$lib/api/types.gen';
 
 	let payouts = $state<PayoutList[]>([]);
@@ -52,21 +53,15 @@
 	<div class="flex items-center justify-between mb-6">
 		<h1 class="text-2xl font-bold text-white">Payouts</h1>
 		<div class="flex gap-3">
-			<button
-				onclick={syncMapping}
-				disabled={syncing}
-				class="px-4 py-2 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 text-white rounded-lg"
-			>
+			<Button onclick={syncMapping} disabled={syncing} variant="secondary" loading={syncing}>
 				{syncing ? 'Syncing...' : 'Sync Mapping'}
-			</button>
+			</Button>
 		</div>
 	</div>
 
 	{#if loading}
 		<div class="flex items-center justify-center py-12">
-			<div
-				class="w-8 h-8 border-2 border-red-500 border-t-transparent rounded-full animate-spin"
-			></div>
+			<Spinner size="lg" color="red" />
 		</div>
 	{:else if error}
 		<div class="bg-red-500/10 border border-red-500/20 rounded-lg p-4 text-red-400">{error}</div>

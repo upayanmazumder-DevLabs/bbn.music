@@ -108,7 +108,9 @@
 			class="absolute left-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50"
 			role="menu"
 		>
-			<div class="px-3 py-1.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+			<div
+				class="px-3 py-1.5 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wide"
+			>
 				Switch to
 			</div>
 
@@ -120,7 +122,11 @@
 					class="flex items-center justify-between px-3 py-2.5 hover:bg-black/5 dark:hover:bg-white/10 transition-colors group"
 				>
 					<div class="flex items-center gap-3">
-						<img src={app.logo} alt={app.label} class="h-5 w-auto opacity-90 brightness-0 dark:brightness-100" />
+						<img
+							src={app.logo}
+							alt={app.label}
+							class="h-5 w-auto opacity-90 brightness-0 dark:brightness-100"
+						/>
 					</div>
 					<ChevronRightOutline
 						class="w-4 h-4 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors"

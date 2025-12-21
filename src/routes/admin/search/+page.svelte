@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { Badge, Button, Spinner } from '$lib/components/ui';
 	import {
 		getQueryBySearchByAdmin,
 		getIdByWalletsByAdmin,
 		patchIdByWalletsByAdmin,
 	} from '$lib/api/sdk.gen';
-	import { getAuthHeaders } from '$lib/stores/auth';
+	import { getAuthHeaders } from '$lib/apiClient';
 	import type { SearchReturn, AdminWallet, AccountType, Wallet, ArtistRef } from '$lib/api/types.gen';
 
 	import {
@@ -190,13 +191,14 @@
 				class="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
 			/>
 		</div>
-		<button
+		<Button
 			onclick={search}
 			disabled={loading || !searchQuery.trim()}
-			class="px-6 py-2 bg-red-500 hover:bg-red-600 disabled:bg-gray-700 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+			variant="danger"
+			loading={loading}
 		>
 			{loading ? 'Searching...' : 'Search'}
-		</button>
+		</Button>
 	</div>
 
 	<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -281,9 +283,7 @@
 
 			{#if loadingDetails}
 				<div class="flex items-center justify-center py-8">
-					<div
-						class="w-6 h-6 border-2 border-red-500 border-t-transparent rounded-full animate-spin"
-					></div>
+					<Spinner size="md" color="red" />
 				</div>
 			{:else if !selectedItem}
 				<p class="text-gray-500 text-center py-8">Select an item to view details</p>
@@ -302,9 +302,7 @@
 							<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Groups</h3>
 							<div class="flex flex-wrap gap-2">
 								{#each (selectedItem as UserSearchResult)._source.groups as group}
-									<span class="px-2 py-1 bg-purple-500/20 text-purple-400 text-xs rounded"
-										>{group}</span
-									>
+									<Badge color="purple">{group}</Badge>
 								{/each}
 							</div>
 						</div>
@@ -441,13 +439,14 @@
 					{/if}
 
 					{#if songSourceAny.dropId}
-						<button
+						<Button
 							onclick={() => navigateToDropById(songSourceAny.dropId)}
-							class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors"
+							variant="danger"
+							class="w-full"
 						>
 							<span>View Parent Drop</span>
 							<ArrowRightOutline class="w-4 h-4" />
-						</button>
+						</Button>
 					{/if}
 				</div>
 			{:else if selectedType === 'wallets'}

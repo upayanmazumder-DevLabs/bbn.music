@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Button, Card } from '$lib/components/ui';
+	import { Button, Card, Modal, Spinner } from '$lib/components/ui';
+	import { EnvelopeSolid } from 'flowbite-svelte-icons';
 	import type { Wallet } from '$lib/api/types.gen';
 	import { getWallet } from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
-	import { toast } from '$lib/stores/toast';
+	import { auth } from '$lib/stores/auth';
 
 	let wallet = $state<Wallet | null>(null);
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
+	let showPayoutModal = $state(false);
 
 	onMount(async () => {
 		try {
@@ -31,8 +33,29 @@
 		return `£ ${amount.toFixed(2)}`;
 	}
 
-	function formatDate(timestamp: string): string {
-		return new Date(timestamp).toLocaleDateString('en-GB', {
+	function formatDate(timestamp: string | number): string {
+		// Handle both ISO strings and Unix timestamps (in seconds or milliseconds)
+		let date: Date;
+		if (typeof timestamp === 'number') {
+			// If it's a small number, it's likely seconds; convert to milliseconds
+			date = new Date(timestamp < 10000000000 ? timestamp * 1000 : timestamp);
+		} else if (typeof timestamp === 'string') {
+			// Try parsing as ISO string first
+			date = new Date(timestamp);
+			// If invalid, try parsing as a number
+			if (isNaN(date.getTime())) {
+				const num = Number(timestamp);
+				date = new Date(num < 10000000000 ? num * 1000 : num);
+			}
+		} else {
+			return 'N/A';
+		}
+
+		if (isNaN(date.getTime())) {
+			return 'N/A';
+		}
+
+		return date.toLocaleDateString('en-GB', {
 			day: 'numeric',
 			month: 'short',
 			year: 'numeric',
@@ -52,8 +75,30 @@
 		}
 	}
 
-	function requestPayout() {
-		toast.show('Please email support@bbn.music and include your PayPal Address', 'info', 6000);
+	function openPayoutModal() {
+		showPayoutModal = true;
+	}
+
+	function getMailtoLink(): string {
+		const email = 'support@bbn.music';
+		const subject = 'Payout Request';
+		const balance = wallet
+			? formatCurrency((wallet.balance?.unrestrained ?? 0) + (wallet.balance?.restrained ?? 0))
+			: '£ 0.00';
+		const username = $auth.user?.profile?.username || 'Unknown';
+		const accountId = $auth.user?.id || 'Unknown';
+		const body = `Hi,
+
+I would like to request a payout for my BBN Music wallet.
+
+Username: ${username}
+Account ID: ${accountId}
+Current Balance: ${balance}
+PayPal Email: [Please enter your PayPal email address]
+
+Thank you!`;
+
+		return `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
 	}
 </script>
 
@@ -65,14 +110,12 @@
 	<!-- Header -->
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<h1 class="text-3xl font-bold text-gray-900 dark:text-white">Your Wallet</h1>
-		<Button onclick={requestPayout}>Request Payout</Button>
+		<Button onclick={openPayoutModal}>Request Payout</Button>
 	</div>
 
 	{#if isLoading}
 		<div class="flex justify-center items-center h-64">
-			<div
-				class="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin"
-			></div>
+			<Spinner size="xl" />
 		</div>
 	{:else if error}
 		<Card variant="default" padding="lg">
@@ -159,3 +202,54 @@
 		</Card>
 	{/if}
 </div>
+
+<!-- Payout Request Modal -->
+<Modal bind:open={showPayoutModal} title="Request Payout" size="md">
+	<div class="space-y-6">
+		<div class="text-center">
+			<div class="w-16 h-16 mx-auto bg-orange-500/20 rounded-full flex items-center justify-center mb-4">
+				<EnvelopeSolid class="w-8 h-8 text-orange-400" />
+			</div>
+			<p class="text-gray-300 mb-4">
+				To request a payout, please send an email to our support team with your PayPal address.
+			</p>
+		</div>
+
+		{#if wallet}
+			<div class="bg-gray-800/50 rounded-lg p-4 space-y-2">
+				<div class="flex justify-between">
+					<span class="text-gray-400">Available Balance</span>
+					<span class="text-white font-semibold">
+						{formatCurrency((wallet.balance?.unrestrained ?? 0) + (wallet.balance?.restrained ?? 0))}
+					</span>
+				</div>
+				{#if wallet.balance?.restrained && wallet.balance.restrained > 0}
+					<div class="flex justify-between text-sm">
+						<span class="text-gray-500">Pending</span>
+						<span class="text-gray-400">{formatCurrency(wallet.balance.restrained)}</span>
+					</div>
+				{/if}
+			</div>
+		{/if}
+
+		<div class="bg-gray-800/30 rounded-lg p-4 border border-gray-700/50">
+			<h4 class="text-sm font-medium text-gray-300 mb-2">Please include in your email:</h4>
+			<ul class="text-sm text-gray-400 space-y-1 list-disc list-inside">
+				<li>Your PayPal email address</li>
+				<li>The amount you wish to withdraw</li>
+			</ul>
+		</div>
+
+		<p class="text-xs text-gray-500 text-center">
+			Payouts are typically processed within 3-5 business days.
+		</p>
+	</div>
+
+	{#snippet footer()}
+		<Button variant="secondary" onclick={() => (showPayoutModal = false)}>Cancel</Button>
+		<Button onclick={() => (window.location.href = getMailtoLink())}>
+			<EnvelopeSolid class="w-4 h-4" />
+			Send Email
+		</Button>
+	{/snippet}
+</Modal>

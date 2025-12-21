@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Card, Button } from '$lib/components/ui';
+	import { Card, Button, Spinner } from '$lib/components/ui';
 	import { ChartPieSolid, CashSolid, PlaySolid } from 'flowbite-svelte-icons';
 	import type { PayoutResponse } from '$lib/api/types.gen';
 	import { getPayoutsByPayment } from '$lib/api/sdk.gen';
@@ -153,9 +153,7 @@
 
 	{#if isLoading}
 		<div class="flex justify-center items-center h-64">
-			<div
-				class="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin"
-			></div>
+			<Spinner size="xl" />
 		</div>
 	{:else if error}
 		<Card variant="default" padding="lg">

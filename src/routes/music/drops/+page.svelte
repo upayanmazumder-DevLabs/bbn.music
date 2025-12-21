@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { Button, Card, Badge } from '$lib/components/ui';
+	import { Button, Card, Badge, Spinner } from '$lib/components/ui';
 	import { PlusOutline } from 'flowbite-svelte-icons';
 	import type { Drop, Artist, ArtistRef } from '$lib/api/types.gen';
 	import { auth } from '$lib/stores/auth';
@@ -15,7 +15,7 @@
 		{
 			id: 'published',
 			label: 'Published',
-			filter: ['PUBLISHED', 'TAKEDOWN_REQUESTED'],
+			filter: ['PUBLISHED', 'TAKEDOWN_REQUESTED', 'EDIT_UNDER_REVIEW'],
 		},
 		{
 			id: 'unpublished',
@@ -167,6 +167,8 @@
 				return { color: 'blue', label: 'Publishing' };
 			case 'UNDER_REVIEW':
 				return { color: 'orange', label: 'Under Review' };
+			case 'EDIT_UNDER_REVIEW':
+				return { color: 'purple', label: 'Edit Pending' };
 			case 'PRIVATE':
 				return { color: 'gray', label: 'Private' };
 			case 'REVIEW_DECLINED':
@@ -253,9 +255,7 @@
 	<!-- Content -->
 	{#if isLoading}
 		<div class="flex justify-center items-center h-64">
-			<div
-				class="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin"
-			></div>
+			<Spinner size="xl" />
 		</div>
 	{:else if error}
 		<Card variant="default" padding="lg">

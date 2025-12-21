@@ -91,7 +91,9 @@
 		>
 			{#if title || dismissible}
 				<!-- Header -->
-				<div class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
+				<div
+					class="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700 flex-shrink-0"
+				>
 					{#if title}
 						<h3 id="modal-title" class="text-xl font-semibold text-gray-900 dark:text-white">
 							{title}
@@ -124,7 +126,9 @@
 
 			{#if footer}
 				<!-- Footer -->
-				<div class="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700 flex-shrink-0">
+				<div
+					class="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700 flex-shrink-0"
+				>
 					{@render footer()}
 				</div>
 			{/if}

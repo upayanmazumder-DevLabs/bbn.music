@@ -31,9 +31,9 @@
 		Badge,
 		Toggle,
 		Alert,
-		IconButton,
-		ArtistSearch,
 	} from '$lib/components/ui';
+	import ArtistModal from '$lib/components/ArtistModal.svelte';
+	import ArtistList from '$lib/components/ArtistList.svelte';
 
 	import { primaryGenres, getSecondaryGenres } from '$lib/data/genres';
 	import { languages, getLanguageName } from '$lib/data/languages';
@@ -43,9 +43,7 @@
 		stepTwoSchema,
 		stepThreeSchema,
 		type ArtistRef,
-		type ArtistType,
 		type Song,
-		artistTypes,
 	} from '$lib/types/drop';
 	import {
 		getIdByDropsByMusic,
@@ -80,18 +78,9 @@
 	let allArtists = $state<Artist[]>([]); // For resolving artist IDs to names
 
 	// Helper function to resolve artist name from ID
-	function getArtistName(artistRef: ArtistRef): string {
-		// If we have a name directly, use it
-		if (artistRef.name) return artistRef.name;
-
-		// If we have an ID, look it up in allArtists
-		if (artistRef._id) {
-			const artist = allArtists.find((a) => a._id === artistRef._id);
-			if (artist) return artist.name;
-			return artistRef._id; // Fallback to showing ID
-		}
-
-		return 'Unknown Artist';
+	function getArtistNameById(id: string): string | undefined {
+		const artist = allArtists.find((a) => a._id === id);
+		return artist?.name;
 	}
 
 	// Load existing drop data on mount
@@ -131,21 +120,19 @@
 
 				// Map API artists to form artists with name resolution
 				formState.artists = drop.artists?.length
-					? drop.artists.map((a: ApiArtistRef) => {
-							const _id = '_id' in a ? a._id : null;
-							let name = 'name' in a ? a.name : undefined;
-
-							// If we have an ID but no name, look it up
-							if (_id && !name) {
-								const artist = allArtists.find((art) => art._id === _id);
-								if (artist) name = artist.name;
+					? drop.artists.map((a: ApiArtistRef): ArtistRef => {
+							if (a.type === 'PRIMARY' || a.type === 'FEATURING') {
+								const _id = '_id' in a ? a._id : '';
+								return { type: a.type, _id };
+							} else {
+								let name = 'name' in a ? a.name : '';
+								// If we have an ID but no name, look it up
+								if (!name && '_id' in a) {
+									const artist = allArtists.find((art) => art._id === a._id);
+									if (artist) name = artist.name;
+								}
+								return { type: a.type, name };
 							}
-
-							return {
-								type: a.type,
-								_id,
-								name,
-							};
 						})
 					: [];
 
@@ -163,21 +150,19 @@
 								_id: s._id,
 								title: s.title,
 								artists:
-									s.artists?.map((a: ApiArtistRef) => {
-										const _id = '_id' in a ? a._id : null;
-										let name = 'name' in a ? a.name : undefined;
-
-										// If we have an ID but no name, look it up
-										if (_id && !name) {
-											const artist = allArtists.find((art) => art._id === _id);
-											if (artist) name = artist.name;
+									s.artists?.map((a: ApiArtistRef): ArtistRef => {
+										if (a.type === 'PRIMARY' || a.type === 'FEATURING') {
+											const _id = '_id' in a ? a._id : '';
+											return { type: a.type, _id };
+										} else {
+											let name = 'name' in a ? a.name : '';
+											// If we have an ID but no name, look it up
+											if (!name && '_id' in a) {
+												const artist = allArtists.find((art) => art._id === a._id);
+												if (artist) name = artist.name;
+											}
+											return { type: a.type, name };
 										}
-
-										return {
-											type: a.type,
-											_id,
-											name,
-										};
 									}) || [],
 								instrumental: !s.explicit, // API doesn't have instrumental, use inverse of explicit as default
 								explicit: s.explicit,
@@ -254,10 +239,10 @@
 	// Release date warning modal
 	let showReleaseDateWarning = $state(false);
 
-	// Temp artist/song for editing
-	let tempArtist = $state<ArtistRef>({ type: 'PRIMARY', _id: null, name: '' });
-	let tempArtistFirstName = $state('');
-	let tempArtistLastName = $state('');
+	// Editing state for artists
+	let editingArtist = $state<ArtistRef | null>(null);
+	let editingSongArtist = $state<ArtistRef | null>(null);
+	let editingSongArtistIndex = $state<number | null>(null);
 	let tempSong = $state<Partial<Song> & { year?: number; language?: string }>({
 		_id: crypto.randomUUID(),
 		title: '',
@@ -471,74 +456,50 @@
 
 	// Artist management
 	function openAddArtist() {
-		tempArtist = { type: 'PRIMARY', _id: null, name: '' };
-		tempArtistFirstName = '';
-		tempArtistLastName = '';
+		editingArtist = null;
 		editingArtistIndex = null;
 		showArtistModal = true;
 	}
 
 	function openEditArtist(index: number) {
-		const artist = formState.artists[index];
-		tempArtist = { ...artist };
-
-		// For producer/songwriter, split the name at the last space
-		if ((artist.type === 'PRODUCER' || artist.type === 'SONGWRITER') && artist.name) {
-			const lastSpaceIndex = artist.name.lastIndexOf(' ');
-			if (lastSpaceIndex > 0) {
-				tempArtistFirstName = artist.name.substring(0, lastSpaceIndex);
-				tempArtistLastName = artist.name.substring(lastSpaceIndex + 1);
-			} else {
-				// No space found, put everything in first name
-				tempArtistFirstName = artist.name;
-				tempArtistLastName = '';
-			}
-		} else {
-			tempArtistFirstName = '';
-			tempArtistLastName = '';
-		}
-
+		editingArtist = formState.artists[index];
 		editingArtistIndex = index;
 		showArtistModal = true;
 	}
 
-	function saveArtist() {
-		// For producer/songwriter, merge first and last name
-		const artistToSave = { ...tempArtist };
-		if (tempArtist.type === 'PRODUCER' || tempArtist.type === 'SONGWRITER') {
-			const fullName = [tempArtistFirstName.trim(), tempArtistLastName.trim()]
-				.filter(Boolean)
-				.join(' ');
-			artistToSave.name = fullName;
-			artistToSave._id = null; // Producer/songwriter don't use artist refs
-		}
-
-		// Check for duplicates (same artist with same type)
-		const isDuplicate = formState.artists.some((artist, index) => {
-			// Skip the current artist if we're editing
+	function handleSaveArtist(artist: ArtistRef) {
+		// Check for duplicates
+		const isDuplicate = formState.artists.some((a, index) => {
 			if (editingArtistIndex !== null && index === editingArtistIndex) return false;
+			if (a.type !== artist.type) return false;
 
-			// Check if same type and same artist (by _id or name)
-			if (artist.type === artistToSave.type) {
-				if (artistToSave._id && artist._id === artistToSave._id) return true;
-				if (artistToSave.name && artist.name?.toLowerCase() === artistToSave.name.toLowerCase())
-					return true;
+			// Check based on artist type (discriminated union)
+			if (
+				(a.type === 'PRIMARY' || a.type === 'FEATURING') &&
+				(artist.type === 'PRIMARY' || artist.type === 'FEATURING')
+			) {
+				return a._id === artist._id;
+			} else if (
+				(a.type === 'SONGWRITER' || a.type === 'PRODUCER') &&
+				(artist.type === 'SONGWRITER' || artist.type === 'PRODUCER')
+			) {
+				return a.name.toLowerCase() === artist.name.toLowerCase();
 			}
 			return false;
 		});
 
 		if (isDuplicate) {
 			toast.show(
-				`This artist is already added as a ${getArtistTypeLabel(artistToSave.type).toLowerCase()}`,
+				`This artist is already added as a ${getArtistTypeLabel(artist.type).toLowerCase()}`,
 				'warning',
 			);
 			return;
 		}
 
 		if (editingArtistIndex !== null) {
-			formState.artists[editingArtistIndex] = { ...artistToSave };
+			formState.artists[editingArtistIndex] = artist;
 		} else {
-			formState.artists = [...formState.artists, { ...artistToSave }];
+			formState.artists = [...formState.artists, artist];
 		}
 		showArtistModal = false;
 	}
@@ -637,53 +598,103 @@
 
 	// Song artist management
 	let showSongArtistModal = $state(false);
-	let tempSongArtist = $state<{
-		type: ArtistType;
-		_id: string | null;
-		name: string;
-	}>({ type: 'PRIMARY', _id: null, name: '' });
-	let tempSongArtistFirstName = $state('');
-	let tempSongArtistLastName = $state('');
 
 	function openAddSongArtist() {
-		tempSongArtist = { type: 'PRIMARY', _id: null, name: '' };
-		tempSongArtistFirstName = '';
-		tempSongArtistLastName = '';
+		editingSongArtist = null;
+		editingSongArtistIndex = null;
 		showSongArtistModal = true;
 	}
 
-	function saveSongArtist() {
-		let artistName = tempSongArtist.name;
-		let artistId = tempSongArtist._id;
+	function openEditSongArtist(index: number) {
+		editingSongArtist = tempSong.artists?.[index] || null;
+		editingSongArtistIndex = index;
+		showSongArtistModal = true;
+	}
 
-		// For producer/songwriter, merge first and last name
-		if (tempSongArtist.type === 'PRODUCER' || tempSongArtist.type === 'SONGWRITER') {
-			artistName = [tempSongArtistFirstName.trim(), tempSongArtistLastName.trim()]
-				.filter(Boolean)
-				.join(' ');
-			artistId = null; // Producer/songwriter don't use artist refs
-
-			if (!artistName) {
-				toast.show('Please enter first and last name', 'error');
-				return;
-			}
-		} else if (!artistName && !artistId) {
-			toast.show('Please select or enter an artist name', 'error');
-			return;
+	function handleSaveSongArtist(artist: ArtistRef) {
+		if (editingSongArtistIndex !== null) {
+			const artists = [...(tempSong.artists || [])];
+			artists[editingSongArtistIndex] = artist;
+			tempSong.artists = artists;
+		} else {
+			tempSong.artists = [...(tempSong.artists || []), artist];
 		}
-
-		const newArtist: ArtistRef = {
-			type: tempSongArtist.type,
-			_id: artistId,
-			name: artistName,
-		};
-
-		tempSong.artists = [...(tempSong.artists || []), newArtist];
 		showSongArtistModal = false;
 	}
 
 	function removeSong(index: number) {
 		formState.songs = formState.songs.filter((_, i) => i !== index);
+	}
+
+	// Song drag and drop state
+	let draggedSongIndex = $state<number | null>(null);
+	let dragOverIndex = $state<number | null>(null);
+	let dropPosition = $state<'above' | 'below' | null>(null);
+
+	function handleSongDragStart(e: DragEvent, index: number) {
+		draggedSongIndex = index;
+		// Set drag effect
+		if (e.dataTransfer) {
+			e.dataTransfer.effectAllowed = 'move';
+			e.dataTransfer.setData('text/plain', String(index));
+		}
+	}
+
+	function handleSongDragOver(e: DragEvent, index: number) {
+		e.preventDefault();
+		if (e.dataTransfer) {
+			e.dataTransfer.dropEffect = 'move';
+		}
+		if (draggedSongIndex !== null && draggedSongIndex !== index) {
+			dragOverIndex = index;
+			// Determine if dropping above or below based on mouse position
+			const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+			const midpoint = rect.top + rect.height / 2;
+			dropPosition = e.clientY < midpoint ? 'above' : 'below';
+		}
+	}
+
+	function handleSongDragLeave(e: DragEvent) {
+		// Only clear if leaving the element entirely (not entering a child)
+		const relatedTarget = e.relatedTarget as HTMLElement;
+		if (!relatedTarget || !(e.currentTarget as HTMLElement).contains(relatedTarget)) {
+			dragOverIndex = null;
+			dropPosition = null;
+		}
+	}
+
+	function handleSongDrop(index: number) {
+		if (draggedSongIndex === null || draggedSongIndex === index) {
+			draggedSongIndex = null;
+			dragOverIndex = null;
+			dropPosition = null;
+			return;
+		}
+
+		const newSongs = [...formState.songs];
+		const [draggedSong] = newSongs.splice(draggedSongIndex, 1);
+
+		// Calculate insert position based on drop position and indices
+		let insertIndex = index;
+		if (dropPosition === 'below') {
+			insertIndex = draggedSongIndex < index ? index : index + 1;
+		} else {
+			insertIndex = draggedSongIndex < index ? index - 1 : index;
+		}
+		insertIndex = Math.max(0, Math.min(insertIndex, newSongs.length));
+
+		newSongs.splice(insertIndex, 0, draggedSong);
+		formState.songs = newSongs;
+
+		draggedSongIndex = null;
+		dragOverIndex = null;
+		dropPosition = null;
+	}
+
+	function handleSongDragEnd() {
+		draggedSongIndex = null;
+		dragOverIndex = null;
+		dropPosition = null;
 	}
 
 	// Song upload
@@ -985,9 +996,7 @@
 
 	{#if initialLoading}
 		<div class="flex flex-col items-center justify-center py-24">
-			<div
-				class="w-12 h-12 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mb-4"
-			></div>
+			<Spinner size="xl" class="mb-4" />
 			<p class="text-gray-400">Loading drop data...</p>
 		</div>
 	{:else if loadError}
@@ -1101,73 +1110,20 @@
 									Add primary artists, features, songwriters & producers
 								</p>
 							</div>
-							<Button onclick={openAddArtist}>
-								<PlusOutline class="w-4 h-4" /> Add Artist
-							</Button>
 						</div>
 
 						{#if formState.errors['artists']}
 							<p class="text-sm text-red-400 mb-2">{formState.errors['artists']}</p>
 						{/if}
-						<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-							{#each formState.artists as artist, index}
-								<div
-									class="group flex items-center gap-4 p-4 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl border border-gray-700/50 hover:border-orange-500/50 focus-within:border-orange-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10 focus-within:shadow-lg focus-within:shadow-orange-500/10"
-								>
-									<div
-										class="w-12 h-12 rounded-xl bg-gradient-to-br from-{getArtistTypeColor(
-											artist.type,
-										)}-500 to-{getArtistTypeColor(
-											artist.type,
-										)}-600 flex items-center justify-center shadow-lg flex-shrink-0"
-									>
-										<UserSolid class="w-6 h-6 text-white" />
-									</div>
-									<div class="flex-1 min-w-0">
-										<p class="text-white font-semibold truncate">
-											{artist.name || 'Unnamed Artist'}
-										</p>
-										<p class="text-sm text-gray-400 font-medium">
-											{getArtistTypeLabel(artist.type)}
-										</p>
-									</div>
-									<div class="flex gap-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity">
-										<button
-											onclick={() => openEditArtist(index)}
-											class="p-2 hover:bg-white/10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white/10"
-											aria-label="Edit artist"
-										>
-											<EditOutline
-												class="w-4 h-4 text-gray-400 hover:text-white transition-colors"
-											/>
-										</button>
-										<button
-											onclick={() => removeArtist(index)}
-											class="p-2 hover:bg-red-500/10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-red-500/10"
-											aria-label="Remove artist"
-										>
-											<TrashBinOutline
-												class="w-4 h-4 text-gray-400 hover:text-red-400 transition-colors"
-											/>
-										</button>
-									</div>
-								</div>
-							{/each}
-
-							{#if formState.artists.length === 0}
-								<div
-									class="col-span-full text-center py-12 border-2 border-dashed border-gray-700 rounded-2xl"
-								>
-									<div
-										class="w-16 h-16 rounded-2xl bg-gray-800 flex items-center justify-center mx-auto mb-4"
-									>
-										<UserSolid class="w-8 h-8 text-gray-500" />
-									</div>
-									<p class="text-gray-400 font-medium mb-1">No artists yet</p>
-									<p class="text-gray-400 text-sm">Click "Add Artist" to get started</p>
-								</div>
-							{/if}
-						</div>
+						<ArtistList
+							artists={formState.artists}
+							editable
+							onadd={openAddArtist}
+							onedit={openEditArtist}
+							onremove={removeArtist}
+							emptyMessage="No artists yet. Click 'Add Artist' to get started."
+							resolveName={getArtistNameById}
+						/>
 					</div>
 
 					<!-- Genre Section -->
@@ -1303,9 +1259,7 @@
 								<div
 									class="w-full h-full bg-gradient-to-br from-gray-800 via-gray-850 to-gray-900 flex flex-col items-center justify-center"
 								>
-									<div
-										class="w-16 h-16 border-4 border-orange-500/30 border-t-orange-500 rounded-full animate-spin mb-4"
-									></div>
+									<Spinner size="xl" class="mb-4" />
 									<p class="text-white font-semibold">Uploading artwork...</p>
 								</div>
 							{:else if formState.artworkPreview}
@@ -1399,49 +1353,89 @@
 						</Button>
 					</div>
 
-					<div class="space-y-3">
+					<div class="space-y-1" role="list">
 						{#each formState.songs as song, index}
-							<div
-								class="group flex items-center gap-4 p-5 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl border border-gray-700/50 hover:border-orange-500/50 focus-within:border-orange-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/10 focus-within:shadow-lg focus-within:shadow-orange-500/10"
-							>
+							<div class="relative">
+								<!-- Drop indicator above -->
+								{#if dragOverIndex === index && dropPosition === 'above'}
+									<div class="absolute -top-1 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent rounded-full z-10">
+										<div class="absolute left-1/2 -translate-x-1/2 -top-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-gray-900"></div>
+									</div>
+								{/if}
+
 								<div
-									class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500/30 to-orange-600/30 flex items-center justify-center text-orange-400 font-bold text-lg shadow-lg border border-orange-500/20 flex-shrink-0"
+									draggable="true"
+									ondragstart={(e) => handleSongDragStart(e, index)}
+									ondragover={(e) => handleSongDragOver(e, index)}
+									ondragleave={(e) => handleSongDragLeave(e)}
+									ondrop={() => handleSongDrop(index)}
+									ondragend={handleSongDragEnd}
+									class="group flex items-center gap-4 p-5 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl border-2 transition-all duration-200 select-none
+										{draggedSongIndex === index
+											? 'opacity-40 scale-[0.98] border-gray-600 shadow-none'
+											: draggedSongIndex !== null
+												? 'border-gray-700/50'
+												: 'border-gray-700/50 hover:border-orange-500/50 hover:shadow-lg hover:shadow-orange-500/10'}
+										{draggedSongIndex === null ? 'cursor-grab' : 'cursor-grabbing'}"
+									role="listitem"
+									aria-grabbed={draggedSongIndex === index}
 								>
-									{index + 1}
-								</div>
-								<MusicSolid class="w-5 h-5 text-gray-500 flex-shrink-0" />
-								<div class="flex-1 min-w-0">
-									<p class="text-white font-semibold truncate text-lg">
-										{song.title || 'Untitled Song'}
-									</p>
-									<p class="text-sm text-gray-400 truncate">
-										{song.artists
-											.filter((a) => a.type === 'PRIMARY')
-											.map((a) => a.name || a._id)
-											.join(', ') || 'No artists assigned'}
-									</p>
-								</div>
-								<div class="flex items-center gap-2 flex-shrink-0">
-									{#if song.explicit}
-										<Badge color="red" size="sm">Explicit</Badge>
-									{/if}
-									{#if song.instrumental}
-										<Badge color="blue" size="sm">Instrumental</Badge>
-									{/if}
-								</div>
-								<div
-									class="flex gap-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex-shrink-0"
-								>
-									<button
-										onclick={() => openEditSong(index)}
-										class="p-2 hover:bg-white/10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white/10"
-										aria-label="Edit song"
+									<!-- Drag handle - grip pattern -->
+									<div class="flex-shrink-0 flex flex-col gap-1 p-1 -ml-1 text-gray-600 hover:text-gray-400 transition-colors">
+										<div class="flex gap-1">
+											<div class="w-1 h-1 rounded-full bg-current"></div>
+											<div class="w-1 h-1 rounded-full bg-current"></div>
+										</div>
+										<div class="flex gap-1">
+											<div class="w-1 h-1 rounded-full bg-current"></div>
+											<div class="w-1 h-1 rounded-full bg-current"></div>
+										</div>
+										<div class="flex gap-1">
+											<div class="w-1 h-1 rounded-full bg-current"></div>
+											<div class="w-1 h-1 rounded-full bg-current"></div>
+										</div>
+									</div>
+									<div
+										class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500/30 to-orange-600/30 flex items-center justify-center text-orange-400 font-bold text-lg shadow-lg border border-orange-500/20 flex-shrink-0"
 									>
-										<EditOutline class="w-4 h-4 text-gray-400 hover:text-white transition-colors" />
-									</button>
-									<button
-										onclick={() => removeSong(index)}
-										class="p-2 hover:bg-red-500/10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-red-500/10"
+										{index + 1}
+									</div>
+									<MusicSolid class="w-5 h-5 text-gray-500 flex-shrink-0" />
+									<div class="flex-1 min-w-0">
+										<p class="text-white font-semibold truncate text-lg">
+											{song.title || 'Untitled Song'}
+										</p>
+										<p class="text-sm text-gray-400 truncate">
+											{song.artists
+												.filter((a): a is { type: 'PRIMARY'; _id: string } => a.type === 'PRIMARY')
+												.map((a) => {
+													const artist = allArtists.find((art) => art._id === a._id);
+													return artist?.name || a._id;
+												})
+												.join(', ') || 'No artists assigned'}
+										</p>
+									</div>
+									<div class="flex items-center gap-2 flex-shrink-0">
+										{#if song.explicit}
+											<Badge color="red" size="sm">Explicit</Badge>
+										{/if}
+										{#if song.instrumental}
+											<Badge color="blue" size="sm">Instrumental</Badge>
+										{/if}
+									</div>
+									<div
+										class="flex gap-1 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex-shrink-0"
+									>
+										<button
+											onclick={() => openEditSong(index)}
+											class="p-2 hover:bg-white/10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white/10"
+											aria-label="Edit song"
+										>
+											<EditOutline class="w-4 h-4 text-gray-400 hover:text-white transition-colors" />
+										</button>
+										<button
+											onclick={() => removeSong(index)}
+											class="p-2 hover:bg-red-500/10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-red-500/10"
 										aria-label="Remove song"
 									>
 										<TrashBinOutline
@@ -1449,6 +1443,14 @@
 										/>
 									</button>
 								</div>
+								</div>
+
+								<!-- Drop indicator below -->
+								{#if dragOverIndex === index && dropPosition === 'below'}
+									<div class="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent rounded-full z-10">
+										<div class="absolute left-1/2 -translate-x-1/2 -top-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-gray-900"></div>
+									</div>
+								{/if}
 							</div>
 						{/each}
 
@@ -1590,62 +1592,12 @@
 </div>
 
 <!-- Artist Modal -->
-<Modal
+<ArtistModal
 	bind:open={showArtistModal}
-	title={editingArtistIndex !== null ? 'Edit Artist' : 'Add Artist'}
-	size="md"
-	class="bg-gray-800"
->
-	<div class="space-y-4">
-		<Select bind:value={tempArtist.type} label="Artist Type">
-			{#each artistTypes as type}
-				<option value={type}>{getArtistTypeLabel(type)}</option>
-			{/each}
-		</Select>
-
-		{#if tempArtist.type === 'SONGWRITER' || tempArtist.type === 'PRODUCER'}
-			<div class="grid grid-cols-2 gap-4">
-				<Input
-					bind:value={tempArtistFirstName}
-					label="First Name"
-					placeholder="John"
-					required
-				/>
-				<Input
-					bind:value={tempArtistLastName}
-					label="Last Name"
-					placeholder="Doe"
-					required
-				/>
-			</div>
-			<p class="text-xs text-gray-500">
-				Enter the legal name of the {tempArtist.type.toLowerCase()}. This will be displayed as "{tempArtistFirstName || 'First'} {tempArtistLastName || 'Last'}".
-			</p>
-		{:else}
-			<ArtistSearch
-				selectedArtist={{ _id: tempArtist._id, name: tempArtist.name ?? '' }}
-				onselect={(artist) => {
-					tempArtist._id = artist._id;
-					tempArtist.name = artist.name;
-				}}
-				label="Artist Name"
-				placeholder="Search existing artists or create new..."
-			/>
-		{/if}
-	</div>
-
-	{#snippet footer()}
-		<Button variant="secondary" onclick={() => (showArtistModal = false)}>Cancel</Button>
-		<Button
-			onclick={saveArtist}
-			disabled={(tempArtist.type === 'SONGWRITER' || tempArtist.type === 'PRODUCER')
-				? !tempArtistFirstName.trim() || !tempArtistLastName.trim()
-				: !tempArtist.name}
-		>
-			Save Artist
-		</Button>
-	{/snippet}
-</Modal>
+	artist={editingArtist}
+	onclose={() => (showArtistModal = false)}
+	onsave={handleSaveArtist}
+/>
 
 <!-- Song Modal -->
 <Modal
@@ -1691,9 +1643,7 @@
 					!uploadingSong && e.key === 'Enter' && document.getElementById('song-file')?.click()}
 			>
 				{#if uploadingSong}
-					<div
-						class="w-16 h-16 rounded-full border-4 border-orange-500/30 border-t-orange-500 animate-spin mx-auto mb-4"
-					></div>
+					<Spinner size="xl" class="mx-auto mb-4" />
 					<p class="text-white font-semibold mb-1">Uploading... {songUploadProgress}%</p>
 					<p class="text-gray-400 text-sm">Please wait while we process your file</p>
 				{:else if songFileUploaded}
@@ -1790,54 +1740,32 @@
 			</div>
 		</div>
 
-		<!-- Step 3: Artists (collapsible/minimal) -->
+		<!-- Step 3: Artists -->
 		<div class="space-y-4">
-			<div class="flex items-center justify-between gap-3">
-				<div class="flex items-center gap-3">
-					<div class="w-8 h-8 rounded-lg bg-gray-700/50 flex items-center justify-center">
-						<UserSolid class="w-4 h-4 text-gray-400" />
-					</div>
-					<div class="flex-1">
-						<h3 class="text-lg font-semibold text-white">
-							Artists <span class="text-orange-400">*</span>
-						</h3>
-						<p class="text-sm text-gray-400">Add at least one artist</p>
-					</div>
+			<div class="flex items-center gap-3">
+				<div class="w-8 h-8 rounded-lg bg-gray-700/50 flex items-center justify-center">
+					<UserSolid class="w-4 h-4 text-gray-400" />
 				</div>
-				<Button size="sm" onclick={openAddSongArtist}>
-					<PlusOutline class="w-4 h-4" /> Add Artist
-				</Button>
+				<div class="flex-1">
+					<h3 class="text-lg font-semibold text-white">
+						Artists <span class="text-orange-400">*</span>
+					</h3>
+					<p class="text-sm text-gray-400">Add at least one artist</p>
+				</div>
 			</div>
 
-			{#if tempSong.artists && tempSong.artists.length > 0}
-				<div class="space-y-2">
-					{#each tempSong.artists as artist, index}
-						<div
-							class="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50"
-						>
-							<UserSolid class="w-4 h-4 text-gray-500 flex-shrink-0" />
-							<div class="flex-1 min-w-0">
-								<p class="text-sm font-medium text-white truncate">
-									{artist.name || 'Unknown Artist'}
-								</p>
-								<p class="text-xs text-gray-500">{artist.type}</p>
-							</div>
-							<IconButton
-								size="sm"
-								onclick={() => {
-									tempSong.artists = tempSong.artists?.filter((_, i) => i !== index) || [];
-								}}
-							>
-								<TrashBinOutline class="w-4 h-4" />
-							</IconButton>
-						</div>
-					{/each}
-				</div>
-			{:else}
-				<div class="p-4 bg-gray-800/30 border border-gray-700/50 rounded-lg text-center">
-					<p class="text-sm text-gray-400">No artists assigned yet</p>
-				</div>
-			{/if}
+			<ArtistList
+				artists={tempSong.artists || []}
+				editable
+				compact
+				onadd={openAddSongArtist}
+				onedit={openEditSongArtist}
+				onremove={(index) => {
+					tempSong.artists = tempSong.artists?.filter((_, i) => i !== index) || [];
+				}}
+				emptyMessage="No artists assigned yet"
+				resolveName={getArtistNameById}
+			/>
 		</div>
 
 		<!-- Step 4: Advanced (ISRC, Year, Language) -->
@@ -1914,57 +1842,13 @@
 </Modal>
 
 <!-- Song Artist Modal -->
-<Modal bind:open={showSongArtistModal} title="Add Artist to Song" size="md" class="bg-gray-800">
-	<div class="space-y-4">
-		<Select bind:value={tempSongArtist.type} label="Artist Type">
-			{#each artistTypes as type}
-				<option value={type}>{getArtistTypeLabel(type)}</option>
-			{/each}
-		</Select>
-
-		{#if tempSongArtist.type === 'SONGWRITER' || tempSongArtist.type === 'PRODUCER'}
-			<div class="grid grid-cols-2 gap-4">
-				<Input
-					bind:value={tempSongArtistFirstName}
-					label="First Name"
-					placeholder="John"
-					required
-				/>
-				<Input
-					bind:value={tempSongArtistLastName}
-					label="Last Name"
-					placeholder="Doe"
-					required
-				/>
-			</div>
-			<p class="text-xs text-gray-500">
-				Enter the legal name of the {tempSongArtist.type.toLowerCase()}. This will be displayed as "{tempSongArtistFirstName || 'First'} {tempSongArtistLastName || 'Last'}".
-			</p>
-		{:else}
-			<ArtistSearch
-				selectedArtist={{ _id: tempSongArtist._id, name: tempSongArtist.name }}
-				onselect={(artist) => {
-					tempSongArtist._id = artist._id;
-					tempSongArtist.name = artist.name;
-				}}
-				label="Artist Name"
-				placeholder="Search existing artists or create new..."
-			/>
-		{/if}
-	</div>
-
-	{#snippet footer()}
-		<Button variant="secondary" onclick={() => (showSongArtistModal = false)}>Cancel</Button>
-		<Button
-			onclick={saveSongArtist}
-			disabled={(tempSongArtist.type === 'SONGWRITER' || tempSongArtist.type === 'PRODUCER')
-				? !tempSongArtistFirstName.trim() || !tempSongArtistLastName.trim()
-				: !tempSongArtist.name}
-		>
-			Add Artist
-		</Button>
-	{/snippet}
-</Modal>
+<ArtistModal
+	bind:open={showSongArtistModal}
+	artist={editingSongArtist}
+	onclose={() => (showSongArtistModal = false)}
+	onsave={handleSaveSongArtist}
+	title={editingSongArtistIndex !== null ? 'Edit Artist' : 'Add Artist to Song'}
+/>
 
 <!-- Release Date Warning Modal -->
 <Modal bind:open={showReleaseDateWarning} title="Short Notice Warning" size="md">

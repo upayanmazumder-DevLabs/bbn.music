@@ -15,6 +15,7 @@
 		CheckCircleSolid,
 		CloseCircleSolid,
 		ExclamationCircleOutline,
+		ChevronDownOutline,
 	} from 'flowbite-svelte-icons';
 
 	import {
@@ -27,8 +28,10 @@
 		Toggle,
 		Alert,
 		IconButton,
-		ArtistSearch,
 	} from '$lib/components/ui';
+	import ArtistModal from '$lib/components/ArtistModal.svelte';
+	import ArtistList from '$lib/components/ArtistList.svelte';
+	import AudioPlayer from '$lib/components/AudioPlayer.svelte';
 	import { primaryGenres, getSecondaryGenres } from '$lib/data/genres';
 	import { languages, getLanguageName } from '$lib/data/languages';
 	import {
@@ -39,10 +42,11 @@
 		postShareByDropsByMusic,
 		getIdByShareByDropsByMusic,
 		deleteIdByShareByDropsByMusic,
+		getArtistsByMusic,
 	} from '$lib/api/sdk.gen.ts';
-	import { getAuthHeaders, auth } from '$lib/stores/auth';
-	import type { FullDrop, DropType, Song, ArtistRef, Share } from '$lib/api/types.gen';
-	import { artistTypes, type ArtistType } from '$lib/types/drop';
+	import { getAuthHeaders } from '$lib/apiClient';
+	import { auth } from '$lib/stores/auth';
+	import type { FullDrop, DropType, Song, ArtistRef, Share, Artist } from '$lib/api/types.gen';
 
 	// Drop ID is always defined in this route (guaranteed by SvelteKit routing)
 	const dropId = $page.params.id!;
@@ -54,6 +58,13 @@
 	let error = $state<string | null>(null);
 	let successMessage = $state<string | null>(null);
 	let artworkUrl = $state<string | null>(null);
+	let allArtists = $state<Artist[]>([]);
+
+	// Helper function to resolve artist name from ID
+	function getArtistNameById(id: string): string | undefined {
+		const artist = allArtists.find((a) => a._id === id);
+		return artist?.name;
+	}
 
 	// Edit state - track what's been modified
 	let hasChanges = $state(false);
@@ -77,13 +88,54 @@
 	// Modals
 	let showArtistModal = $state(false);
 	let editingArtistIndex = $state<number | null>(null);
-	let tempArtist = $state<{ type: ArtistType; _id: string | null; name: string }>({
-		type: 'PRIMARY',
-		_id: null,
-		name: '',
-	});
+	let editingArtist = $state<ArtistRef | null>(null);
 	let showStatusChangeModal = $state(false);
 	let pendingStatusChange = $state<DropType | null>(null);
+
+	// Song editing
+	let songs = $state<Song[]>([]);
+	let showSongModal = $state(false);
+	let editingSongIndex = $state<number | null>(null);
+	let tempSong = $state<{
+		title: string;
+		explicit: boolean;
+		instrumental: boolean;
+		artists: ArtistRef[];
+		isrc?: string;
+		primaryGenre: string;
+		secondaryGenre: string;
+		year?: number;
+		language: string;
+	}>({
+		title: '',
+		explicit: false,
+		instrumental: false,
+		artists: [],
+		isrc: undefined,
+		primaryGenre: '',
+		secondaryGenre: '',
+		year: undefined,
+		language: '',
+	});
+
+	// Track previous values to detect which toggle changed
+	let prevExplicit = $state(false);
+	let prevInstrumental = $state(false);
+
+	// Mutual exclusivity: explicit and instrumental cannot both be true
+	$effect(() => {
+		if (tempSong.explicit && !prevExplicit && tempSong.instrumental) {
+			tempSong.instrumental = false;
+		} else if (tempSong.instrumental && !prevInstrumental && tempSong.explicit) {
+			tempSong.explicit = false;
+		}
+		prevExplicit = tempSong.explicit;
+		prevInstrumental = tempSong.instrumental;
+	});
+
+	let showSongArtistModal = $state(false);
+	let editingSongArtistIndex = $state<number | null>(null);
+	let editingSongArtist = $state<ArtistRef | null>(null);
 
 	// Derived values
 	const secondaryGenreOptions = $derived(getSecondaryGenres(primaryGenre));
@@ -93,6 +145,15 @@
 			drop?.type === 'PUBLISHED' ||
 			drop?.type === 'EDIT_UNDER_REVIEW'
 	);
+	// GTIN/ISRC cannot be changed once the drop has been published
+	const isGtinEditable = $derived(
+		isEditable && (drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE')
+	);
+	const isIsrcEditable = $derived(
+		isEditable && (drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE')
+	);
+	// Secondary genre options for song modal
+	const tempSongSecondaryGenreOptions = $derived(getSecondaryGenres(tempSong.primaryGenre));
 	const canSubmitForReview = $derived(drop?.type === 'UNSUBMITTED');
 	const canCancelReview = $derived(drop?.type === 'UNDER_REVIEW');
 	const canRequestTakedown = $derived(drop?.type === 'PUBLISHED' || drop?.type === 'EDIT_UNDER_REVIEW');
@@ -108,6 +169,18 @@
 		loading = true;
 		error = null;
 		try {
+			// Load all artists first for name resolution
+			try {
+				const artistsResponse = await getArtistsByMusic({
+					headers: getAuthHeaders(),
+				});
+				if (artistsResponse.data) {
+					allArtists = artistsResponse.data as Artist[];
+				}
+			} catch (e) {
+				console.error('Failed to load artists:', e);
+			}
+
 			const response = await getIdByDropsByMusic({
 				path: { id: dropId },
 				headers: getAuthHeaders(),
@@ -124,7 +197,9 @@
 				soundRecordingCopyright = drop.soundRecordingCopyright;
 				gtin = drop.gtin ?? '';
 				comments = drop.comments ?? '';
+				// Copy artists (names resolved at display time via resolveName)
 				artists = [...drop.artists];
+				songs = drop.songs.map((s) => ({ ...s, artists: [...s.artists] }));
 
 				// Load artwork if available
 				if (drop.artwork) {
@@ -240,6 +315,7 @@
 					gtin: gtin || undefined,
 					comments: comments || undefined,
 					artists,
+					songs,
 				},
 				headers: getAuthHeaders(),
 			});
@@ -316,42 +392,22 @@
 
 	// Artist management
 	function openAddArtist() {
-		tempArtist = { type: 'PRIMARY', _id: null, name: '' };
+		editingArtist = null;
 		editingArtistIndex = null;
 		showArtistModal = true;
 	}
 
 	function openEditArtist(index: number) {
-		const artist = artists[index];
-		if ('_id' in artist) {
-			tempArtist = {
-				type: artist.type as ArtistType,
-				_id: artist._id,
-				name: '',
-			};
-		} else {
-			tempArtist = {
-				type: artist.type as ArtistType,
-				_id: null,
-				name: artist.name,
-			};
-		}
+		editingArtist = artists[index];
 		editingArtistIndex = index;
 		showArtistModal = true;
 	}
 
-	function saveArtist() {
-		let newArtist: ArtistRef;
-		if (tempArtist.type === 'PRIMARY' || tempArtist.type === 'FEATURING') {
-			newArtist = { _id: tempArtist._id ?? '', type: tempArtist.type };
-		} else {
-			newArtist = { name: tempArtist.name, type: tempArtist.type };
-		}
-
+	function handleSaveArtist(artist: ArtistRef) {
 		if (editingArtistIndex !== null) {
-			artists[editingArtistIndex] = newArtist;
+			artists[editingArtistIndex] = artist;
 		} else {
-			artists = [...artists, newArtist];
+			artists = [...artists, artist];
 		}
 		showArtistModal = false;
 		markChanged();
@@ -360,6 +416,74 @@
 	function removeArtist(index: number) {
 		artists = artists.filter((_, i) => i !== index);
 		markChanged();
+	}
+
+	// Song management
+	function openEditSong(index: number) {
+		const song = songs[index];
+		tempSong = {
+			title: song.title,
+			explicit: song.explicit ?? false,
+			instrumental: song.instrumental ?? false,
+			artists: [...song.artists],
+			isrc: song.isrc,
+			primaryGenre: song.primaryGenre ?? '',
+			secondaryGenre: song.secondaryGenre ?? '',
+			year: song.year,
+			language: song.language ?? '',
+		};
+		// Reset prev values to match the loaded song
+		prevExplicit = tempSong.explicit;
+		prevInstrumental = tempSong.instrumental;
+		editingSongIndex = index;
+		showSongModal = true;
+	}
+
+	function saveSong() {
+		if (editingSongIndex === null) return;
+
+		const existingSong = songs[editingSongIndex];
+		songs[editingSongIndex] = {
+			...existingSong,
+			title: tempSong.title,
+			explicit: tempSong.explicit,
+			instrumental: tempSong.instrumental,
+			artists: tempSong.artists,
+			isrc: tempSong.isrc,
+			primaryGenre: tempSong.primaryGenre || existingSong.primaryGenre,
+			secondaryGenre: tempSong.secondaryGenre || existingSong.secondaryGenre,
+			year: tempSong.year ?? existingSong.year,
+			language: tempSong.language || existingSong.language,
+		};
+		showSongModal = false;
+		editingSongIndex = null;
+		markChanged();
+	}
+
+	// Song artist management (within song modal)
+	function openAddSongArtist() {
+		editingSongArtist = null;
+		editingSongArtistIndex = null;
+		showSongArtistModal = true;
+	}
+
+	function openEditSongArtist(index: number) {
+		editingSongArtist = tempSong.artists[index];
+		editingSongArtistIndex = index;
+		showSongArtistModal = true;
+	}
+
+	function handleSaveSongArtist(artist: ArtistRef) {
+		if (editingSongArtistIndex !== null) {
+			tempSong.artists[editingSongArtistIndex] = artist;
+		} else {
+			tempSong.artists = [...tempSong.artists, artist];
+		}
+		showSongArtistModal = false;
+	}
+
+	function removeSongArtist(index: number) {
+		tempSong.artists = tempSong.artists.filter((_, i) => i !== index);
 	}
 
 	function getStatusColor(type: DropType | undefined): string {
@@ -406,15 +530,7 @@
 		}
 	}
 
-	function getArtistTypeLabel(type: string): string {
-		return type.charAt(0) + type.slice(1).toLowerCase();
-	}
-
-	function getArtistDisplayName(artist: ArtistRef): string {
-		if ('name' in artist) return artist.name;
-		return artist._id;
-	}
-</script>
+	</script>
 
 <svelte:head>
 	<title>{drop?.title ?? 'Loading...'} - Edit Drop - bbn.music</title>
@@ -599,7 +715,7 @@
 				{#if isAdmin}
 					<Card variant="glass" padding="md" class="mt-6 border-red-500/30">
 						<h3 class="text-lg font-semibold text-red-400 mb-4">Admin Actions</h3>
-						<div class="space-y-2 text-sm">
+						<div class="space-y-2 text-sm mb-4">
 							<p class="text-gray-400">
 								Drop ID: <span class="font-mono text-gray-300">{drop._id}</span>
 							</p>
@@ -612,6 +728,9 @@
 								</p>
 							{/if}
 						</div>
+						<Button href="/admin/drops/{drop._id}" variant="danger" size="sm" class="w-full">
+							Open Admin Review
+						</Button>
 					</Card>
 				{/if}
 			</div>
@@ -697,9 +816,9 @@
 						<Input
 							bind:value={gtin}
 							label="UPC/EAN"
-							disabled={!isEditable}
+							disabled={!isGtinEditable}
 							oninput={markChanged}
-							hint={drop.gtin ? undefined : 'Will be auto-generated when published'}
+							hint={!isGtinEditable && drop.gtin ? 'Cannot be changed after publishing' : drop.gtin ? undefined : 'Will be auto-generated when published'}
 						/>
 					</div>
 				</Card>
@@ -715,52 +834,31 @@
 						{/if}
 					</div>
 
-					<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-						{#each artists as artist, index}
-							<div
-								class="group flex items-center gap-3 p-3 bg-gray-900/50 rounded-xl border border-gray-700/50"
-							>
-								<div
-									class="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center"
-								>
-									<UserSolid class="w-5 h-5 text-orange-400" />
-								</div>
-								<div class="flex-1 min-w-0">
-									<p class="text-white font-medium truncate">{getArtistDisplayName(artist)}</p>
-									<p class="text-sm text-gray-400">{getArtistTypeLabel(artist.type)}</p>
-								</div>
-								{#if isEditable}
-									<div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-										<IconButton onclick={() => openEditArtist(index)}>
-											<EditOutline class="w-4 h-4" />
-										</IconButton>
-										<IconButton onclick={() => removeArtist(index)}>
-											<TrashBinOutline class="w-4 h-4 text-red-400" />
-										</IconButton>
-									</div>
-								{/if}
-							</div>
-						{/each}
-					</div>
+					<ArtistList
+						{artists}
+						editable={isEditable}
+						onedit={openEditArtist}
+						onremove={removeArtist}
+						emptyMessage="No artists added yet"
+						resolveName={getArtistNameById}
+					/>
 				</Card>
 
 				<!-- Songs -->
 				<Card variant="glass" padding="md">
 					<div class="flex items-center justify-between mb-4">
 						<h3 class="text-lg font-semibold text-white">Songs</h3>
-						<Badge color="gray">{drop.songs.length} song{drop.songs.length !== 1 ? 's' : ''}</Badge
-						>
+						<Badge color="gray">{songs.length} song{songs.length !== 1 ? 's' : ''}</Badge>
 					</div>
 
 					<div class="space-y-2">
-						{#each drop.songs as song, index}
+						{#each songs as song, index}
 							<div
-								class="flex items-center gap-4 p-3 bg-gray-900/50 rounded-xl border border-gray-700/50"
+								class="group flex items-center gap-4 p-3 bg-gray-900/50 rounded-xl border border-gray-700/50"
 							>
-								<div
-									class="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center text-orange-400 font-bold text-sm"
-								>
-									{index + 1}
+								<div class="flex items-center gap-3">
+									<span class="w-6 text-center text-sm text-gray-500 font-medium">{index + 1}</span>
+									<AudioPlayer songId={song._id} size="sm" />
 								</div>
 								<div class="flex-1 min-w-0">
 									<p class="text-white font-medium truncate">{song.title}</p>
@@ -780,6 +878,11 @@
 									{/if}
 									{#if song.isrc}
 										<span class="text-xs text-gray-500 font-mono">{song.isrc}</span>
+									{/if}
+									{#if isEditable}
+										<IconButton onclick={() => openEditSong(index)} class="opacity-0 group-hover:opacity-100 transition-opacity">
+											<EditOutline class="w-4 h-4" />
+										</IconButton>
 									{/if}
 								</div>
 							</div>
@@ -875,39 +978,12 @@
 </div>
 
 <!-- Artist Modal -->
-<Modal
+<ArtistModal
 	bind:open={showArtistModal}
-	title={editingArtistIndex !== null ? 'Edit Artist' : 'Add Artist'}
-	size="md"
-	class="bg-gray-800"
->
-	<div class="space-y-4">
-		<Select bind:value={tempArtist.type} label="Artist Type">
-			{#each artistTypes as type}
-				<option value={type}>{getArtistTypeLabel(type)}</option>
-			{/each}
-		</Select>
-
-		<ArtistSearch
-			selectedArtist={{ _id: tempArtist._id, name: tempArtist.name }}
-			onselect={(artist) => {
-				tempArtist._id = artist._id;
-				tempArtist.name = artist.name;
-			}}
-			label={tempArtist.type === 'SONGWRITER' || tempArtist.type === 'PRODUCER'
-				? 'Full Name (First Last)'
-				: 'Artist Name'}
-			placeholder={tempArtist.type === 'SONGWRITER' || tempArtist.type === 'PRODUCER'
-				? 'Search or enter full name...'
-				: 'Search existing artists or create new...'}
-		/>
-	</div>
-
-	{#snippet footer()}
-		<Button variant="secondary" onclick={() => (showArtistModal = false)}>Cancel</Button>
-		<Button onclick={saveArtist} disabled={!tempArtist.name && !tempArtist._id}>Save Artist</Button>
-	{/snippet}
-</Modal>
+	artist={editingArtist}
+	onclose={() => (showArtistModal = false)}
+	onsave={handleSaveArtist}
+/>
 
 <!-- Status Change Confirmation Modal -->
 <Modal bind:open={showStatusChangeModal} title="Confirm Status Change" size="md">
@@ -937,3 +1013,130 @@
 		</Button>
 	{/snippet}
 </Modal>
+
+<!-- Song Edit Modal -->
+<Modal
+	bind:open={showSongModal}
+	title="Edit Song"
+	size="xl"
+	class="bg-gray-800"
+>
+	<div class="space-y-6">
+		<!-- Song Title -->
+		<Input
+			bind:value={tempSong.title}
+			label="Song Title"
+			placeholder="Enter song title"
+			disabled={!isEditable}
+		/>
+
+		<!-- Genre Section -->
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			<Select
+				bind:value={tempSong.primaryGenre}
+				label="Primary Genre"
+				disabled={!isEditable}
+			>
+				<option value="">Select primary genre...</option>
+				{#each primaryGenres as genre}
+					<option value={genre}>{genre}</option>
+				{/each}
+			</Select>
+
+			<Select
+				bind:value={tempSong.secondaryGenre}
+				label="Secondary Genre"
+				disabled={!isEditable || !tempSong.primaryGenre}
+			>
+				<option value="">Select secondary genre...</option>
+				{#if tempSong.primaryGenre}
+					{#each tempSongSecondaryGenreOptions as genre}
+						<option value={genre}>{genre}</option>
+					{/each}
+				{/if}
+			</Select>
+		</div>
+
+		<!-- Content Flags -->
+		<div>
+			<span class="block text-sm font-medium text-white mb-3">Content Flags</span>
+			<div class="flex gap-6">
+				<Toggle bind:checked={tempSong.explicit} label="Explicit Content" disabled={!isEditable} />
+				<Toggle bind:checked={tempSong.instrumental} label="Instrumental" disabled={!isEditable} />
+			</div>
+		</div>
+
+		<!-- Song Artists -->
+		<ArtistList
+			artists={tempSong.artists}
+			editable={isEditable}
+			onadd={openAddSongArtist}
+			onedit={openEditSongArtist}
+			onremove={removeSongArtist}
+			emptyMessage="No artists added yet"
+			compact={true}
+			resolveName={getArtistNameById}
+		/>
+
+		<!-- Advanced Settings -->
+		<details class="group">
+			<summary class="flex items-center gap-3 cursor-pointer list-none">
+				<div class="w-8 h-8 rounded-lg bg-gray-700/50 flex items-center justify-center">
+					<ChevronDownOutline
+						class="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180"
+					/>
+				</div>
+				<h3 class="text-lg font-semibold text-white">Advanced Settings</h3>
+				<span class="text-xs text-gray-500">(Optional)</span>
+			</summary>
+			<div class="mt-4 pl-11 space-y-4">
+				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<Input
+						type="number"
+						value={tempSong.year?.toString() ?? ''}
+						oninput={(e) => {
+							const val = (e.target as HTMLInputElement).value;
+							tempSong.year = val ? parseInt(val, 10) : undefined;
+						}}
+						label="Recording Year"
+						placeholder="YYYY"
+						hint="Year when this song was originally recorded"
+						disabled={!isEditable}
+					/>
+					<Select
+						bind:value={tempSong.language}
+						label="Language"
+						hint="Language of the song (defaults to drop language)"
+						disabled={!isEditable}
+					>
+						<option value="">Use drop language</option>
+						{#each Object.entries(languages) as [code, name]}
+							<option value={code}>{name}</option>
+						{/each}
+					</Select>
+				</div>
+				<Input
+					bind:value={tempSong.isrc}
+					label="ISRC Code"
+					placeholder="CC-XXX-YY-NNNNN"
+					disabled={!isIsrcEditable}
+					hint={!isIsrcEditable && tempSong.isrc ? 'Cannot be changed after publishing' : 'International Standard Recording Code - leave empty to auto-generate'}
+				/>
+			</div>
+		</details>
+	</div>
+
+	{#snippet footer()}
+		<Button variant="secondary" onclick={() => (showSongModal = false)}>Cancel</Button>
+		<Button onclick={saveSong} disabled={!tempSong.title.trim() || !isEditable}>Save Song</Button>
+	{/snippet}
+</Modal>
+
+<!-- Song Artist Modal -->
+<ArtistModal
+	bind:open={showSongArtistModal}
+	artist={editingSongArtist}
+	onclose={() => (showSongArtistModal = false)}
+	onsave={handleSaveSongArtist}
+	title={editingSongArtistIndex !== null ? 'Edit Song Artist' : 'Add Song Artist'}
+/>

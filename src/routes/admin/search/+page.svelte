@@ -130,10 +130,10 @@
 	}
 
 	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('de-DE', {
+		return new Intl.NumberFormat('en-GB', {
 			style: 'currency',
-			currency: 'EUR',
-		}).format(amount / 100);
+			currency: 'GBP',
+		}).format(amount);
 	}
 
 	function getIndexIcon(index: string) {

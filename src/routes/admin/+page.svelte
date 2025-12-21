@@ -42,7 +42,10 @@
 	}
 
 	function formatCurrency(amount: number): string {
-		return `£ ${amount.toFixed(2)}`;
+		return new Intl.NumberFormat('en-GB', {
+			style: 'currency',
+			currency: 'GBP',
+		}).format(amount);
 	}
 </script>
 

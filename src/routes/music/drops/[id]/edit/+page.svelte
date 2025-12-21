@@ -143,20 +143,22 @@
 		drop?.type === 'UNSUBMITTED' ||
 			drop?.type === 'PRIVATE' ||
 			drop?.type === 'PUBLISHED' ||
-			drop?.type === 'EDIT_UNDER_REVIEW'
+			drop?.type === 'EDIT_UNDER_REVIEW',
 	);
 	// GTIN/ISRC cannot be changed once the drop has been published
 	const isGtinEditable = $derived(
-		isEditable && (drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE')
+		isEditable && (drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE'),
 	);
 	const isIsrcEditable = $derived(
-		isEditable && (drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE')
+		isEditable && (drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE'),
 	);
 	// Secondary genre options for song modal
 	const tempSongSecondaryGenreOptions = $derived(getSecondaryGenres(tempSong.primaryGenre));
 	const canSubmitForReview = $derived(drop?.type === 'UNSUBMITTED');
 	const canCancelReview = $derived(drop?.type === 'UNDER_REVIEW');
-	const canRequestTakedown = $derived(drop?.type === 'PUBLISHED' || drop?.type === 'EDIT_UNDER_REVIEW');
+	const canRequestTakedown = $derived(
+		drop?.type === 'PUBLISHED' || drop?.type === 'EDIT_UNDER_REVIEW',
+	);
 	const canCancelTakedown = $derived(drop?.type === 'TAKEDOWN_REQUESTED');
 	const canCancelEditReview = $derived(drop?.type === 'EDIT_UNDER_REVIEW');
 	const isAdmin = $derived($auth.user?.isAdmin ?? false);
@@ -529,8 +531,7 @@
 				return type ?? 'Unknown';
 		}
 	}
-
-	</script>
+</script>
 
 <svelte:head>
 	<title>{drop?.title ?? 'Loading...'} - Edit Drop - bbn.music</title>
@@ -601,7 +602,8 @@
 				<div>
 					<p class="text-blue-400 font-medium">Published Release</p>
 					<p class="text-blue-400/70 text-sm">
-						Your release is live on streaming platforms. You can make edits, but saving will automatically submit them for review before going live.
+						Your release is live on streaming platforms. You can make edits, but saving will
+						automatically submit them for review before going live.
 					</p>
 				</div>
 			</div>
@@ -613,8 +615,8 @@
 				<div>
 					<p class="text-orange-400 font-medium">Edit Under Review</p>
 					<p class="text-orange-400/70 text-sm">
-						Your changes are being reviewed. Your release remains live on streaming platforms with the original metadata.
-						You can continue making edits or cancel the review.
+						Your changes are being reviewed. Your release remains live on streaming platforms with
+						the original metadata. You can continue making edits or cancel the review.
 					</p>
 				</div>
 			</div>
@@ -678,7 +680,7 @@
 								<CloseCircleSolid class="w-4 h-4" /> Cancel Review
 							</Button>
 						{/if}
-							{#if canCancelEditReview}
+						{#if canCancelEditReview}
 							<Button
 								variant="secondary"
 								class="w-full"
@@ -818,7 +820,11 @@
 							label="UPC/EAN"
 							disabled={!isGtinEditable}
 							oninput={markChanged}
-							hint={!isGtinEditable && drop.gtin ? 'Cannot be changed after publishing' : drop.gtin ? undefined : 'Will be auto-generated when published'}
+							hint={!isGtinEditable && drop.gtin
+								? 'Cannot be changed after publishing'
+								: drop.gtin
+									? undefined
+									: 'Will be auto-generated when published'}
 						/>
 					</div>
 				</Card>
@@ -880,7 +886,10 @@
 										<span class="text-xs text-gray-500 font-mono">{song.isrc}</span>
 									{/if}
 									{#if isEditable}
-										<IconButton onclick={() => openEditSong(index)} class="opacity-0 group-hover:opacity-100 transition-opacity">
+										<IconButton
+											onclick={() => openEditSong(index)}
+											class="opacity-0 group-hover:opacity-100 transition-opacity"
+										>
 											<EditOutline class="w-4 h-4" />
 										</IconButton>
 									{/if}
@@ -1015,12 +1024,7 @@
 </Modal>
 
 <!-- Song Edit Modal -->
-<Modal
-	bind:open={showSongModal}
-	title="Edit Song"
-	size="xl"
-	class="bg-gray-800"
->
+<Modal bind:open={showSongModal} title="Edit Song" size="xl" class="bg-gray-800">
 	<div class="space-y-6">
 		<!-- Song Title -->
 		<Input
@@ -1032,11 +1036,7 @@
 
 		<!-- Genre Section -->
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-			<Select
-				bind:value={tempSong.primaryGenre}
-				label="Primary Genre"
-				disabled={!isEditable}
-			>
+			<Select bind:value={tempSong.primaryGenre} label="Primary Genre" disabled={!isEditable}>
 				<option value="">Select primary genre...</option>
 				{#each primaryGenres as genre}
 					<option value={genre}>{genre}</option>
@@ -1120,7 +1120,9 @@
 					label="ISRC Code"
 					placeholder="CC-XXX-YY-NNNNN"
 					disabled={!isIsrcEditable}
-					hint={!isIsrcEditable && tempSong.isrc ? 'Cannot be changed after publishing' : 'International Standard Recording Code - leave empty to auto-generate'}
+					hint={!isIsrcEditable && tempSong.isrc
+						? 'Cannot be changed after publishing'
+						: 'International Standard Recording Code - leave empty to auto-generate'}
 				/>
 			</div>
 		</details>

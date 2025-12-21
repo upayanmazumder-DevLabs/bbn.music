@@ -132,7 +132,9 @@
 	<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 		<div>
 			<h1 class="text-3xl font-bold text-gray-900 dark:text-white">Earnings</h1>
-			<p class="text-gray-500 dark:text-gray-400 mt-1">Track your streaming revenue and performance</p>
+			<p class="text-gray-500 dark:text-gray-400 mt-1">
+				Track your streaming revenue and performance
+			</p>
 		</div>
 		{#if payouts.length > 0}
 			<div class="flex items-center gap-1 p-1 bg-gray-200 dark:bg-gray-800 rounded-lg">
@@ -303,7 +305,10 @@
 									{periodMatch ? periodMatch[2] : '??'}
 								</div>
 								<div>
-									<h3 class="font-semibold text-gray-900 dark:text-white">{monthNames[monthIndex]} {year}</h3>
+									<h3 class="font-semibold text-gray-900 dark:text-white">
+										{monthNames[monthIndex]}
+										{year}
+									</h3>
 								</div>
 							</div>
 							<div class="flex items-center gap-8">

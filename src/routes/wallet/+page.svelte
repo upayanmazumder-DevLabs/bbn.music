@@ -177,16 +177,26 @@ Thank you!`;
 						<thead>
 							<tr class="border-b border-gray-200 dark:border-gray-700">
 								<th class="text-left p-4 text-gray-500 dark:text-gray-400 font-medium">Amount</th>
-								<th class="text-left p-4 text-gray-500 dark:text-gray-400 font-medium">Description</th>
+								<th class="text-left p-4 text-gray-500 dark:text-gray-400 font-medium"
+									>Description</th
+								>
 								<th class="text-left p-4 text-gray-500 dark:text-gray-400 font-medium">Date</th>
-								<th class="text-left p-4 text-gray-500 dark:text-gray-400 font-medium">Counterparty</th>
+								<th class="text-left p-4 text-gray-500 dark:text-gray-400 font-medium"
+									>Counterparty</th
+								>
 							</tr>
 						</thead>
 						<tbody>
 							{#each wallet.transactions as tx}
-								<tr class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+								<tr
+									class="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+								>
 									<td class="p-4">
-										<span class="{tx.amount >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'} font-medium">
+										<span
+											class="{tx.amount >= 0
+												? 'text-green-600 dark:text-green-400'
+												: 'text-red-600 dark:text-red-400'} font-medium"
+										>
 											{tx.amount >= 0 ? '+' : ''}{formatCurrency(tx.amount)}
 										</span>
 									</td>
@@ -207,7 +217,9 @@ Thank you!`;
 <Modal bind:open={showPayoutModal} title="Request Payout" size="md">
 	<div class="space-y-6">
 		<div class="text-center">
-			<div class="w-16 h-16 mx-auto bg-orange-500/20 rounded-full flex items-center justify-center mb-4">
+			<div
+				class="w-16 h-16 mx-auto bg-orange-500/20 rounded-full flex items-center justify-center mb-4"
+			>
 				<EnvelopeSolid class="w-8 h-8 text-orange-400" />
 			</div>
 			<p class="text-gray-300 mb-4">
@@ -220,7 +232,9 @@ Thank you!`;
 				<div class="flex justify-between">
 					<span class="text-gray-400">Available Balance</span>
 					<span class="text-white font-semibold">
-						{formatCurrency((wallet.balance?.unrestrained ?? 0) + (wallet.balance?.restrained ?? 0))}
+						{formatCurrency(
+							(wallet.balance?.unrestrained ?? 0) + (wallet.balance?.restrained ?? 0),
+						)}
 					</span>
 				</div>
 				{#if wallet.balance?.restrained && wallet.balance.restrained > 0}

@@ -17,27 +17,44 @@
 	import { getAuthHeaders } from '$lib/apiClient';
 	import { auth } from '$lib/stores/auth';
 	import { toast } from '$lib/stores/toast';
-	import type { SingleAdminDrop, AdminDrop, DropType, ShazamResults, ArtistRef, Song } from '$lib/api/types.gen';
+	import type {
+		SingleAdminDrop,
+		AdminDrop,
+		DropType,
+		ShazamResults,
+		ArtistRef,
+		Song,
+		Artist,
+		FullDrop,
+		AccountType,
+	} from '$lib/api/types.gen';
 
-// Merged type for admin drop view (combines admin data with drop data)
-type MergedAdminDrop = SingleAdminDrop & {
-	title?: string;
-	gtin?: string;
-	artists?: Array<ArtistRef>;
-	release?: string;
-	language?: string;
-	primaryGenre?: string;
-	secondaryGenre?: string;
-	compositionCopyright?: string;
-	soundRecordingCopyright?: string;
-	artwork?: string;
-	songs?: Array<Song>;
-	comments?: string;
-	_id?: string;
-	user?: string;
-	type?: DropType;
-	copyrightEditable?: boolean;
-};
+	// Merged type for admin drop view (combines admin data with drop data)
+	type MergedAdminDrop = SingleAdminDrop & {
+		title?: string;
+		gtin?: string;
+		artists?: Array<ArtistRef>;
+		release?: string;
+		language?: string;
+		primaryGenre?: string;
+		secondaryGenre?: string;
+		compositionCopyright?: string;
+		soundRecordingCopyright?: string;
+		artwork?: string;
+		songs?: Array<Song>;
+		comments?: string;
+		_id?: string;
+		user?: string;
+		type?: DropType;
+		copyrightEditable?: boolean;
+		// From AdminDrop
+		accountType?: AccountType;
+		priority?: number;
+		// From SingleAdminDrop
+		artistList?: Array<Artist>;
+		filenames?: Array<string>;
+		publishedSnapshot?: FullDrop | null;
+	};
 	import { Card, Badge, Button, IconButton, Spinner } from '$lib/components/ui';
 	import AudioPlayer from '$lib/components/AudioPlayer.svelte';
 	import {
@@ -48,6 +65,10 @@ type MergedAdminDrop = SingleAdminDrop & {
 		CheckCircleSolid,
 		CloseCircleSolid,
 		ExclamationCircleOutline,
+		ChevronDownOutline,
+		ChevronUpOutline,
+		LinkOutline,
+		ClockOutline,
 	} from 'flowbite-svelte-icons';
 
 	// Drop ID is guaranteed by SvelteKit routing
@@ -96,6 +117,10 @@ type MergedAdminDrop = SingleAdminDrop & {
 	// Shazam results
 	let shazamResults = $state<ShazamResults | null>(null);
 	let loadingShazam = $state(false);
+
+	// Expandable sections
+	let expandedLyrics = $state<Record<string, boolean>>({});
+	let showPublishedSnapshot = $state(false);
 
 	// Email templates
 	const getTemplates = (): Record<TemplateKey, [string, string]> => ({
@@ -406,6 +431,156 @@ type MergedAdminDrop = SingleAdminDrop & {
 			.map((a: ArtistRef) => ('name' in a ? a.name : a._id))
 			.join(', ');
 	}
+
+	function getAccountTypeColor(
+		type: AccountType | undefined,
+	): 'green' | 'orange' | 'purple' | 'gray' {
+		switch (type) {
+			case 'VIP':
+				return 'purple';
+			case 'SUBSCRIBED':
+				return 'green';
+			default:
+				return 'gray';
+		}
+	}
+
+	function getAccountTypeLabel(type: AccountType | undefined): string {
+		switch (type) {
+			case 'VIP':
+				return 'VIP';
+			case 'SUBSCRIBED':
+				return 'Pro';
+			case 'DEFAULT':
+				return 'Free';
+			default:
+				return 'Unknown';
+		}
+	}
+
+	function getAuthMethodLabel(method: { type: string; provider?: string } | undefined): string {
+		if (!method) return 'Unknown';
+		switch (method.type) {
+			case 'oauth':
+				return `OAuth (${method.provider || 'unknown'})`;
+			case 'password':
+				return 'Password';
+			case 'webAuthn':
+				return 'WebAuthn';
+			default:
+				return method.type;
+		}
+	}
+
+	function resolveArtistName(artistId: string): string | undefined {
+		return drop?.artistList?.find((a) => a._id === artistId)?.name;
+	}
+
+	function getArtistProfile(artistId: string): Artist | undefined {
+		return drop?.artistList?.find((a) => a._id === artistId);
+	}
+
+	function toggleLyrics(songId: string) {
+		expandedLyrics[songId] = !expandedLyrics[songId];
+	}
+
+	interface EventInfo {
+		title: string;
+		detail?: string;
+		badge?: { text: string; color: 'green' | 'red' | 'orange' | 'blue' | 'gray' };
+	}
+
+	function getEventInfo(event: {
+		type: string;
+		meta?: Record<string, unknown>;
+		userId?: string;
+	}): EventInfo {
+		if (event.type === 'auth') return { title: 'Logged in' };
+		if (event.type === 'refresh-auth') return { title: 'Refreshed session' };
+
+		if (event.type === 'action' && event.meta) {
+			const action = event.meta.action as string;
+			const targetType = event.meta.type as string | undefined;
+			const data = event.meta.data as { type?: string; title?: string } | undefined;
+			const previousType = data?.type;
+
+			switch (action) {
+				case 'drop-create':
+					return { title: 'Created drop' };
+				case 'drop-type-change': {
+					const typeLabels: Record<string, string> = {
+						UNDER_REVIEW: 'Under Review',
+						PUBLISHED: 'Published',
+						PUBLISHING: 'Publishing',
+						PRIVATE: 'Private',
+						TAKEDOWN_REQUESTED: 'Takedown Requested',
+						REVIEW_DECLINED: 'Declined',
+						UNSUBMITTED: 'Draft',
+					};
+					const typeColors: Record<string, 'green' | 'red' | 'orange' | 'blue' | 'gray'> = {
+						UNDER_REVIEW: 'orange',
+						PUBLISHED: 'green',
+						PUBLISHING: 'blue',
+						PRIVATE: 'gray',
+						TAKEDOWN_REQUESTED: 'red',
+						REVIEW_DECLINED: 'red',
+						UNSUBMITTED: 'gray',
+					};
+					if (targetType && previousType) {
+						return {
+							title: 'Status changed',
+							detail: `${typeLabels[previousType] || previousType} → ${typeLabels[targetType] || targetType}`,
+							badge: {
+								text: typeLabels[targetType] || targetType,
+								color: typeColors[targetType] || 'gray',
+							},
+						};
+					}
+					if (targetType) {
+						return {
+							title: 'Status changed',
+							badge: {
+								text: typeLabels[targetType] || targetType,
+								color: typeColors[targetType] || 'gray',
+							},
+						};
+					}
+					return { title: 'Status changed' };
+				}
+				case 'drop-review':
+					return {
+						title: 'Reviewed by admin',
+						badge: { text: 'Reviewed', color: 'green' },
+					};
+				default:
+					return { title: action.replace(/-/g, ' ') };
+			}
+		}
+
+		return { title: event.type };
+	}
+
+	function formatEventTime(eventId: string): string {
+		// MongoDB ObjectId contains timestamp in first 4 bytes (hex)
+		try {
+			const timestamp = parseInt(eventId.substring(0, 8), 16) * 1000;
+			const date = new Date(timestamp);
+			const now = new Date();
+			const diffMs = now.getTime() - date.getTime();
+			const diffMins = Math.floor(diffMs / 60000);
+			const diffHours = Math.floor(diffMs / 3600000);
+			const diffDays = Math.floor(diffMs / 86400000);
+
+			if (diffMins < 1) return 'Just now';
+			if (diffMins < 60) return `${diffMins}m ago`;
+			if (diffHours < 24) return `${diffHours}h ago`;
+			if (diffDays < 7) return `${diffDays}d ago`;
+
+			return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+		} catch {
+			return '';
+		}
+	}
 </script>
 
 <svelte:head>
@@ -455,7 +630,9 @@ type MergedAdminDrop = SingleAdminDrop & {
 					{loadingShazam ? 'Checking...' : 'Check Shazam'}
 				</Button>
 				<Button variant="secondary" onclick={() => (showPublishDialog = true)}>Publish</Button>
-				<Button variant="secondary" onclick={() => goto(`/music/drops/${dropId}/edit`)}>Edit Drop</Button>
+				<Button variant="secondary" onclick={() => goto(`/music/drops/${dropId}/edit`)}
+					>Edit Drop</Button
+				>
 				<Button onclick={() => openResponseDialog('ACCEPT')}>
 					<CheckCircleSolid class="w-4 h-4" /> Accept
 				</Button>
@@ -522,10 +699,7 @@ type MergedAdminDrop = SingleAdminDrop & {
 
 						<!-- Details -->
 						<div class="flex-1 space-y-3">
-							<div>
-								<h2 class="text-2xl font-bold text-white">{drop.title || '(No title)'}</h2>
-								<p class="text-gray-400">{getArtistNames(drop.artists)}</p>
-							</div>
+							<h2 class="text-2xl font-bold text-white">{drop.title || '(No title)'}</h2>
 
 							<div class="grid grid-cols-2 gap-4 text-sm">
 								<div>
@@ -560,32 +734,187 @@ type MergedAdminDrop = SingleAdminDrop & {
 					</div>
 				</Card>
 
+				<!-- Artists -->
+				{#if drop.artists && drop.artists.length > 0}
+					<Card variant="default" padding="md">
+						<h3 class="text-lg font-semibold text-white mb-4">Artists ({drop.artists.length})</h3>
+						<div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+							{#each drop.artists as artist}
+								{@const artistProfile =
+									artist.type === 'PRIMARY' || artist.type === 'FEATURING'
+										? getArtistProfile(artist._id)
+										: null}
+								<div
+									class="flex items-center gap-3 p-3 bg-gray-800/50 rounded-lg border border-gray-700/50"
+								>
+									<div
+										class="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center flex-shrink-0"
+									>
+										<UserOutline class="w-5 h-5 text-orange-400" />
+									</div>
+									<div class="flex-1 min-w-0">
+										<p class="text-white font-medium truncate">
+											{'name' in artist ? artist.name : resolveArtistName(artist._id) || artist._id}
+										</p>
+										<div class="flex items-center gap-2">
+											<Badge color={artist.type === 'PRIMARY' ? 'orange' : 'gray'} size="sm"
+												>{artist.type}</Badge
+											>
+											{#if artistProfile}
+												{#if artistProfile.spotify}
+													<a
+														href={artistProfile.spotify}
+														target="_blank"
+														class="text-green-400 hover:text-green-300 text-xs flex items-center gap-1"
+													>
+														<LinkOutline class="w-3 h-3" /> Spotify
+													</a>
+												{/if}
+												{#if artistProfile.apple}
+													<a
+														href={artistProfile.apple}
+														target="_blank"
+														class="text-pink-400 hover:text-pink-300 text-xs flex items-center gap-1"
+													>
+														<LinkOutline class="w-3 h-3" /> Apple
+													</a>
+												{/if}
+											{/if}
+										</div>
+									</div>
+								</div>
+							{/each}
+						</div>
+					</Card>
+				{/if}
+
 				<!-- Songs -->
 				<Card variant="default" padding="md">
 					<h3 class="text-lg font-semibold text-white mb-4">Songs ({drop.songs?.length || 0})</h3>
 					{#if drop.songs && drop.songs.length > 0}
-						<div class="space-y-2">
+						<div class="space-y-4">
 							{#each drop.songs as song, i}
-								<div class="flex items-center gap-4 p-3 bg-gray-800/50 rounded-lg">
-									<span class="text-gray-500 w-6 text-center">{i + 1}</span>
-									<AudioPlayer songId={song._id} size="sm" />
-									<div class="flex-1 min-w-0">
-										<p class="text-white font-medium truncate">{song.title}</p>
-										<p class="text-gray-400 text-sm truncate">
-											{song.artists?.map((a) => ('name' in a ? a.name : a._id)).join(', ')}
-										</p>
+								<div class="p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
+									<!-- Song Header -->
+									<div class="flex items-start gap-4">
+										<span class="text-gray-500 w-6 text-center pt-1 font-mono">{i + 1}</span>
+										<AudioPlayer songId={song._id} size="sm" />
+										<div class="flex-1 min-w-0">
+											<div class="flex items-center gap-2">
+												<p class="text-white font-medium">{song.title}</p>
+												{#if song.explicit}
+													<Badge color="red" size="sm">E</Badge>
+												{/if}
+												{#if song.instrumental}
+													<Badge color="blue" size="sm">Instrumental</Badge>
+												{/if}
+											</div>
+											<p class="text-gray-400 text-sm">
+												{song.artists
+													?.map((a) => ('name' in a ? a.name : resolveArtistName(a._id) || a._id))
+													.join(', ') || 'Unknown Artist'}
+											</p>
+											{#if drop.filenames?.[i]}
+												<p
+													class="text-gray-500 text-xs font-mono truncate mt-0.5"
+													title={drop.filenames[i]}
+												>
+													{drop.filenames[i]}
+												</p>
+											{/if}
+										</div>
+										<code class="text-xs text-gray-500 font-mono">{song.isrc || 'No ISRC'}</code>
 									</div>
-									<div class="text-right text-sm">
-										<p class="text-gray-400">{song.isrc || 'No ISRC'}</p>
+
+									<!-- Song Details Grid -->
+									<div
+										class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-3 pt-3 border-t border-gray-700/30 text-sm"
+									>
+										<div>
+											<span class="text-gray-500 text-xs">Genre</span>
+											<p class="text-gray-300">{song.primaryGenre} / {song.secondaryGenre}</p>
+										</div>
+										<div>
+											<span class="text-gray-500 text-xs">Language</span>
+											<p class="text-gray-300">{song.language || 'N/A'}</p>
+										</div>
+										<div>
+											<span class="text-gray-500 text-xs">Year</span>
+											<p class="text-gray-300">{song.year || 'N/A'}</p>
+										</div>
+										<div>
+											<span class="text-gray-500 text-xs">Country</span>
+											<p class="text-gray-300">{song.country || 'N/A'}</p>
+										</div>
 									</div>
-									<div class="flex gap-2">
-										{#if song.explicit}
-											<Badge color="red" size="sm">E</Badge>
-										{/if}
-										{#if song.instrumental}
-											<Badge color="blue" size="sm">Inst</Badge>
-										{/if}
-									</div>
+
+									<!-- Song Artists Breakdown -->
+									{#if song.artists && song.artists.length > 0}
+										<div class="mt-3 pt-3 border-t border-gray-700/30">
+											<span class="text-gray-500 text-xs">Credits</span>
+											<div class="flex flex-wrap gap-2 mt-1">
+												{#each song.artists as artist}
+													{@const artistProfile =
+														artist.type === 'PRIMARY' || artist.type === 'FEATURING'
+															? getArtistProfile(artist._id)
+															: null}
+													<div
+														class="flex items-center gap-1 px-2 py-1 bg-gray-700/50 rounded text-xs"
+													>
+														<span class="text-gray-400">{artist.type}:</span>
+														<span class="text-white"
+															>{'name' in artist
+																? artist.name
+																: resolveArtistName(artist._id) || artist._id}</span
+														>
+														{#if artistProfile?.spotify}
+															<a
+																href={artistProfile.spotify}
+																target="_blank"
+																class="text-green-400 hover:text-green-300"
+															>
+																<LinkOutline class="w-3 h-3" />
+															</a>
+														{/if}
+														{#if artistProfile?.apple}
+															<a
+																href={artistProfile.apple}
+																target="_blank"
+																class="text-pink-400 hover:text-pink-300"
+															>
+																<LinkOutline class="w-3 h-3" />
+															</a>
+														{/if}
+													</div>
+												{/each}
+											</div>
+										</div>
+									{/if}
+
+									<!-- Lyrics -->
+									{#if song.lyrics || song.timedLyrics}
+										<div class="mt-3 pt-3 border-t border-gray-700/30">
+											<button
+												class="flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors"
+												onclick={() => toggleLyrics(song._id)}
+											>
+												{#if expandedLyrics[song._id]}
+													<ChevronUpOutline class="w-4 h-4" />
+												{:else}
+													<ChevronDownOutline class="w-4 h-4" />
+												{/if}
+												{song.timedLyrics ? 'Timed Lyrics' : 'Lyrics'}
+												{#if song.timedLyrics}
+													<Badge color="green" size="sm">Synced</Badge>
+												{/if}
+											</button>
+											{#if expandedLyrics[song._id]}
+												<pre
+													class="mt-2 p-3 bg-gray-900/50 rounded text-sm text-gray-300 whitespace-pre-wrap max-h-60 overflow-y-auto">{song.timedLyrics ||
+														song.lyrics}</pre>
+											{/if}
+										</div>
+									{/if}
 								</div>
 							{/each}
 						</div>
@@ -602,11 +931,128 @@ type MergedAdminDrop = SingleAdminDrop & {
 					</Card>
 				{/if}
 
-				<!-- IDs -->
-				<Card variant="default" padding="sm">
-					<div class="flex gap-6 text-xs text-gray-500">
-						<span>Drop ID: <code class="text-gray-400">{drop._id}</code></span>
-						<span>User ID: <code class="text-gray-400">{drop.user}</code></span>
+				<!-- Published Snapshot Comparison -->
+				{#if drop.publishedSnapshot}
+					<Card variant="default" padding="md">
+						<button
+							class="w-full flex items-center justify-between"
+							onclick={() => (showPublishedSnapshot = !showPublishedSnapshot)}
+						>
+							<h3 class="text-lg font-semibold text-white flex items-center gap-2">
+								<ClockOutline class="w-5 h-5 text-blue-400" />
+								Published Version
+							</h3>
+							{#if showPublishedSnapshot}
+								<ChevronUpOutline class="w-5 h-5 text-gray-400" />
+							{:else}
+								<ChevronDownOutline class="w-5 h-5 text-gray-400" />
+							{/if}
+						</button>
+						{#if showPublishedSnapshot}
+							<div class="mt-4 space-y-3">
+								<!-- Compare key fields -->
+								<div class="grid grid-cols-2 gap-4 text-sm">
+									<div class="space-y-2">
+										<p class="text-gray-500 text-xs font-medium">CURRENT</p>
+										<div class="p-2 bg-gray-900/50 rounded">
+											<p class="text-white font-medium">{drop.title}</p>
+											<p class="text-gray-400 text-xs">{getArtistNames(drop.artists)}</p>
+										</div>
+									</div>
+									<div class="space-y-2">
+										<p class="text-gray-500 text-xs font-medium">PUBLISHED</p>
+										<div class="p-2 bg-green-900/20 rounded border border-green-700/30">
+											<p class="text-white font-medium">{drop.publishedSnapshot.title}</p>
+											<p class="text-gray-400 text-xs">
+												{getArtistNames(drop.publishedSnapshot.artists)}
+											</p>
+										</div>
+									</div>
+								</div>
+
+								<!-- Metadata comparison -->
+								<div class="text-xs space-y-1 p-3 bg-gray-900/30 rounded">
+									<div
+										class="grid grid-cols-3 gap-2 text-gray-500 font-medium border-b border-gray-700/50 pb-1"
+									>
+										<span>Field</span>
+										<span>Current</span>
+										<span>Published</span>
+									</div>
+									<div class="grid grid-cols-3 gap-2">
+										<span class="text-gray-500">Release</span>
+										<span class="text-gray-300">{drop.release || 'N/A'}</span>
+										<span class="text-gray-300">{drop.publishedSnapshot.release || 'N/A'}</span>
+									</div>
+									<div class="grid grid-cols-3 gap-2">
+										<span class="text-gray-500">Genre</span>
+										<span class="text-gray-300">{drop.primaryGenre}/{drop.secondaryGenre}</span>
+										<span class="text-gray-300"
+											>{drop.publishedSnapshot.primaryGenre}/{drop.publishedSnapshot
+												.secondaryGenre}</span
+										>
+									</div>
+									<div class="grid grid-cols-3 gap-2">
+										<span class="text-gray-500">Songs</span>
+										<span class="text-gray-300">{drop.songs?.length || 0}</span>
+										<span class="text-gray-300">{drop.publishedSnapshot.songs?.length || 0}</span>
+									</div>
+									<div class="grid grid-cols-3 gap-2">
+										<span class="text-gray-500">GTIN</span>
+										<span class="text-gray-300 font-mono">{drop.gtin || 'N/A'}</span>
+										<span class="text-gray-300 font-mono"
+											>{drop.publishedSnapshot.gtin || 'N/A'}</span
+										>
+									</div>
+								</div>
+
+								<!-- Published songs list -->
+								{#if drop.publishedSnapshot.songs && drop.publishedSnapshot.songs.length > 0}
+									<div class="pt-2">
+										<p class="text-gray-500 text-xs font-medium mb-2">Published Songs</p>
+										<div class="space-y-1">
+											{#each drop.publishedSnapshot.songs as song, i}
+												<div class="flex items-center gap-2 text-sm p-2 bg-gray-800/30 rounded">
+													<span class="text-gray-500 w-4">{i + 1}</span>
+													<span class="text-white">{song.title}</span>
+													<code class="text-gray-500 text-xs ml-auto">{song.isrc || 'No ISRC'}</code
+													>
+												</div>
+											{/each}
+										</div>
+									</div>
+								{/if}
+							</div>
+						{/if}
+					</Card>
+				{/if}
+
+				<!-- IDs & Meta -->
+				<Card variant="default" padding="md">
+					<h3 class="text-sm font-medium text-gray-400 mb-3">Technical Info</h3>
+					<div class="space-y-2 text-xs">
+						<div class="flex justify-between">
+							<span class="text-gray-500">Drop ID</span>
+							<code class="text-gray-400">{drop._id}</code>
+						</div>
+						<div class="flex justify-between">
+							<span class="text-gray-500">User ID</span>
+							<code class="text-gray-400">{drop.user}</code>
+						</div>
+						{#if drop.artwork}
+							<div class="flex justify-between">
+								<span class="text-gray-500">Artwork ID</span>
+								<code class="text-gray-400">{drop.artwork}</code>
+							</div>
+						{/if}
+						{#if drop.copyrightEditable !== undefined}
+							<div class="flex justify-between items-center">
+								<span class="text-gray-500">Copyright Editable</span>
+								<Badge color={drop.copyrightEditable ? 'green' : 'gray'} size="sm">
+									{drop.copyrightEditable ? 'Yes' : 'No'}
+								</Badge>
+							</div>
+						{/if}
 					</div>
 				</Card>
 			</div>
@@ -615,7 +1061,14 @@ type MergedAdminDrop = SingleAdminDrop & {
 			<div class="space-y-6">
 				<!-- User Profile -->
 				<Card variant="default" padding="md">
-					<h3 class="text-lg font-semibold text-white mb-4">User Info</h3>
+					<div class="flex items-center justify-between mb-4">
+						<h3 class="text-lg font-semibold text-white">User Info</h3>
+						{#if drop.accountType}
+							<Badge color={getAccountTypeColor(drop.accountType)}
+								>{getAccountTypeLabel(drop.accountType)}</Badge
+							>
+						{/if}
+					</div>
 					{#if drop.userInfo}
 						<div class="space-y-4">
 							<div class="flex items-center gap-4">
@@ -623,42 +1076,90 @@ type MergedAdminDrop = SingleAdminDrop & {
 									class="w-16 h-16 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden"
 								>
 									{#if userAvatarUrl}
-										<img
-											src={userAvatarUrl}
-											alt="Avatar"
-											class="w-full h-full object-cover"
-										/>
+										<img src={userAvatarUrl} alt="Avatar" class="w-full h-full object-cover" />
 									{:else}
 										<UserOutline class="w-8 h-8 text-gray-500" />
 									{/if}
 								</div>
-								<div>
+								<div class="flex-1 min-w-0">
 									<p class="text-white font-semibold">{drop.userInfo.profile.username}</p>
-									<p class="text-gray-400 text-sm">{drop.userInfo.profile.email}</p>
-									{#if drop.userInfo.profile.verified?.email}
-										<Badge color="green" size="sm">Verified</Badge>
-									{:else}
-										<Badge color="gray" size="sm">Unverified</Badge>
-									{/if}
+									<p class="text-gray-400 text-sm truncate">{drop.userInfo.profile.email}</p>
+									<div class="flex items-center gap-2 mt-1">
+										{#if drop.userInfo.profile.verified?.email}
+											<Badge color="green" size="sm">Email Verified</Badge>
+										{:else}
+											<Badge color="red" size="sm">Unverified</Badge>
+										{/if}
+										{#if drop.userInfo.profile.phone}
+											{#if drop.userInfo.profile.verified?.phone}
+												<Badge color="green" size="sm">Phone Verified</Badge>
+											{:else}
+												<Badge color="gray" size="sm">Phone</Badge>
+											{/if}
+										{/if}
+									</div>
 								</div>
 							</div>
 
-							<div class="text-sm space-y-2">
+							<div class="text-sm space-y-2 pt-2 border-t border-gray-700/50">
+								{#if drop.userInfo.profile.phone}
+									<div class="flex justify-between">
+										<span class="text-gray-500">Phone</span>
+										<span class="text-gray-300">{drop.userInfo.profile.phone}</span>
+									</div>
+								{/if}
 								<div class="flex justify-between">
 									<span class="text-gray-500">User ID</span>
 									<code class="text-gray-400 text-xs">{drop.userInfo._id}</code>
 								</div>
-								{#if drop.userInfo.groups && drop.userInfo.groups.length > 0}
-									<div>
-										<span class="text-gray-500">Groups</span>
-										<div class="flex flex-wrap gap-1 mt-1">
-											{#each drop.userInfo.groups as group}
-												<Badge color="purple" size="sm">{group}</Badge>
-											{/each}
-										</div>
+								{#if drop.priority !== undefined && drop.priority > 0}
+									<div class="flex justify-between">
+										<span class="text-gray-500">Priority</span>
+										<Badge color="orange" size="sm">{drop.priority}</Badge>
 									</div>
 								{/if}
 							</div>
+
+							<!-- Auth Methods -->
+							{#if drop.userInfo.authentication && drop.userInfo.authentication.length > 0}
+								<div class="pt-2 border-t border-gray-700/50">
+									<span class="text-gray-500 text-sm">Auth Methods</span>
+									<div class="flex flex-wrap gap-1 mt-1">
+										{#each drop.userInfo.authentication as auth}
+											<Badge color="blue" size="sm">{getAuthMethodLabel(auth)}</Badge>
+										{/each}
+									</div>
+								</div>
+							{/if}
+
+							<!-- Permissions -->
+							{#if drop.userInfo.permissions && drop.userInfo.permissions.length > 0}
+								<div class="pt-2 border-t border-gray-700/50">
+									<span class="text-gray-500 text-sm">Permissions</span>
+									<div class="flex flex-wrap gap-1 mt-1">
+										{#each drop.userInfo.permissions.slice(0, 5) as permission}
+											<Badge color="gray" size="sm">{permission}</Badge>
+										{/each}
+										{#if drop.userInfo.permissions.length > 5}
+											<Badge color="gray" size="sm"
+												>+{drop.userInfo.permissions.length - 5} more</Badge
+											>
+										{/if}
+									</div>
+								</div>
+							{/if}
+
+							<!-- Groups -->
+							{#if drop.userInfo.groups && drop.userInfo.groups.length > 0}
+								<div class="pt-2 border-t border-gray-700/50">
+									<span class="text-gray-500 text-sm">Groups</span>
+									<div class="flex flex-wrap gap-1 mt-1">
+										{#each drop.userInfo.groups as group}
+											<Badge color="purple" size="sm">{group}</Badge>
+										{/each}
+									</div>
+								</div>
+							{/if}
 						</div>
 					{:else}
 						<p class="text-gray-500">No user info available</p>
@@ -669,15 +1170,26 @@ type MergedAdminDrop = SingleAdminDrop & {
 				{#if drop.events && drop.events.length > 0}
 					<Card variant="default" padding="md">
 						<h3 class="text-lg font-semibold text-white mb-4">Recent Activity</h3>
-						<div class="space-y-2 max-h-64 overflow-y-auto">
-							{#each drop.events.slice(0, 10) as event}
-								<div class="text-sm p-2 bg-gray-800/50 rounded">
-									<div class="flex justify-between">
-										<span class="text-gray-300">{event.type}</span>
-										<span class="text-gray-500 text-xs">{event.source?.platform || 'Unknown'}</span>
+						<!-- TODO: reverse order in backend instead of frontend -->
+						<div class="space-y-2 max-h-80 overflow-y-auto">
+							{#each [...drop.events].reverse().slice(0, 15) as event}
+								{@const info = getEventInfo(
+									event as { type: string; meta?: Record<string, unknown>; userId?: string },
+								)}
+								<div class="text-sm p-3 bg-gray-800/50 rounded-lg">
+									<div class="flex items-center justify-between gap-2">
+										<div class="flex items-center gap-2 min-w-0">
+											<span class="text-white font-medium">{info.title}</span>
+											{#if info.badge}
+												<Badge color={info.badge.color} size="sm">{info.badge.text}</Badge>
+											{/if}
+										</div>
+										<span class="text-gray-500 text-xs whitespace-nowrap"
+											>{formatEventTime(event._id)}</span
+										>
 									</div>
-									{#if event.ip}
-										<p class="text-gray-500 text-xs">{event.ip}</p>
+									{#if info.detail}
+										<p class="text-gray-400 text-xs mt-1">{info.detail}</p>
 									{/if}
 								</div>
 							{/each}

@@ -22,16 +22,7 @@
 	} from 'flowbite-svelte-icons';
 
 	// Shared UI components
-	import {
-		Button,
-		Input,
-		Select,
-		Textarea,
-		Card,
-		Badge,
-		Toggle,
-		Alert,
-	} from '$lib/components/ui';
+	import { Button, Input, Select, Textarea, Card, Badge, Toggle, Alert } from '$lib/components/ui';
 	import ArtistModal from '$lib/components/ArtistModal.svelte';
 	import ArtistList from '$lib/components/ArtistList.svelte';
 
@@ -1015,7 +1006,10 @@
 				<!-- Active progress line -->
 				<div
 					class="absolute top-4 left-4 h-0.5 bg-orange-500 transition-all duration-500"
-					style="width: calc({((formState.currentStep - 1) / 3) * 100}% - {(formState.currentStep - 1) / 3 * 2}rem)"
+					style="width: calc({((formState.currentStep - 1) / 3) * 100}% - {((formState.currentStep -
+						1) /
+						3) *
+						2}rem)"
 				></div>
 
 				{#each steps as step}
@@ -1358,8 +1352,12 @@
 							<div class="relative">
 								<!-- Drop indicator above -->
 								{#if dragOverIndex === index && dropPosition === 'above'}
-									<div class="absolute -top-1 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent rounded-full z-10">
-										<div class="absolute left-1/2 -translate-x-1/2 -top-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-gray-900"></div>
+									<div
+										class="absolute -top-1 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent rounded-full z-10"
+									>
+										<div
+											class="absolute left-1/2 -translate-x-1/2 -top-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-gray-900"
+										></div>
 									</div>
 								{/if}
 
@@ -1372,16 +1370,18 @@
 									ondragend={handleSongDragEnd}
 									class="group flex items-center gap-4 p-5 bg-gradient-to-br from-gray-800/80 to-gray-900/80 rounded-2xl border-2 transition-all duration-200 select-none
 										{draggedSongIndex === index
-											? 'opacity-40 scale-[0.98] border-gray-600 shadow-none'
-											: draggedSongIndex !== null
-												? 'border-gray-700/50'
-												: 'border-gray-700/50 hover:border-orange-500/50 hover:shadow-lg hover:shadow-orange-500/10'}
+										? 'opacity-40 scale-[0.98] border-gray-600 shadow-none'
+										: draggedSongIndex !== null
+											? 'border-gray-700/50'
+											: 'border-gray-700/50 hover:border-orange-500/50 hover:shadow-lg hover:shadow-orange-500/10'}
 										{draggedSongIndex === null ? 'cursor-grab' : 'cursor-grabbing'}"
 									role="listitem"
 									aria-grabbed={draggedSongIndex === index}
 								>
 									<!-- Drag handle - grip pattern -->
-									<div class="flex-shrink-0 flex flex-col gap-1 p-1 -ml-1 text-gray-600 hover:text-gray-400 transition-colors">
+									<div
+										class="flex-shrink-0 flex flex-col gap-1 p-1 -ml-1 text-gray-600 hover:text-gray-400 transition-colors"
+									>
 										<div class="flex gap-1">
 											<div class="w-1 h-1 rounded-full bg-current"></div>
 											<div class="w-1 h-1 rounded-full bg-current"></div>
@@ -1431,24 +1431,30 @@
 											class="p-2 hover:bg-white/10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500 focus:bg-white/10"
 											aria-label="Edit song"
 										>
-											<EditOutline class="w-4 h-4 text-gray-400 hover:text-white transition-colors" />
+											<EditOutline
+												class="w-4 h-4 text-gray-400 hover:text-white transition-colors"
+											/>
 										</button>
 										<button
 											onclick={() => removeSong(index)}
 											class="p-2 hover:bg-red-500/10 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:bg-red-500/10"
-										aria-label="Remove song"
-									>
-										<TrashBinOutline
-											class="w-4 h-4 text-gray-400 hover:text-red-400 transition-colors"
-										/>
-									</button>
-								</div>
+											aria-label="Remove song"
+										>
+											<TrashBinOutline
+												class="w-4 h-4 text-gray-400 hover:text-red-400 transition-colors"
+											/>
+										</button>
+									</div>
 								</div>
 
 								<!-- Drop indicator below -->
 								{#if dragOverIndex === index && dropPosition === 'below'}
-									<div class="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent rounded-full z-10">
-										<div class="absolute left-1/2 -translate-x-1/2 -top-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-gray-900"></div>
+									<div
+										class="absolute -bottom-1 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-orange-500 to-transparent rounded-full z-10"
+									>
+										<div
+											class="absolute left-1/2 -translate-x-1/2 -top-1 w-3 h-3 bg-orange-500 rounded-full border-2 border-gray-900"
+										></div>
 									</div>
 								{/if}
 							</div>

@@ -105,7 +105,9 @@
 			<!-- Registration Form -->
 			<form onsubmit={handleSubmit} class="space-y-5">
 				<div>
-					<label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Full Name</label>
+					<label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+						>Full Name</label
+					>
 					<div class="relative">
 						<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
 							<UserCircleOutline class="w-5 h-5 text-gray-500" />
@@ -126,12 +128,16 @@
 						/>
 					</div>
 					{#if validationErrors.name}
-						<p id="name-error" role="alert" class="mt-1.5 text-sm text-red-400">{validationErrors.name}</p>
+						<p id="name-error" role="alert" class="mt-1.5 text-sm text-red-400">
+							{validationErrors.name}
+						</p>
 					{/if}
 				</div>
 
 				<div>
-					<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+					<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+						>Email</label
+					>
 					<div class="relative">
 						<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
 							<EnvelopeSolid class="w-5 h-5 text-gray-500" />
@@ -152,12 +158,16 @@
 						/>
 					</div>
 					{#if validationErrors.email}
-						<p id="email-error" role="alert" class="mt-1.5 text-sm text-red-400">{validationErrors.email}</p>
+						<p id="email-error" role="alert" class="mt-1.5 text-sm text-red-400">
+							{validationErrors.email}
+						</p>
 					{/if}
 				</div>
 
 				<div>
-					<label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label
+					<label
+						for="password"
+						class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label
 					>
 					<div class="relative">
 						<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -179,7 +189,9 @@
 						/>
 					</div>
 					{#if validationErrors.password}
-						<p id="password-error" role="alert" class="mt-1.5 text-sm text-red-400">{validationErrors.password}</p>
+						<p id="password-error" role="alert" class="mt-1.5 text-sm text-red-400">
+							{validationErrors.password}
+						</p>
 					{:else}
 						<p id="password-hint" class="mt-1.5 text-sm text-gray-500">
 							Use 8 or more characters with letters, numbers & symbols
@@ -188,7 +200,9 @@
 				</div>
 
 				<div>
-					<label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+					<label
+						for="confirmPassword"
+						class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
 						>Confirm Password</label
 					>
 					<div class="relative">
@@ -204,14 +218,18 @@
 							required
 							autocomplete="new-password"
 							aria-invalid={!!validationErrors.confirmPassword}
-							aria-describedby={validationErrors.confirmPassword ? 'confirm-password-error' : undefined}
+							aria-describedby={validationErrors.confirmPassword
+								? 'confirm-password-error'
+								: undefined}
 							class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-white/5 border rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all {validationErrors.confirmPassword
 								? 'border-red-500'
 								: 'border-gray-300 dark:border-white/10 hover:border-gray-400 dark:hover:border-white/20'}"
 						/>
 					</div>
 					{#if validationErrors.confirmPassword}
-						<p id="confirm-password-error" role="alert" class="mt-1.5 text-sm text-red-400">{validationErrors.confirmPassword}</p>
+						<p id="confirm-password-error" role="alert" class="mt-1.5 text-sm text-red-400">
+							{validationErrors.confirmPassword}
+						</p>
 					{/if}
 				</div>
 
@@ -306,7 +324,11 @@
 			<!-- Sign In Link -->
 			<p class="text-center text-sm text-gray-500 dark:text-gray-400">
 				Already have an account?
-				<a href="/signin" class="font-medium text-orange-500 dark:text-orange-400 hover:text-orange-600 dark:hover:text-orange-300">Sign in</a>
+				<a
+					href="/signin"
+					class="font-medium text-orange-500 dark:text-orange-400 hover:text-orange-600 dark:hover:text-orange-300"
+					>Sign in</a
+				>
 			</p>
 		</div>
 	</div>

@@ -60,8 +60,14 @@
 	{:else}
 		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 			<!-- BBN Revenue Card -->
-			<div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-6">
-				<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2">BBN Revenue</h3>
+			<div
+				class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-6"
+			>
+				<h3
+					class="text-sm font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-2"
+				>
+					BBN Revenue
+				</h3>
 				<p class="text-3xl font-bold text-gray-900 dark:text-white">{formatCurrency(bbnRevenue)}</p>
 				<p class="text-sm text-gray-500 mt-2">Total balance from BBN company wallet</p>
 			</div>

@@ -7,7 +7,13 @@
 		patchIdByWalletsByAdmin,
 	} from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
-	import type { SearchReturn, AdminWallet, AccountType, Wallet, ArtistRef } from '$lib/api/types.gen';
+	import type {
+		SearchReturn,
+		AdminWallet,
+		AccountType,
+		Wallet,
+		ArtistRef,
+	} from '$lib/api/types.gen';
 
 	import {
 		SearchOutline,
@@ -191,20 +197,19 @@
 				class="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
 			/>
 		</div>
-		<Button
-			onclick={search}
-			disabled={loading || !searchQuery.trim()}
-			variant="danger"
-			loading={loading}
-		>
+		<Button onclick={search} disabled={loading || !searchQuery.trim()} variant="danger" {loading}>
 			{loading ? 'Searching...' : 'Search'}
 		</Button>
 	</div>
 
 	<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 		<!-- Search Results -->
-		<div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
-			<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Results ({results.length})</h2>
+		<div
+			class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4"
+		>
+			<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+				Results ({results.length})
+			</h2>
 
 			{#if results.length === 0}
 				<p class="text-gray-500 text-center py-8">
@@ -228,19 +233,26 @@
 							<div class="flex-1 min-w-0">
 								{#if result._index === 'users'}
 									{@const userSource = (result as UserSearchResult)._source}
-									<p class="text-gray-900 dark:text-white font-medium truncate">{userSource.profile?.username}</p>
-									<p class="text-gray-500 dark:text-gray-400 text-sm truncate">{userSource.profile?.email}</p>
+									<p class="text-gray-900 dark:text-white font-medium truncate">
+										{userSource.profile?.username}
+									</p>
+									<p class="text-gray-500 dark:text-gray-400 text-sm truncate">
+										{userSource.profile?.email}
+									</p>
 								{:else if result._index === 'drops'}
 									{@const dropSource = (result as DropSearchResult)._source}
-									<p class="text-gray-900 dark:text-white font-medium truncate">{dropSource.title}</p>
+									<p class="text-gray-900 dark:text-white font-medium truncate">
+										{dropSource.title}
+									</p>
 									<p class="text-gray-500 dark:text-gray-400 text-sm truncate">
-										{dropSource.type} • {dropSource.artists
-											?.map((a: any) => a.name)
-											.join(', ') || 'Unknown Artist'}
+										{dropSource.type} • {dropSource.artists?.map((a: any) => a.name).join(', ') ||
+											'Unknown Artist'}
 									</p>
 								{:else if result._index === 'songs'}
 									{@const songSource = (result as SongSearchResult)._source}
-									<p class="text-gray-900 dark:text-white font-medium truncate">{songSource.title}</p>
+									<p class="text-gray-900 dark:text-white font-medium truncate">
+										{songSource.title}
+									</p>
 									<p class="text-gray-500 dark:text-gray-400 text-sm truncate">
 										ISRC: {songSource.isrc || 'None'} • {songSource.artists
 											?.map((a: any) => a.name)
@@ -273,7 +285,9 @@
 		</div>
 
 		<!-- Details Panel -->
-		<div class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+		<div
+			class="bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700 rounded-xl p-4"
+		>
 			<h2 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
 				{#if selectedType === 'users'}User Details
 				{:else if selectedType === 'songs'}Song Details
@@ -292,9 +306,15 @@
 				<div class="space-y-4">
 					<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
 						<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Profile</h3>
-						<p class="text-gray-900 dark:text-white font-medium">{(selectedItem as UserSearchResult)._source.profile?.username}</p>
-						<p class="text-gray-500 dark:text-gray-400 text-sm">{(selectedItem as UserSearchResult)._source.profile?.email}</p>
-						<p class="text-gray-500 text-xs mt-1">ID: {(selectedItem as UserSearchResult)._source._id}</p>
+						<p class="text-gray-900 dark:text-white font-medium">
+							{(selectedItem as UserSearchResult)._source.profile?.username}
+						</p>
+						<p class="text-gray-500 dark:text-gray-400 text-sm">
+							{(selectedItem as UserSearchResult)._source.profile?.email}
+						</p>
+						<p class="text-gray-500 text-xs mt-1">
+							ID: {(selectedItem as UserSearchResult)._source._id}
+						</p>
 					</div>
 
 					{#if (selectedItem as UserSearchResult)._source.groups?.length > 0}
@@ -383,7 +403,9 @@
 											class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded text-sm"
 										>
 											<div class="flex-1 min-w-0">
-												<p class="text-gray-900 dark:text-white truncate">{tx.description || tx.type}</p>
+												<p class="text-gray-900 dark:text-white truncate">
+													{tx.description || tx.type}
+												</p>
 												<p class="text-gray-500 text-xs">
 													{new Date(Number(tx.timestamp)).toLocaleDateString('de-DE')}
 													{#if tx.counterParty}
@@ -413,17 +435,25 @@
 				<div class="space-y-4">
 					<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
 						<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Song Info</h3>
-						<p class="text-gray-900 dark:text-white font-medium text-lg">{(selectedItem as SongSearchResult)._source.title}</p>
-						<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
-							{(selectedItem as SongSearchResult)._source.artists?.map((a: any) => a.name).join(', ') || 'Unknown Artist'}
+						<p class="text-gray-900 dark:text-white font-medium text-lg">
+							{(selectedItem as SongSearchResult)._source.title}
 						</p>
-						<p class="text-gray-500 text-xs mt-2">ID: {(selectedItem as SongSearchResult)._source._id}</p>
+						<p class="text-gray-500 dark:text-gray-400 text-sm mt-1">
+							{(selectedItem as SongSearchResult)._source.artists
+								?.map((a: any) => a.name)
+								.join(', ') || 'Unknown Artist'}
+						</p>
+						<p class="text-gray-500 text-xs mt-2">
+							ID: {(selectedItem as SongSearchResult)._source._id}
+						</p>
 					</div>
 
 					{#if (selectedItem as SongSearchResult)._source.isrc}
 						<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
 							<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">ISRC</h3>
-							<p class="text-gray-900 dark:text-white font-mono">{(selectedItem as SongSearchResult)._source.isrc}</p>
+							<p class="text-gray-900 dark:text-white font-mono">
+								{(selectedItem as SongSearchResult)._source.isrc}
+							</p>
 						</div>
 					{/if}
 
@@ -454,11 +484,19 @@
 				<div class="space-y-4">
 					<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
 						<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Owner</h3>
-						<p class="text-gray-900 dark:text-white font-medium">{(selectedItem as WalletSearchResult)._source.userName || 'Unknown'}</p>
-						<p class="text-gray-500 dark:text-gray-400 text-sm">{(selectedItem as WalletSearchResult)._source.email || 'No email'}</p>
-						<p class="text-gray-500 text-xs mt-1">Wallet ID: {(selectedItem as WalletSearchResult)._source._id}</p>
+						<p class="text-gray-900 dark:text-white font-medium">
+							{(selectedItem as WalletSearchResult)._source.userName || 'Unknown'}
+						</p>
+						<p class="text-gray-500 dark:text-gray-400 text-sm">
+							{(selectedItem as WalletSearchResult)._source.email || 'No email'}
+						</p>
+						<p class="text-gray-500 text-xs mt-1">
+							Wallet ID: {(selectedItem as WalletSearchResult)._source._id}
+						</p>
 						{#if (selectedItem as WalletSearchResult)._source.user}
-							<p class="text-gray-500 text-xs">User ID: {(selectedItem as WalletSearchResult)._source.user}</p>
+							<p class="text-gray-500 text-xs">
+								User ID: {(selectedItem as WalletSearchResult)._source.user}
+							</p>
 						{/if}
 					</div>
 
@@ -468,13 +506,17 @@
 							<div>
 								<p class="text-xs text-gray-500">Unrestrained</p>
 								<p class="text-gray-900 dark:text-white font-medium text-lg">
-									{formatCurrency((selectedItem as WalletSearchResult)._source.balance?.unrestrained || 0)}
+									{formatCurrency(
+										(selectedItem as WalletSearchResult)._source.balance?.unrestrained || 0,
+									)}
 								</p>
 							</div>
 							<div>
 								<p class="text-xs text-gray-500">Restrained</p>
 								<p class="text-gray-900 dark:text-white font-medium text-lg">
-									{formatCurrency((selectedItem as WalletSearchResult)._source.balance?.restrained || 0)}
+									{formatCurrency(
+										(selectedItem as WalletSearchResult)._source.balance?.restrained || 0,
+									)}
 								</p>
 							</div>
 						</div>
@@ -550,7 +592,9 @@
 										class="flex items-center justify-between p-2 bg-gray-50 dark:bg-gray-800/50 rounded text-sm"
 									>
 										<div class="flex-1 min-w-0">
-											<p class="text-gray-900 dark:text-white truncate">{tx.description || tx.type}</p>
+											<p class="text-gray-900 dark:text-white truncate">
+												{tx.description || tx.type}
+											</p>
 											<p class="text-gray-500 text-xs">
 												{new Date(Number(tx.timestamp)).toLocaleDateString('de-DE')}
 												{#if tx.counterParty}
@@ -559,9 +603,7 @@
 											</p>
 										</div>
 										<span
-											class="ml-2 font-medium {tx.amount >= 0
-												? 'text-green-400'
-												: 'text-red-400'}"
+											class="ml-2 font-medium {tx.amount >= 0 ? 'text-green-400' : 'text-red-400'}"
 										>
 											{tx.amount >= 0 ? '+' : ''}{formatCurrency(tx.amount)}
 										</span>

@@ -340,7 +340,9 @@
 	{/if}
 
 	<!-- Profile Section -->
-	<section class="rounded-2xl p-6 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
+	<section
+		class="rounded-2xl p-6 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10"
+	>
 		<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Profile</h2>
 
 		{#if avatarError}
@@ -412,7 +414,8 @@
 			</div>
 			<div class="flex-1">
 				<div>
-					<label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Display Name</label
+					<label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+						>Display Name</label
 					>
 					<input
 						id="name"
@@ -428,7 +431,9 @@
 		<div class="space-y-4">
 			<div>
 				<div class="flex items-center gap-2 mb-2">
-					<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email</label>
+					<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300"
+						>Email</label
+					>
 					{#if emailVerified}
 						<Badge color="green" size="sm"><CheckCircleSolid class="w-3 h-3 mr-1" />Verified</Badge>
 					{:else}
@@ -472,8 +477,9 @@
 
 			<div>
 				<div class="flex items-center gap-2 mb-2">
-					<label for="phone-input" class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-						>Phone Number</label
+					<label
+						for="phone-input"
+						class="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number</label
 					>
 					{#if phone && phoneVerified}
 						<Badge color="green" size="sm"><CheckCircleSolid class="w-3 h-3 mr-1" />Verified</Badge>
@@ -503,7 +509,9 @@
 	</section>
 
 	<!-- Notifications Section -->
-	<section class="rounded-2xl p-6 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
+	<section
+		class="rounded-2xl p-6 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10"
+	>
 		<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Notifications</h2>
 
 		<div class="space-y-4">
@@ -538,7 +546,9 @@
 	</section>
 
 	<!-- Security Section -->
-	<section class="rounded-2xl p-6 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10">
+	<section
+		class="rounded-2xl p-6 bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10"
+	>
 		<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Security</h2>
 
 		<div class="space-y-4">
@@ -592,7 +602,10 @@
 						{/if}
 
 						<div>
-							<label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+							<label
+								for="newPassword"
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+							>
 								New Password
 							</label>
 							<div class="relative">
@@ -613,7 +626,10 @@
 						</div>
 
 						<div>
-							<label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+							<label
+								for="confirmPassword"
+								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+							>
 								Confirm New Password
 							</label>
 							<div class="relative">

@@ -31,7 +31,8 @@
 			success = true;
 		} catch (err: any) {
 			console.error('Password reset error:', err);
-			error = err?.error?.message || err?.message || 'Failed to send reset email. Please try again.';
+			error =
+				err?.error?.message || err?.message || 'Failed to send reset email. Please try again.';
 		}
 
 		isLoading = false;
@@ -90,7 +91,10 @@
 				<!-- Reset Form -->
 				<form onsubmit={handleSubmit} class="space-y-5">
 					<div>
-						<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+						<label
+							for="email"
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label
+						>
 						<div class="relative">
 							<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
 								<EnvelopeSolid class="w-5 h-5 text-gray-500" />
@@ -126,7 +130,11 @@
 				<!-- Back to Sign In Link -->
 				<p class="text-center text-sm text-gray-500 dark:text-gray-400">
 					Remember your password?
-					<a href="/signin" class="font-medium text-orange-500 dark:text-orange-400 hover:text-orange-600 dark:hover:text-orange-300">Sign in</a>
+					<a
+						href="/signin"
+						class="font-medium text-orange-500 dark:text-orange-400 hover:text-orange-600 dark:hover:text-orange-300"
+						>Sign in</a
+					>
 				</p>
 			{/if}
 		</div>

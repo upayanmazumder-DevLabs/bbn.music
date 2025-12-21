@@ -19,7 +19,8 @@
 		<section class="mt-8">
 			<Heading tag="h2" class="text-xl font-bold">Conformity Status</Heading>
 			<p class="mt-4">
-				This website is <strong class="text-gray-900 dark:text-white">fully conformant</strong> with WCAG 2.1 Level AA.
+				This website is <strong class="text-gray-900 dark:text-white">fully conformant</strong> with WCAG
+				2.1 Level AA.
 			</p>
 		</section>
 
@@ -53,7 +54,10 @@
 			<div class="mt-4 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
 				<p>
 					<strong class="text-gray-900 dark:text-white">Email:</strong>
-					<a href="mailto:support@bbn.music" class="text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300">
+					<a
+						href="mailto:support@bbn.music"
+						class="text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300"
+					>
 						support@bbn.music
 					</a>
 				</p>
@@ -77,11 +81,13 @@
 				response, you have the right to contact the competent enforcement body.
 			</p>
 			<p class="mt-4">
-				In Germany, you can contact the Federal Agency for Accessibility
-				(Bundesfachstelle Barrierefreiheit):
+				In Germany, you can contact the Federal Agency for Accessibility (Bundesfachstelle
+				Barrierefreiheit):
 			</p>
 			<div class="mt-4 p-4 bg-gray-100 dark:bg-gray-800/50 rounded-lg">
-				<p><strong class="text-gray-900 dark:text-white">Bundesfachstelle Barrierefreiheit</strong></p>
+				<p>
+					<strong class="text-gray-900 dark:text-white">Bundesfachstelle Barrierefreiheit</strong>
+				</p>
 				<p class="mt-2">
 					<a
 						href="https://www.bundesfachstelle-barrierefreiheit.de"
@@ -98,8 +104,8 @@
 		<section class="mt-8">
 			<Heading tag="h2" class="text-xl font-bold">Technical Specifications</Heading>
 			<p class="mt-4">
-				Accessibility of this website relies on the following technologies to work with your
-				browser and any assistive technologies or plugins installed on your computer:
+				Accessibility of this website relies on the following technologies to work with your browser
+				and any assistive technologies or plugins installed on your computer:
 			</p>
 			<ul class="list-disc list-inside mt-2 space-y-1">
 				<li>HTML</li>

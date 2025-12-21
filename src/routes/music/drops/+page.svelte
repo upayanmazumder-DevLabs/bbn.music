@@ -6,7 +6,12 @@
 	import { PlusOutline } from 'flowbite-svelte-icons';
 	import type { Drop, Artist, ArtistRef } from '$lib/api/types.gen';
 	import { auth } from '$lib/stores/auth';
-	import { getDropsByMusic, getArtworkByDropByMusic, postMusic, getArtistsByMusic } from '$lib/api/sdk.gen';
+	import {
+		getDropsByMusic,
+		getArtworkByDropByMusic,
+		postMusic,
+		getArtistsByMusic,
+	} from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
 	import { imageCache } from '$lib/stores/imageCache';
 
@@ -243,7 +248,9 @@
 				{tab.label}
 				{#if count > 0}
 					<span
-						class="ml-2 px-2 py-0.5 rounded-full text-xs {isActive ? 'bg-white/20' : 'bg-gray-300 dark:bg-gray-700'}"
+						class="ml-2 px-2 py-0.5 rounded-full text-xs {isActive
+							? 'bg-white/20'
+							: 'bg-gray-300 dark:bg-gray-700'}"
 					>
 						{count}
 					</span>
@@ -310,7 +317,9 @@
 			{#each filteredDrops as drop}
 				{@const status = getStatusBadge(drop.type)}
 				{@const dropUrl =
-					drop.type === 'UNSUBMITTED' ? `/music/drops/new?id=${drop._id}` : `/music/drops/${drop._id}/edit`}
+					drop.type === 'UNSUBMITTED'
+						? `/music/drops/new?id=${drop._id}`
+						: `/music/drops/${drop._id}/edit`}
 				<a href={dropUrl} class="block">
 					<Card
 						variant="default"
@@ -319,7 +328,9 @@
 					>
 						<div class="flex items-center gap-4 p-4">
 							<!-- Artwork -->
-							<div class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-800">
+							<div
+								class="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 rounded-lg overflow-hidden bg-gray-200 dark:bg-gray-800"
+							>
 								{#if drop.artwork && drop._id && artworkUrls[drop._id]}
 									<img
 										src={artworkUrls[drop._id]}
@@ -340,21 +351,31 @@
 							<!-- Title & Artist -->
 							<div class="flex-1 min-w-0">
 								<h3 class="font-semibold text-gray-900 dark:text-white truncate">{drop.title}</h3>
-								<p class="text-gray-500 dark:text-gray-400 text-sm truncate">{getArtistNames(drop.artists)}</p>
+								<p class="text-gray-500 dark:text-gray-400 text-sm truncate">
+									{getArtistNames(drop.artists)}
+								</p>
 							</div>
 
 							<!-- Metadata - hidden on mobile -->
-							<div class="hidden md:flex items-center gap-8 text-sm text-gray-500 dark:text-gray-400">
+							<div
+								class="hidden md:flex items-center gap-8 text-sm text-gray-500 dark:text-gray-400"
+							>
 								<div class="w-28 text-center">
-									<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">Release</p>
+									<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">
+										Release
+									</p>
 									<p>{formatDate(drop.release)}</p>
 								</div>
 								<div class="w-24 text-center">
-									<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">Genre</p>
+									<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">
+										Genre
+									</p>
 									<p class="truncate">{drop.primaryGenre || '-'}</p>
 								</div>
 								<div class="w-16 text-center">
-									<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">Songs</p>
+									<p class="text-xs text-gray-400 dark:text-gray-500 uppercase tracking-wide">
+										Songs
+									</p>
 									<p>{drop.songs?.length || 0}</p>
 								</div>
 							</div>

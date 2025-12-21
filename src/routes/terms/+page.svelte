@@ -11,7 +11,8 @@
 
 	<div class="prose dark:prose-invert max-w-none space-y-6 text-gray-600 dark:text-gray-300">
 		<section>
-			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Definitions</Heading>
+			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Definitions</Heading
+			>
 			<p>
 				To facilitate the understanding of these Terms of Use, the following principal expressions
 				will have these meanings:
@@ -268,7 +269,9 @@
 		</section>
 
 		<section>
-			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Duration and Termination</Heading>
+			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold"
+				>Duration and Termination</Heading
+			>
 			<p>
 				<strong>5.1</strong> The duration of our contractual relationship is initially undetermined. It
 				shall begin when registering at the Platform and upon the explicit acceptance of these Terms of
@@ -305,7 +308,9 @@
 		</section>
 
 		<section>
-			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Intellectual Property Rights</Heading>
+			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold"
+				>Intellectual Property Rights</Heading
+			>
 			<p>
 				<strong>6.1</strong> Nothing contained herein shall be construed as granting or conferring any
 				property rights in the Platform or any part thereof to You; therefore, We are not granting to
@@ -390,7 +395,9 @@
 		</section>
 
 		<section>
-			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Miscellaneous</Heading>
+			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold"
+				>Miscellaneous</Heading
+			>
 			<p>
 				<strong>10.1</strong> Non-assignment: You may not assign your account or any interest therein
 				to any third party, without our express prior written consent.
@@ -444,7 +451,9 @@
 		</section>
 
 		<section>
-			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Dispute Resolution</Heading>
+			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold"
+				>Dispute Resolution</Heading
+			>
 			<p>
 				<strong>12.1</strong> Any dispute arising out of or relating to these Terms of Use shall first
 				be submitted to Our internal resolution process described in Section 11.3. You agree to cooperate

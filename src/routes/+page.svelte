@@ -217,7 +217,9 @@
 
 	<!-- Make it. Drop it. -->
 	<section class="text-center py-12">
-		<h2 class="text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-4">Make it. Drop it.</h2>
+		<h2 class="text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-4">
+			Make it. Drop it.
+		</h2>
 		<p class="text-xl text-gray-500 dark:text-gray-400 font-semibold">
 			Distributing music should be accessible without any credit card.
 		</p>
@@ -255,14 +257,20 @@
 	<!-- Testimonials -->
 	<section>
 		<div class="text-center mb-12">
-			<h2 class="text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-4">Loved by Artists</h2>
-			<p class="text-xl text-gray-500 dark:text-gray-400 font-semibold">See how our Artists value bbn.music</p>
+			<h2 class="text-5xl md:text-6xl font-black text-gray-900 dark:text-white mb-4">
+				Loved by Artists
+			</h2>
+			<p class="text-xl text-gray-500 dark:text-gray-400 font-semibold">
+				See how our Artists value bbn.music
+			</p>
 		</div>
 
 		<div class="max-w-3xl mx-auto space-y-12">
 			{#each testimonials as testimonial, i}
 				<div class={i % 2 === 0 ? 'text-left' : 'text-right ml-auto'}>
-					<p class="text-lg md:text-xl text-gray-900 dark:text-white font-semibold italic mb-6 leading-relaxed">
+					<p
+						class="text-lg md:text-xl text-gray-900 dark:text-white font-semibold italic mb-6 leading-relaxed"
+					>
 						"{testimonial.quote}"
 					</p>
 					<a
@@ -276,7 +284,9 @@
 							alt={testimonial.name}
 							class="w-10 h-10 rounded-full object-cover group-hover:ring-2 group-hover:ring-orange-500 transition-all"
 						/>
-						<span class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors">
+						<span
+							class="text-xl font-bold text-gray-900 dark:text-white group-hover:text-orange-500 dark:group-hover:text-orange-400 transition-colors"
+						>
 							{testimonial.name}
 						</span>
 					</a>

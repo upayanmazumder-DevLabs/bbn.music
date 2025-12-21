@@ -77,7 +77,10 @@
 					throw new Error('Failed to authenticate');
 				}
 			} catch (err: any) {
-				error = err?.error?.message || err?.message || 'Invalid or expired reset link. Please request a new one.';
+				error =
+					err?.error?.message ||
+					err?.message ||
+					'Invalid or expired reset link. Please request a new one.';
 				viewState = 'login';
 			}
 			isLoading = false;
@@ -217,7 +220,9 @@
 						style="position: absolute; left: -9999px; width: 1px; height: 1px;"
 					/>
 					<div>
-						<label for="newPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+						<label
+							for="newPassword"
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
 							>New Password</label
 						>
 						<div class="relative">
@@ -239,7 +244,9 @@
 					</div>
 
 					<div>
-						<label for="confirmNewPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+						<label
+							for="confirmNewPassword"
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
 							>Confirm Password</label
 						>
 						<div class="relative">
@@ -317,7 +324,10 @@
 				<!-- Sign In Form -->
 				<form onsubmit={handleSubmit} class="space-y-5">
 					<div>
-						<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label>
+						<label
+							for="email"
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label
+						>
 						<div class="relative">
 							<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
 								<EnvelopeSolid class="w-5 h-5 text-gray-500" />
@@ -336,7 +346,9 @@
 					</div>
 
 					<div>
-						<label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+						<label
+							for="password"
+							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
 							>Password</label
 						>
 						<div class="relative">
@@ -433,7 +445,11 @@
 				<!-- Sign Up Link -->
 				<p class="text-center text-sm text-gray-500 dark:text-gray-400">
 					Don't have an account?
-					<a href="/register" class="font-medium text-orange-500 dark:text-orange-400 hover:text-orange-600 dark:hover:text-orange-300">Sign up</a>
+					<a
+						href="/register"
+						class="font-medium text-orange-500 dark:text-orange-400 hover:text-orange-600 dark:hover:text-orange-300"
+						>Sign up</a
+					>
 				</p>
 			</div>
 		{/if}

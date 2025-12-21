@@ -552,6 +552,37 @@
 						title: 'Reviewed by admin',
 						badge: { text: 'Reviewed', color: 'green' },
 					};
+				case 'shazam-results': {
+					const shazamData = event.meta.data as
+						| Array<{ title?: string; artist?: string }>
+						| undefined;
+					// Only count entries with a real title as actual matches
+					const validMatches =
+						shazamData?.filter((m) => m.title && m.title !== 'No title found') || [];
+					const matchCount = validMatches.length;
+
+					if (matchCount === 0) {
+						return {
+							title: 'Shazam check',
+							detail: 'No matches found',
+							badge: { text: 'Clear', color: 'green' },
+						};
+					}
+
+					const firstMatch = validMatches[0];
+					const matchInfo = firstMatch.artist
+						? `${firstMatch.title} - ${firstMatch.artist}`
+						: firstMatch.title!;
+
+					return {
+						title: 'Shazam check',
+						detail:
+							matchCount === 1
+								? `Match: ${matchInfo}`
+								: `${matchCount} matches found (${matchInfo})`,
+						badge: { text: `${matchCount} match${matchCount > 1 ? 'es' : ''}`, color: 'orange' },
+					};
+				}
 				default:
 					return { title: action.replace(/-/g, ' ') };
 			}

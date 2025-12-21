@@ -28,7 +28,7 @@
 	let viewState = $state<ViewState>('login');
 
 	// Get redirect URL from query params
-	const redirectUrl = $derived($page.url.searchParams.get('redirect') || '/drops');
+	const redirectUrl = $derived($page.url.searchParams.get('redirect') || '/music/drops');
 
 	// Handle special auth callbacks (OAuth, password reset, email verification)
 	onMount(async () => {
@@ -144,7 +144,7 @@
 			}
 
 			// Password updated, redirect to drops
-			goto('/drops');
+			goto('/music/drops');
 		} catch (err: any) {
 			error = err?.error?.message || err?.message || 'Failed to update password. Please try again.';
 		}
@@ -315,7 +315,7 @@
 				<h1 class="text-2xl font-bold text-gray-900 dark:text-white">Email Verified!</h1>
 				<p class="text-gray-500 dark:text-gray-400">Your email has been successfully verified.</p>
 				<Button
-					href="/drops"
+					href="/music/drops"
 					class="bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-600 hover:to-orange-500 text-white font-semibold py-3 px-6 rounded-lg shadow-lg shadow-orange-500/20 transition-all"
 				>
 					Continue to Drops

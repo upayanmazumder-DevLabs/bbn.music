@@ -69,7 +69,7 @@
 
 	// Redirect if no ID provided
 	if (!dropId) {
-		goto('/drops');
+		goto('/music/drops');
 	}
 
 	// Form state using Svelte 5 runes
@@ -941,7 +941,7 @@
 			});
 
 			toast.show('Drop submitted for review!', 'success');
-			goto('/drops');
+			goto('/music/drops');
 		} catch (e: any) {
 			console.error('Submit failed:', e);
 			const errorMsg = e?.error?.message || e?.message || 'Failed to submit drop';
@@ -994,7 +994,7 @@
 		<Card variant="default" padding="lg">
 			<div class="text-center py-8">
 				<p class="text-red-400 mb-4">{loadError}</p>
-				<Button onclick={() => goto('/drops')}>Back to Drops</Button>
+				<Button onclick={() => goto('/music/drops')}>Back to Drops</Button>
 			</div>
 		</Card>
 	{:else}
@@ -1557,7 +1557,7 @@
 			<!-- Navigation -->
 			<div class="flex justify-between mt-8 pt-6 border-t border-gray-700/50">
 				{#if formState.currentStep === 1}
-					<Button variant="secondary" href="/drops">
+					<Button variant="secondary" href="/music/drops">
 						<CloseOutline class="w-4 h-4" /> Cancel
 					</Button>
 				{:else}

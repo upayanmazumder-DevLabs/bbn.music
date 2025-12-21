@@ -200,7 +200,7 @@
 				throw new Error('Invalid response from server');
 			}
 
-			goto(`/drops/new?id=${data.id}`);
+			goto(`/music/drops/new?id=${data.id}`);
 		} catch (err: any) {
 			console.error('Failed to create drop:', err);
 			error = err?.error?.message || err?.message || 'Failed to create drop';
@@ -310,7 +310,7 @@
 			{#each filteredDrops as drop}
 				{@const status = getStatusBadge(drop.type)}
 				{@const dropUrl =
-					drop.type === 'UNSUBMITTED' ? `/drops/new?id=${drop._id}` : `/drops/${drop._id}/edit`}
+					drop.type === 'UNSUBMITTED' ? `/music/drops/new?id=${drop._id}` : `/music/drops/${drop._id}/edit`}
 				<a href={dropUrl} class="block">
 					<Card
 						variant="default"

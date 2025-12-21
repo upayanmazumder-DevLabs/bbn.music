@@ -119,7 +119,7 @@
 		}
 
 		if (isAuthenticated && (pathname === '/signin' || pathname === '/register')) {
-			goto('/drops', { replaceState: true });
+			goto('/music/drops', { replaceState: true });
 			return false;
 		}
 
@@ -162,9 +162,9 @@
 	type NavItem = { href: string; label: string; exact?: boolean };
 
 	const musicNavItems: NavItem[] = [
-		{ href: '/drops', label: 'Drops' },
-		{ href: '/artists', label: 'Artists' },
-		{ href: '/payouts', label: 'Earnings' },
+		{ href: '/music/drops', label: 'Drops' },
+		{ href: '/music/artists', label: 'Artists' },
+		{ href: '/music/payouts', label: 'Earnings' },
 	];
 
 	const adminNavItems: NavItem[] = [
@@ -184,6 +184,7 @@
 		const path = $page.url.pathname;
 		if (path.startsWith('/admin')) return 'admin';
 		if (path.startsWith('/wallet')) return 'wallet';
+		if (path.startsWith('/music')) return 'music';
 		return 'music';
 	});
 

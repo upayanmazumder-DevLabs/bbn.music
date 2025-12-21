@@ -438,7 +438,7 @@
 					{loadingShazam ? 'Checking...' : 'Check Shazam'}
 				</Button>
 				<Button variant="secondary" onclick={() => (showPublishDialog = true)}>Publish</Button>
-				<Button variant="secondary" onclick={() => goto(`/drops/${dropId}/edit`)}>Edit Drop</Button>
+				<Button variant="secondary" onclick={() => goto(`/music/drops/${dropId}/edit`)}>Edit Drop</Button>
 				<Button onclick={() => openResponseDialog('ACCEPT')}>
 					<CheckCircleSolid class="w-4 h-4" /> Accept
 				</Button>

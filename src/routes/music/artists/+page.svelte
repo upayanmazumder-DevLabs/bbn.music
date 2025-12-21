@@ -182,7 +182,7 @@
 		<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
 			{#each filteredArtists as artist}
 				<Card variant="default" padding="none">
-					<a href="/artists/{artist._id}" class="block p-4 hover:bg-gray-800/50 transition-colors">
+					<a href="/music/artists/{artist._id}" class="block p-4 hover:bg-gray-800/50 transition-colors">
 						<!-- Artist Avatar -->
 						<div class="relative mb-3">
 							{#if artist.avatar}

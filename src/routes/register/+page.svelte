@@ -73,7 +73,7 @@
 		const success = await auth.register(email, password, name);
 
 		if (success) {
-			goto('/drops');
+			goto('/music/drops');
 		} else {
 			// Get error from auth state, or use fallback
 			const authState = $auth;
@@ -84,7 +84,7 @@
 
 	function handleOAuth(provider: 'google' | 'discord' | 'microsoft') {
 		// Store the redirect goal before OAuth redirect
-		localStorage.setItem('goal', '/drops');
+		localStorage.setItem('goal', '/music/drops');
 		window.location.href = APITools.oauthRedirect(provider);
 	}
 </script>

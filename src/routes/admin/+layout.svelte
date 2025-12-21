@@ -8,7 +8,7 @@
 	onMount(() => {
 		// Redirect non-admin users
 		if (!$auth.isAuthenticated || !$auth.user?.isAdmin) {
-			goto('/drops');
+			goto('/music/drops');
 		}
 	});
 </script>

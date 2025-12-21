@@ -14,8 +14,8 @@
 			id: 'music',
 			logo: bbnMusicLogo,
 			label: 'bbn.music',
-			route: '/drops',
-			pathPrefix: '', // default app
+			route: '/music/drops',
+			pathPrefix: '/music', // music dashboard routes
 			color: 'orange',
 			requiresAuth: false,
 			requiresAdmin: false,
@@ -47,7 +47,8 @@
 		const path = $page.url.pathname;
 		if (path.startsWith('/admin')) return apps.find((a) => a.id === 'admin')!;
 		if (path.startsWith('/wallet')) return apps.find((a) => a.id === 'wallet')!;
-		return apps.find((a) => a.id === 'music')!;
+		if (path.startsWith('/music')) return apps.find((a) => a.id === 'music')!;
+		return apps.find((a) => a.id === 'music')!; // default fallback
 	});
 
 	// Filter apps based on auth state and permissions

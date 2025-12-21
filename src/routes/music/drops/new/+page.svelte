@@ -44,8 +44,8 @@
 		postDropByDropsByMusic,
 		postTypeByTypeByDropByMusic,
 	} from '$lib/api/sdk.gen';
-	import { getAuthHeaders, getBaseUrl } from '$lib/apiClient';
-	import { auth } from '$lib/stores/auth';
+	import { getAuthHeaders } from '$lib/apiClient';
+	import { uploadViaWebSocket as wsUpload } from '$lib/utils/wsUpload';
 	import type {
 		FullDrop,
 		ArtistRef as ApiArtistRef,
@@ -755,61 +755,12 @@
 	}
 
 	async function uploadSongViaWebSocket(file: File): Promise<string> {
-		return new Promise((resolve, reject) => {
-			const baseUrl = getBaseUrl();
-			const wsUrl = `${baseUrl.replace('https:', 'wss:').replace('http:', 'ws:')}api/@bbn/music/songs/upload`;
-			const ws = new WebSocket(wsUrl);
-
-			const reader = file.stream().getReader();
-			let totalBytes = 0;
-
-			ws.onopen = () => {
-				const token = auth.getStoredToken();
-				if (!token) {
-					reject(new Error('No authentication token'));
-					ws.close();
-					return;
-				}
-				ws.send(`JWT ${token}`);
-			};
-
-			ws.onmessage = async ({ data }) => {
-				if (data.startsWith('failed')) {
-					console.error('Upload failed:', data);
-					ws.close();
-					reject(new Error(data));
-				} else if (data === 'file') {
-					ws.send(`file ${JSON.stringify({ filename: file.name, type: file.type })}`);
-				} else if (data === 'next') {
-					const chunk = await reader.read();
-
-					if (chunk.value) {
-						ws.send(chunk.value);
-						totalBytes += chunk.value.length;
-						songUploadProgress = Math.round((totalBytes / file.size) * 100);
-					}
-
-					if (chunk.done) {
-						ws.send('end');
-					}
-				} else {
-					// Upload complete - data contains the song ID
-					reader.releaseLock();
-					ws.close();
-					resolve(data);
-				}
-			};
-
-			ws.onerror = (event) => {
-				reader.releaseLock();
-				reject(new Error('WebSocket connection error'));
-			};
-
-			ws.onclose = (event) => {
-				if (!event.wasClean && totalBytes === 0) {
-					reject(new Error('Connection closed unexpectedly'));
-				}
-			};
+		return wsUpload({
+			path: 'api/@bbn/music/songs/upload',
+			file,
+			onProgress: (percent) => {
+				songUploadProgress = percent;
+			},
 		});
 	}
 
@@ -838,7 +789,10 @@
 
 		uploadingArtwork = true;
 		try {
-			const artworkId = await uploadViaWebSocket(file, dropId);
+			const artworkId = await wsUpload({
+				path: `api/@bbn/music/drops/${dropId}/upload`,
+				file,
+			});
 			formState.artwork = artworkId;
 			toast.show('Artwork uploaded successfully', 'success');
 		} catch (e: any) {
@@ -850,64 +804,6 @@
 		} finally {
 			uploadingArtwork = false;
 		}
-	}
-
-	async function uploadViaWebSocket(file: File, dropId: string): Promise<string> {
-		return new Promise((resolve, reject) => {
-			const baseUrl = getBaseUrl();
-			const wsUrl = `${baseUrl.replace('https:', 'wss:').replace('http:', 'ws:')}api/@bbn/music/drops/${dropId}/upload`;
-			const ws = new WebSocket(wsUrl);
-
-			const reader = file.stream().getReader();
-			let uploadProgress = 0;
-
-			ws.onopen = () => {
-				const token = auth.getStoredToken();
-				if (!token) {
-					reject(new Error('No authentication token'));
-					ws.close();
-					return;
-				}
-				ws.send(`JWT ${token}`);
-			};
-
-			ws.onmessage = async ({ data }) => {
-				if (data.startsWith('failed')) {
-					console.error('Upload failed:', data);
-					ws.close();
-					reject(new Error(data));
-				} else if (data === 'file') {
-					ws.send(`file ${JSON.stringify({ filename: file.name, type: file.type })}`);
-				} else if (data === 'next') {
-					const chunk = await reader.read();
-
-					if (chunk.value) {
-						ws.send(chunk.value);
-						uploadProgress += chunk.value.length;
-					}
-
-					if (chunk.done) {
-						ws.send('end');
-					}
-				} else {
-					// Upload complete - data contains the artwork ID
-					reader.releaseLock();
-					ws.close();
-					resolve(data);
-				}
-			};
-
-			ws.onerror = (event) => {
-				reader.releaseLock();
-				reject(new Error('WebSocket connection error'));
-			};
-
-			ws.onclose = (event) => {
-				if (!event.wasClean && uploadProgress === 0) {
-					reject(new Error('Connection closed unexpectedly'));
-				}
-			};
-		});
 	}
 
 	async function handleDrop(event: DragEvent) {

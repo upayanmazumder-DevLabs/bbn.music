@@ -1,14 +1,20 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { Button, Spinner } from '$lib/components/ui';
+	import { Button, Modal, Spinner } from '$lib/components/ui';
 	import { getPayoutsByAdmin, postSyncMappingByAdmin } from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
+	import { toast } from '$lib/stores/toast';
+	import { uploadViaWebSocket } from '$lib/utils/wsUpload';
 	import type { PayoutList } from '$lib/api/types.gen';
+	import { CloudArrowUpOutline } from 'flowbite-svelte-icons';
 
 	let payouts = $state<PayoutList[]>([]);
 	let loading = $state(true);
 	let error = $state<string | null>(null);
 	let syncing = $state(false);
+	let showUploadModal = $state(false);
+	let uploading = $state(false);
+	let selectedFile = $state<File | null>(null);
 
 	onMount(async () => {
 		await loadPayouts();
@@ -41,6 +47,32 @@
 		}
 	}
 
+	function handleFileSelect(event: Event) {
+		const input = event.target as HTMLInputElement;
+		selectedFile = input.files?.[0] || null;
+	}
+
+	async function uploadPayout() {
+		if (!selectedFile) return;
+
+		uploading = true;
+		try {
+			await uploadViaWebSocket({
+				path: 'api/@bbn/admin/payouts/upload',
+				file: selectedFile,
+			});
+			toast.show('Payout uploaded successfully', 'success');
+			showUploadModal = false;
+			selectedFile = null;
+			await loadPayouts();
+		} catch (e: any) {
+			console.error('Upload failed:', e);
+			toast.show(e?.message || 'Failed to upload payout', 'error');
+		} finally {
+			uploading = false;
+		}
+	}
+
 	function formatCurrency(amount: number): string {
 		return new Intl.NumberFormat('de-DE', {
 			style: 'currency',
@@ -53,6 +85,10 @@
 	<div class="flex items-center justify-between mb-6">
 		<h1 class="text-2xl font-bold text-white">Payouts</h1>
 		<div class="flex gap-3">
+			<Button onclick={() => (showUploadModal = true)} variant="secondary">
+				<CloudArrowUpOutline class="w-4 h-4" />
+				Upload Payout
+			</Button>
 			<Button onclick={syncMapping} disabled={syncing} variant="secondary" loading={syncing}>
 				{syncing ? 'Syncing...' : 'Sync Mapping'}
 			</Button>
@@ -90,3 +126,44 @@
 		</div>
 	{/if}
 </div>
+
+<!-- Upload Modal -->
+<Modal bind:open={showUploadModal} title="Upload Payout" size="md">
+	<div class="space-y-4">
+		<p class="text-gray-400 text-sm">
+			Select a payout file to upload. Supported formats: CSV, Excel.
+		</p>
+
+		<div class="relative">
+			<input
+				type="file"
+				accept=".csv,.xlsx,.xls"
+				onchange={handleFileSelect}
+				class="block w-full text-sm text-gray-400
+					file:mr-4 file:py-2 file:px-4
+					file:rounded-lg file:border-0
+					file:text-sm file:font-medium
+					file:bg-orange-500/20 file:text-orange-400
+					hover:file:bg-orange-500/30
+					cursor-pointer"
+			/>
+		</div>
+
+		{#if selectedFile}
+			<div class="flex items-center gap-2 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+				<CloudArrowUpOutline class="w-5 h-5 text-orange-400" />
+				<span class="text-white text-sm truncate">{selectedFile.name}</span>
+				<span class="text-gray-500 text-xs ml-auto">
+					{(selectedFile.size / 1024).toFixed(1)} KB
+				</span>
+			</div>
+		{/if}
+	</div>
+
+	{#snippet footer()}
+		<Button variant="secondary" onclick={() => (showUploadModal = false)}>Cancel</Button>
+		<Button onclick={uploadPayout} disabled={!selectedFile || uploading} loading={uploading}>
+			{uploading ? 'Uploading...' : 'Upload'}
+		</Button>
+	{/snippet}
+</Modal>

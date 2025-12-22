@@ -430,6 +430,8 @@ export const zMessageEvent = z.enum([
 	'message-from-support',
 ]);
 
+export const zNotificationCategory = z.enum(['drops', 'royalties', 'marketing']);
+
 export const zMessagePreference = z.object({
 	_id: z.string(),
 	user: z.string(),
@@ -787,6 +789,7 @@ export const zUpdateDrop = z.object({
 				language: z.string(),
 				explicit: z.boolean(),
 				instrumental: z.boolean(),
+				file: z.unknown(),
 				lyrics: z.optional(z.string()),
 				timedLyrics: z.optional(z.string()),
 			}),
@@ -794,6 +797,35 @@ export const zUpdateDrop = z.object({
 	),
 	comments: z.optional(z.string()),
 	type: z.optional(zDropType),
+});
+
+export const zYearInReview = z.object({
+	year: z.number(),
+	dropsReleased: z.number(),
+	royaltiesEarned: z.number(),
+	streams: z.object({
+		total: z.number(),
+		monthly: z.tuple([
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+		]),
+	}),
+	territories: z.array(
+		z.object({
+			territory: z.string(),
+			streams: z.number(),
+		}),
+	),
 });
 
 export const zGetDropsByAdminData = z.object({
@@ -1358,16 +1390,7 @@ export const zPutReadAllByNotificationsByMessagingResponse = z.object({
 export const zPutPreferencesByMessagingData = z.object({
 	body: z.optional(
 		z.object({
-			event: z.enum([
-				'drop-approved',
-				'drop-declined',
-				'drop-published',
-				'drop-update',
-				'newsletter',
-				'royalty-payout',
-				'payout-processed',
-				'message-from-support',
-			]),
+			category: z.enum(['drops', 'royalties', 'marketing']),
 			enabled: z.boolean(),
 			platforms: z.array(z.enum(['whatsapp', 'email', 'rcs', 'sms'])),
 		}),
@@ -1696,6 +1719,7 @@ export const zPatchIdByDropsByMusicData = z.object({
 						language: z.string(),
 						explicit: z.boolean(),
 						instrumental: z.boolean(),
+						file: z.string(),
 						lyrics: z.optional(z.string()),
 						timedLyrics: z.optional(z.string()),
 					}),
@@ -1903,6 +1927,46 @@ export const zGetUploadBySongsByMusicData = z.object({
 	body: z.optional(z.never()),
 	path: z.optional(z.never()),
 	query: z.optional(z.any()),
+});
+
+export const zGetIdByYearInReviewByMusicData = z.object({
+	body: z.optional(z.never()),
+	path: z.object({
+		id: z.string(),
+	}),
+	query: z.optional(z.any()),
+});
+
+/**
+ * Successful operation
+ */
+export const zGetIdByYearInReviewByMusicResponse = z.object({
+	year: z.number(),
+	dropsReleased: z.number(),
+	royaltiesEarned: z.number(),
+	streams: z.object({
+		total: z.number(),
+		monthly: z.tuple([
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+			z.number(),
+		]),
+	}),
+	territories: z.array(
+		z.object({
+			territory: z.string(),
+			streams: z.number(),
+		}),
+	),
 });
 
 export const zGetApplicationsByOauthData = z.object({

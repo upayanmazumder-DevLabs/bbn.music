@@ -11,8 +11,12 @@
 		putUserByUser,
 		postResendVerifyEmailByMailByUser,
 		getPictureByUserByUser,
+		getIdByPreferencesByMessaging,
+		putPreferencesByMessaging,
 	} from '$lib/api/sdk.gen';
+	import type { MessagePreference, NotificationCategory, Platform } from '$lib/api/types.gen';
 	import { getAuthHeaders, getBaseUrl } from '$lib/apiClient';
+	import { onMount } from 'svelte';
 	import PhoneInput from '$lib/components/PhoneInput.svelte';
 
 	let name = $state($auth.user?.profile.username || '');
@@ -68,11 +72,103 @@
 		}
 	});
 
-	let notifications = $state({
-		dropUpdates: true,
-		payoutAlerts: true,
-		marketing: false,
+	// Notification preferences
+	// API only accepts these platforms for preferences
+	type PreferencePlatform = 'email' | 'whatsapp' | 'rcs' | 'sms';
+	type CategoryPreference = { enabled: boolean; platforms: PreferencePlatform[] };
+	type Preferences = Record<NotificationCategory, CategoryPreference>;
+
+	const defaultPreferences: Preferences = {
+		drops: { enabled: true, platforms: ['email'] },
+		royalties: { enabled: true, platforms: ['email'] },
+		marketing: { enabled: false, platforms: [] },
+	};
+
+	let notificationPrefs = $state<Preferences>({ ...defaultPreferences });
+	let loadingPrefs = $state(true);
+	let savingPref = $state<NotificationCategory | null>(null);
+
+	// Available platforms for notifications
+	const availablePlatforms: { id: PreferencePlatform; label: string }[] = [
+		{ id: 'email', label: 'Email' },
+		{ id: 'whatsapp', label: 'WhatsApp' },
+	];
+
+	// Load notification preferences on mount
+	onMount(async () => {
+		await loadNotificationPreferences();
 	});
+
+	async function loadNotificationPreferences() {
+		if (!$auth.user?.id) return;
+
+		// Filter platforms to only include valid preference platforms
+		const validPlatforms: PreferencePlatform[] = ['email', 'whatsapp', 'rcs', 'sms'];
+		const filterPlatforms = (platforms: Platform[] | undefined): PreferencePlatform[] => {
+			if (!platforms) return [];
+			return platforms.filter((p): p is PreferencePlatform => validPlatforms.includes(p as PreferencePlatform));
+		};
+
+		try {
+			const response = await getIdByPreferencesByMessaging({
+				path: { id: $auth.user.id },
+				headers: getAuthHeaders(),
+			});
+
+			if (response.data) {
+				const prefs = response.data as MessagePreference;
+				// Merge with defaults to ensure all categories exist
+				notificationPrefs = {
+					drops: prefs.preferences.drops
+						? { enabled: prefs.preferences.drops.enabled, platforms: filterPlatforms(prefs.preferences.drops.platforms) }
+						: defaultPreferences.drops,
+					royalties: prefs.preferences.royalties
+						? { enabled: prefs.preferences.royalties.enabled, platforms: filterPlatforms(prefs.preferences.royalties.platforms) }
+						: defaultPreferences.royalties,
+					marketing: prefs.preferences.marketing
+						? { enabled: prefs.preferences.marketing.enabled, platforms: filterPlatforms(prefs.preferences.marketing.platforms) }
+						: defaultPreferences.marketing,
+				};
+			}
+		} catch (e) {
+			console.error('Failed to load notification preferences:', e);
+		} finally {
+			loadingPrefs = false;
+		}
+	}
+
+	async function updatePreference(category: NotificationCategory, enabled: boolean, platforms: PreferencePlatform[]) {
+		savingPref = category;
+		try {
+			await putPreferencesByMessaging({
+				body: { category, enabled, platforms },
+				headers: getAuthHeaders(),
+			});
+			notificationPrefs[category] = { enabled, platforms };
+		} catch (e) {
+			console.error('Failed to update notification preference:', e);
+		} finally {
+			savingPref = null;
+		}
+	}
+
+	function toggleCategory(category: NotificationCategory) {
+		const current = notificationPrefs[category];
+		const newEnabled = !current.enabled;
+		// When enabling, default to email if no platforms selected
+		const platforms = newEnabled && current.platforms.length === 0 ? ['email'] as PreferencePlatform[] : current.platforms;
+		updatePreference(category, newEnabled, platforms);
+	}
+
+	function togglePlatform(category: NotificationCategory, platform: PreferencePlatform) {
+		const current = notificationPrefs[category];
+		const platforms = current.platforms.includes(platform)
+			? current.platforms.filter((p) => p !== platform)
+			: [...current.platforms, platform];
+		// If no platforms left, disable the category
+		const enabled = platforms.length > 0 ? current.enabled : false;
+		updatePreference(category, enabled, platforms);
+	}
 
 	let saving = $state(false);
 	let saved = $state(false);
@@ -514,35 +610,116 @@
 	>
 		<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Notifications</h2>
 
-		<div class="space-y-4">
-			<div class="flex items-center justify-between">
-				<div>
-					<p class="text-gray-900 dark:text-white font-medium">Drop Updates</p>
-					<p class="text-sm text-gray-400">Status changes for your drops</p>
-				</div>
-				<Toggle bind:checked={notifications.dropUpdates} />
+		{#if loadingPrefs}
+			<div class="flex items-center justify-center py-8">
+				<div class="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
 			</div>
-
-			<div class="border-t border-white/10"></div>
-
-			<div class="flex items-center justify-between">
-				<div>
-					<p class="text-gray-900 dark:text-white font-medium">Payout Alerts</p>
-					<p class="text-sm text-gray-400">Earnings and payout notifications</p>
+		{:else}
+			<div class="space-y-6">
+				<!-- Drop Updates -->
+				<div class="space-y-3">
+					<div class="flex items-center justify-between">
+						<div>
+							<p class="text-gray-900 dark:text-white font-medium">Drop Updates</p>
+							<p class="text-sm text-gray-500 dark:text-gray-400">Status changes for your drops</p>
+						</div>
+						<div class="flex items-center gap-2">
+							{#if savingPref === 'drops'}
+								<div class="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+							{/if}
+							<button onclick={() => toggleCategory('drops')} class="focus:outline-none">
+								<Toggle checked={notificationPrefs.drops.enabled} />
+							</button>
+						</div>
+					</div>
+					{#if notificationPrefs.drops.enabled}
+						<div class="flex items-center gap-2 ml-4">
+							<span class="text-xs text-gray-500 dark:text-gray-400 mr-2">Via:</span>
+							{#each availablePlatforms as platform}
+								<button
+									onclick={() => togglePlatform('drops', platform.id)}
+									class="px-3 py-1 text-xs rounded-full border transition-colors {notificationPrefs.drops.platforms.includes(platform.id)
+										? 'bg-orange-500/20 border-orange-500/50 text-orange-400'
+										: 'bg-gray-200 dark:bg-white/5 border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/20'}"
+								>
+									{platform.label}
+								</button>
+							{/each}
+						</div>
+					{/if}
 				</div>
-				<Toggle bind:checked={notifications.payoutAlerts} />
-			</div>
 
-			<div class="border-t border-white/10"></div>
+				<div class="border-t border-gray-200 dark:border-white/10"></div>
 
-			<div class="flex items-center justify-between">
-				<div>
-					<p class="text-gray-900 dark:text-white font-medium">Marketing</p>
-					<p class="text-sm text-gray-400">News and tips from bbn.music</p>
+				<!-- Royalty/Payout Alerts -->
+				<div class="space-y-3">
+					<div class="flex items-center justify-between">
+						<div>
+							<p class="text-gray-900 dark:text-white font-medium">Payout Alerts</p>
+							<p class="text-sm text-gray-500 dark:text-gray-400">Earnings and payout notifications</p>
+						</div>
+						<div class="flex items-center gap-2">
+							{#if savingPref === 'royalties'}
+								<div class="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+							{/if}
+							<button onclick={() => toggleCategory('royalties')} class="focus:outline-none">
+								<Toggle checked={notificationPrefs.royalties.enabled} />
+							</button>
+						</div>
+					</div>
+					{#if notificationPrefs.royalties.enabled}
+						<div class="flex items-center gap-2 ml-4">
+							<span class="text-xs text-gray-500 dark:text-gray-400 mr-2">Via:</span>
+							{#each availablePlatforms as platform}
+								<button
+									onclick={() => togglePlatform('royalties', platform.id)}
+									class="px-3 py-1 text-xs rounded-full border transition-colors {notificationPrefs.royalties.platforms.includes(platform.id)
+										? 'bg-orange-500/20 border-orange-500/50 text-orange-400'
+										: 'bg-gray-200 dark:bg-white/5 border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/20'}"
+								>
+									{platform.label}
+								</button>
+							{/each}
+						</div>
+					{/if}
 				</div>
-				<Toggle bind:checked={notifications.marketing} />
+
+				<div class="border-t border-gray-200 dark:border-white/10"></div>
+
+				<!-- Marketing -->
+				<div class="space-y-3">
+					<div class="flex items-center justify-between">
+						<div>
+							<p class="text-gray-900 dark:text-white font-medium">Marketing</p>
+							<p class="text-sm text-gray-500 dark:text-gray-400">News and tips from bbn.music</p>
+						</div>
+						<div class="flex items-center gap-2">
+							{#if savingPref === 'marketing'}
+								<div class="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+							{/if}
+							<button onclick={() => toggleCategory('marketing')} class="focus:outline-none">
+								<Toggle checked={notificationPrefs.marketing.enabled} />
+							</button>
+						</div>
+					</div>
+					{#if notificationPrefs.marketing.enabled}
+						<div class="flex items-center gap-2 ml-4">
+							<span class="text-xs text-gray-500 dark:text-gray-400 mr-2">Via:</span>
+							{#each availablePlatforms as platform}
+								<button
+									onclick={() => togglePlatform('marketing', platform.id)}
+									class="px-3 py-1 text-xs rounded-full border transition-colors {notificationPrefs.marketing.platforms.includes(platform.id)
+										? 'bg-orange-500/20 border-orange-500/50 text-orange-400'
+										: 'bg-gray-200 dark:bg-white/5 border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/20'}"
+								>
+									{platform.label}
+								</button>
+							{/each}
+						</div>
+					{/if}
+				</div>
 			</div>
-		</div>
+		{/if}
 	</section>
 
 	<!-- Security Section -->

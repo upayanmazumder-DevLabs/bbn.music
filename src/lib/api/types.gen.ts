@@ -394,11 +394,13 @@ export type MessageEvent =
 	| 'payout-processed'
 	| 'message-from-support';
 
+export type NotificationCategory = 'drops' | 'royalties' | 'marketing';
+
 export type MessagePreference = {
 	_id: string;
 	user: string;
 	preferences: {
-		[key in MessageEvent]?: {
+		[key in NotificationCategory]?: {
 			enabled: boolean;
 			platforms: Array<Platform>;
 		};
@@ -694,11 +696,39 @@ export type UpdateDrop = {
 		language: string;
 		explicit: boolean;
 		instrumental: boolean;
+		file: unknown;
 		lyrics?: string;
 		timedLyrics?: string;
 	}>;
 	comments?: string;
 	type?: DropType;
+};
+
+export type YearInReview = {
+	year: number;
+	dropsReleased: number;
+	royaltiesEarned: number;
+	streams: {
+		total: number;
+		monthly: [
+			number,
+			number,
+			number,
+			number,
+			number,
+			number,
+			number,
+			number,
+			number,
+			number,
+			number,
+			number,
+		];
+	};
+	territories: Array<{
+		territory: string;
+		streams: number;
+	}>;
 };
 
 export type GetDropsByAdminData = {
@@ -1373,15 +1403,7 @@ export type PutReadAllByNotificationsByMessagingResponse =
 
 export type PutPreferencesByMessagingData = {
 	body?: {
-		event:
-			| 'drop-approved'
-			| 'drop-declined'
-			| 'drop-published'
-			| 'drop-update'
-			| 'newsletter'
-			| 'royalty-payout'
-			| 'payout-processed'
-			| 'message-from-support';
+		category: 'drops' | 'royalties' | 'marketing';
 		enabled: boolean;
 		platforms: Array<'whatsapp' | 'email' | 'rcs' | 'sms'>;
 	};
@@ -1398,7 +1420,7 @@ export type PutPreferencesByMessagingResponses = {
 		_id: string;
 		user: string;
 		preferences: {
-			[key in MessageEvent]?: {
+			[key in NotificationCategory]?: {
 				enabled: boolean;
 				platforms: Array<Platform>;
 			};
@@ -1747,6 +1769,7 @@ export type PatchIdByDropsByMusicData = {
 			language: string;
 			explicit: boolean;
 			instrumental: boolean;
+			file: string;
 			lyrics?: string;
 			timedLyrics?: string;
 		}>;
@@ -2007,6 +2030,50 @@ export type GetUploadBySongsByMusicData = {
 	query?: never;
 	url: '/api/@bbn/music/songs/upload';
 };
+
+export type GetIdByYearInReviewByMusicData = {
+	body?: never;
+	path: {
+		id: string;
+	};
+	query?: never;
+	url: '/api/@bbn/music/year-in-review/{id}';
+};
+
+export type GetIdByYearInReviewByMusicResponses = {
+	/**
+	 * Successful operation
+	 */
+	200: {
+		year: number;
+		dropsReleased: number;
+		royaltiesEarned: number;
+		streams: {
+			total: number;
+			monthly: [
+				number,
+				number,
+				number,
+				number,
+				number,
+				number,
+				number,
+				number,
+				number,
+				number,
+				number,
+				number,
+			];
+		};
+		territories: Array<{
+			territory: string;
+			streams: number;
+		}>;
+	};
+};
+
+export type GetIdByYearInReviewByMusicResponse =
+	GetIdByYearInReviewByMusicResponses[keyof GetIdByYearInReviewByMusicResponses];
 
 export type GetApplicationsByOauthData = {
 	body?: never;

@@ -61,6 +61,8 @@ import type {
 	GetIdByUserByMessagesByMessagingResponses,
 	GetIdByWalletsByAdminData,
 	GetIdByWalletsByAdminResponses,
+	GetIdByYearInReviewByMusicData,
+	GetIdByYearInReviewByMusicResponses,
 	GetMyConversationsByMessagingData,
 	GetMyConversationsByMessagingResponses,
 	GetNotificationsByMessagingData,
@@ -198,6 +200,8 @@ import {
 	zGetIdByUserByMessagesByMessagingResponse,
 	zGetIdByWalletsByAdminData,
 	zGetIdByWalletsByAdminResponse,
+	zGetIdByYearInReviewByMusicData,
+	zGetIdByYearInReviewByMusicResponse,
 	zGetMyConversationsByMessagingData,
 	zGetMyConversationsByMessagingResponse,
 	zGetNotificationsByMessagingData,
@@ -1133,6 +1137,17 @@ export const getUploadBySongsByMusic = <ThrowOnError extends boolean = false>(
 		requestValidator: async (data: any) => await zGetUploadBySongsByMusicData.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
 		url: '/api/@bbn/music/songs/upload',
+		...options,
+	});
+
+export const getIdByYearInReviewByMusic = <ThrowOnError extends boolean = false>(
+	options: Options<GetIdByYearInReviewByMusicData, ThrowOnError>,
+) =>
+	(options.client ?? client).get<GetIdByYearInReviewByMusicResponses, unknown, ThrowOnError>({
+		requestValidator: async (data: any) => await zGetIdByYearInReviewByMusicData.parseAsync(data),
+		responseValidator: async (data: any) => await zGetIdByYearInReviewByMusicResponse.parseAsync(data),
+		security: [{ scheme: 'bearer', type: 'http' }],
+		url: '/api/@bbn/music/year-in-review/{id}',
 		...options,
 	});
 

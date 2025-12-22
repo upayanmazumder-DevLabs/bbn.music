@@ -100,6 +100,13 @@
 	let songs = $state<Song[]>([]);
 	let showSongModal = $state(false);
 	let editingSongIndex = $state<number | null>(null);
+	let uploadingSongFile = $state(false);
+	let songUploadProgress = $state(0);
+	// Track new file IDs for songs that have been re-uploaded
+	let songFileUpdates = $state<Record<number, string>>({});
+	// Track if current song being edited has a new file uploaded
+	let currentSongFileUploaded = $state(false);
+	let currentSongFilename = $state('');
 	let tempSong = $state<{
 		title: string;
 		explicit: boolean;
@@ -368,6 +375,14 @@
 		error = null;
 		successMessage = null;
 		try {
+			// Apply any file updates to songs before saving
+			const songsToSave = songs.map((song, index) => {
+				if (songFileUpdates[index]) {
+					return { ...song, file: songFileUpdates[index] };
+				}
+				return song;
+			});
+
 			// Save drop data
 			await patchIdByDropsByMusic({
 				path: { id: dropId },
@@ -382,7 +397,7 @@
 					gtin: gtin || undefined,
 					comments: comments || undefined,
 					artists,
-					songs,
+					songs: songsToSave,
 				},
 				headers: getAuthHeaders(),
 			});
@@ -398,6 +413,7 @@
 				successMessage = 'Drop saved successfully';
 			}
 			hasChanges = false;
+			songFileUpdates = {}; // Clear file updates after successful save
 			await loadDrop();
 		} catch (e: any) {
 			error = e?.error?.message || e?.message || 'Failed to save drop';
@@ -503,6 +519,9 @@
 		prevExplicit = tempSong.explicit;
 		prevInstrumental = tempSong.instrumental;
 		editingSongIndex = index;
+		// Reset file upload state - check if we already have a pending file update for this song
+		currentSongFileUploaded = !!songFileUpdates[index];
+		currentSongFilename = songFileUpdates[index] ? 'New file pending' : '';
 		showSongModal = true;
 	}
 
@@ -551,6 +570,44 @@
 
 	function removeSongArtist(index: number) {
 		tempSong.artists = tempSong.artists.filter((_, i) => i !== index);
+	}
+
+	function handleSongFileUpload(event: Event) {
+		const input = event.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (file && editingSongIndex !== null) {
+			uploadSongFile(file);
+		}
+		// Reset input so the same file can be selected again
+		input.value = '';
+	}
+
+	async function uploadSongFile(file: File) {
+		if (editingSongIndex === null) return;
+
+		uploadingSongFile = true;
+		songUploadProgress = 0;
+		try {
+			const fileId = await wsUpload({
+				path: 'api/@bbn/music/songs/upload',
+				file,
+				onProgress: (percent) => {
+					songUploadProgress = percent;
+				},
+			});
+			// Store the new file ID for this song
+			songFileUpdates[editingSongIndex] = fileId;
+			currentSongFileUploaded = true;
+			currentSongFilename = file.name;
+			hasChanges = true;
+			toast.show('Audio file uploaded successfully', 'success');
+		} catch (e: any) {
+			console.error('Song file upload failed:', e);
+			toast.show(e?.message || 'Failed to upload audio file', 'error');
+		} finally {
+			uploadingSongFile = false;
+			songUploadProgress = 0;
+		}
 	}
 
 	function getStatusColor(type: DropType | undefined): string {
@@ -954,14 +1011,19 @@
 					<div class="space-y-2">
 						{#each songs as song, index}
 							<div
-								class="group flex items-center gap-4 p-3 bg-gray-900/50 rounded-xl border border-gray-700/50"
+								class="group flex items-center gap-4 p-3 bg-gray-900/50 rounded-xl border border-gray-700/50 {songFileUpdates[index] ? 'border-green-500/50' : ''}"
 							>
 								<div class="flex items-center gap-3">
 									<span class="w-6 text-center text-sm text-gray-500 font-medium">{index + 1}</span>
 									<AudioPlayer songId={song._id} size="sm" />
 								</div>
 								<div class="flex-1 min-w-0">
-									<p class="text-white font-medium truncate">{song.title}</p>
+									<div class="flex items-center gap-2">
+										<p class="text-white font-medium truncate">{song.title}</p>
+										{#if songFileUpdates[index]}
+											<Badge color="green" size="sm">New file</Badge>
+										{/if}
+									</div>
 									<p class="text-sm text-gray-400 truncate">
 										{song.artists
 											.filter((a) => a.type === 'PRIMARY')
@@ -977,12 +1039,13 @@
 										<Badge color="blue" size="sm">Inst</Badge>
 									{/if}
 									{#if song.isrc}
-										<span class="text-xs text-gray-500 font-mono">{song.isrc}</span>
+										<span class="text-xs text-gray-500 font-mono hidden sm:inline">{song.isrc}</span>
 									{/if}
 									{#if isEditable}
 										<IconButton
 											onclick={() => openEditSong(index)}
 											class="opacity-0 group-hover:opacity-100 transition-opacity"
+											aria-label="Edit song"
 										>
 											<EditOutline class="w-4 h-4" />
 										</IconButton>
@@ -1120,6 +1183,66 @@
 <!-- Song Edit Modal -->
 <Modal bind:open={showSongModal} title="Edit Song" size="xl" class="bg-gray-800">
 	<div class="space-y-6">
+		<!-- Audio File Section -->
+		{#if isEditable}
+			<div
+				class="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/20 rounded-xl p-4"
+			>
+				<div class="flex items-start gap-3 mb-3">
+					<div
+						class="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0"
+					>
+						<MusicSolid class="w-5 h-5 text-orange-400" />
+					</div>
+					<div class="flex-1">
+						<h3 class="text-base font-semibold text-white">Audio File</h3>
+						<p class="text-sm text-gray-400">Replace the audio file for this song</p>
+					</div>
+				</div>
+
+				<div
+					class="border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 {uploadingSongFile
+						? 'border-orange-500/50 bg-orange-500/5 cursor-wait'
+						: currentSongFileUploaded
+							? 'border-green-500/50 bg-green-500/5 cursor-pointer hover:border-green-500'
+							: 'border-gray-600 bg-gray-800/30 cursor-pointer hover:border-orange-500/50 hover:bg-orange-500/5'}"
+					role="button"
+					tabindex="0"
+					onclick={() => !uploadingSongFile && document.getElementById('song-file-input')?.click()}
+					onkeydown={(e) =>
+						!uploadingSongFile &&
+						e.key === 'Enter' &&
+						document.getElementById('song-file-input')?.click()}
+				>
+					{#if uploadingSongFile}
+						<div
+							class="w-10 h-10 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"
+						></div>
+						<p class="text-white font-medium">Uploading... {songUploadProgress}%</p>
+						<p class="text-gray-400 text-sm">Please wait while we process your file</p>
+					{:else if currentSongFileUploaded}
+						<CheckCircleSolid class="w-10 h-10 text-green-400 mx-auto mb-3" />
+						<p class="text-white font-medium">New audio file ready</p>
+						{#if currentSongFilename}
+							<p class="text-green-400 text-sm font-medium">{currentSongFilename}</p>
+						{/if}
+						<p class="text-gray-400 text-xs mt-1">Click to replace with a different file</p>
+					{:else}
+						<UploadOutline class="w-10 h-10 text-orange-500 mx-auto mb-3" />
+						<p class="text-white font-medium">Click to upload a new audio file</p>
+						<p class="text-gray-400 text-sm">WAV or FLAC format recommended</p>
+					{/if}
+				</div>
+				<input
+					type="file"
+					id="song-file-input"
+					accept="audio/wav,audio/x-wav,audio/flac,audio/x-flac,audio/*"
+					onchange={handleSongFileUpload}
+					class="hidden"
+				/>
+			</div>
+		{/if}
+
 		<!-- Song Title -->
 		<Input
 			bind:value={tempSong.title}

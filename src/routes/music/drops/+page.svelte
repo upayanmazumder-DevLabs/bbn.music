@@ -6,6 +6,7 @@
 	import { PlusOutline } from 'flowbite-svelte-icons';
 	import type { Drop, Artist, ArtistRef } from '$lib/api/types.gen';
 	import { auth } from '$lib/stores/auth';
+	import { toast } from '$lib/stores/toast';
 	import {
 		getDropsByMusic,
 		getArtworkByDropByMusic,
@@ -189,7 +190,14 @@
 
 	let isCreating = $state(false);
 
+	// Check if user has verified email
+	const hasVerifiedEmail = $derived($auth.user?.profile.verified.email ?? false);
+
 	async function createNewDrop() {
+		if (!hasVerifiedEmail) {
+			toast.show('Please verify your email address before creating a drop', 'warning');
+			return;
+		}
 		if (isCreating) return;
 		isCreating = true;
 

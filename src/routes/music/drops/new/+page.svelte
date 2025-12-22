@@ -45,6 +45,7 @@
 		postTypeByTypeByDropByMusic,
 	} from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
+	import { auth } from '$lib/stores/auth';
 	import { uploadViaWebSocket as wsUpload } from '$lib/utils/wsUpload';
 	import type {
 		FullDrop,
@@ -60,6 +61,13 @@
 	if (!dropId) {
 		goto('/music/drops');
 	}
+
+	// Redirect if email not verified
+	$effect(() => {
+		if (!$auth.user?.profile.verified.email) {
+			goto('/music/drops');
+		}
+	});
 
 	// Form state using Svelte 5 runes
 	let formState = $state(createInitialDropState(dropId!));

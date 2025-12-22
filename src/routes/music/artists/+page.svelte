@@ -6,6 +6,10 @@
 	import { getArtistsByMusic, postArtistsByMusic } from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
 	import { toast } from '$lib/stores/toast';
+	import { auth } from '$lib/stores/auth';
+
+	// Check if user has verified email
+	const hasVerifiedEmail = $derived($auth.user?.profile.verified.email ?? false);
 
 	let artists = $state<Artist[]>([]);
 	let filteredArtists = $state<Artist[]>([]);
@@ -50,6 +54,10 @@
 	});
 
 	function openAddModal() {
+		if (!hasVerifiedEmail) {
+			toast.show('Please verify your email address before adding an artist', 'warning');
+			return;
+		}
 		newArtistName = '';
 		newArtistSpotify = '';
 		newArtistApple = '';

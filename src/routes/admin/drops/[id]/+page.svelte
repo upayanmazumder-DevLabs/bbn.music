@@ -56,6 +56,7 @@
 	};
 	import { Card, Badge, Button, IconButton, Spinner } from '$lib/components/ui';
 	import AudioPlayer from '$lib/components/AudioPlayer.svelte';
+	import DropDiffView from '$lib/components/admin/DropDiffView.svelte';
 	import {
 		ArrowLeftOutline,
 		UserOutline,
@@ -200,6 +201,11 @@
 					...(dropResponse.data as MergedAdminDrop),
 					...(adminResponse.data as MergedAdminDrop),
 				};
+
+				// Auto-expand diff view for edit reviews
+				if (drop.type === 'EDIT_UNDER_REVIEW' && drop.publishedSnapshot) {
+					showPublishedSnapshot = true;
+				}
 
 				// Load artwork
 				if (drop.artwork) {
@@ -722,6 +728,35 @@
 			</Card>
 		{/if}
 
+		<!-- Edit Diff View -->
+		{#if drop.publishedSnapshot}
+			<Card variant="default" padding="md">
+				<button
+					class="w-full flex items-center justify-between"
+					onclick={() => (showPublishedSnapshot = !showPublishedSnapshot)}
+				>
+					<h3 class="text-lg font-semibold text-white flex items-center gap-2">
+						<ClockOutline class="w-5 h-5 text-blue-400" />
+						Changes from Published Version
+					</h3>
+					{#if showPublishedSnapshot}
+						<ChevronUpOutline class="w-5 h-5 text-gray-400" />
+					{:else}
+						<ChevronDownOutline class="w-5 h-5 text-gray-400" />
+					{/if}
+				</button>
+				{#if showPublishedSnapshot}
+					<div class="mt-4">
+						<DropDiffView
+							current={drop as unknown as FullDrop}
+							published={drop.publishedSnapshot}
+							artistList={drop.artistList}
+						/>
+					</div>
+				{/if}
+			</Card>
+		{/if}
+
 		<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 			<!-- Left Column: Drop Details -->
 			<div class="lg:col-span-2 space-y-6">
@@ -970,102 +1005,6 @@
 					<Card variant="default" padding="md">
 						<h3 class="text-lg font-semibold text-white mb-4">User Comments</h3>
 						<p class="text-gray-300 whitespace-pre-wrap">{drop.comments}</p>
-					</Card>
-				{/if}
-
-				<!-- Published Snapshot Comparison -->
-				{#if drop.publishedSnapshot}
-					<Card variant="default" padding="md">
-						<button
-							class="w-full flex items-center justify-between"
-							onclick={() => (showPublishedSnapshot = !showPublishedSnapshot)}
-						>
-							<h3 class="text-lg font-semibold text-white flex items-center gap-2">
-								<ClockOutline class="w-5 h-5 text-blue-400" />
-								Published Version
-							</h3>
-							{#if showPublishedSnapshot}
-								<ChevronUpOutline class="w-5 h-5 text-gray-400" />
-							{:else}
-								<ChevronDownOutline class="w-5 h-5 text-gray-400" />
-							{/if}
-						</button>
-						{#if showPublishedSnapshot}
-							<div class="mt-4 space-y-3">
-								<!-- Compare key fields -->
-								<div class="grid grid-cols-2 gap-4 text-sm">
-									<div class="space-y-2">
-										<p class="text-gray-500 text-xs font-medium">CURRENT</p>
-										<div class="p-2 bg-gray-900/50 rounded">
-											<p class="text-white font-medium">{drop.title}</p>
-											<p class="text-gray-400 text-xs">{getArtistNames(drop.artists)}</p>
-										</div>
-									</div>
-									<div class="space-y-2">
-										<p class="text-gray-500 text-xs font-medium">PUBLISHED</p>
-										<div class="p-2 bg-green-900/20 rounded border border-green-700/30">
-											<p class="text-white font-medium">{drop.publishedSnapshot.title}</p>
-											<p class="text-gray-400 text-xs">
-												{getArtistNames(drop.publishedSnapshot.artists)}
-											</p>
-										</div>
-									</div>
-								</div>
-
-								<!-- Metadata comparison -->
-								<div class="text-xs space-y-1 p-3 bg-gray-900/30 rounded">
-									<div
-										class="grid grid-cols-3 gap-2 text-gray-500 font-medium border-b border-gray-700/50 pb-1"
-									>
-										<span>Field</span>
-										<span>Current</span>
-										<span>Published</span>
-									</div>
-									<div class="grid grid-cols-3 gap-2">
-										<span class="text-gray-500">Release</span>
-										<span class="text-gray-300">{drop.release || 'N/A'}</span>
-										<span class="text-gray-300">{drop.publishedSnapshot.release || 'N/A'}</span>
-									</div>
-									<div class="grid grid-cols-3 gap-2">
-										<span class="text-gray-500">Genre</span>
-										<span class="text-gray-300">{drop.primaryGenre}/{drop.secondaryGenre}</span>
-										<span class="text-gray-300"
-											>{drop.publishedSnapshot.primaryGenre}/{drop.publishedSnapshot
-												.secondaryGenre}</span
-										>
-									</div>
-									<div class="grid grid-cols-3 gap-2">
-										<span class="text-gray-500">Songs</span>
-										<span class="text-gray-300">{drop.songs?.length || 0}</span>
-										<span class="text-gray-300">{drop.publishedSnapshot.songs?.length || 0}</span>
-									</div>
-									<div class="grid grid-cols-3 gap-2">
-										<span class="text-gray-500">GTIN</span>
-										<span class="text-gray-300 font-mono">{drop.gtin || 'N/A'}</span>
-										<span class="text-gray-300 font-mono"
-											>{drop.publishedSnapshot.gtin || 'N/A'}</span
-										>
-									</div>
-								</div>
-
-								<!-- Published songs list -->
-								{#if drop.publishedSnapshot.songs && drop.publishedSnapshot.songs.length > 0}
-									<div class="pt-2">
-										<p class="text-gray-500 text-xs font-medium mb-2">Published Songs</p>
-										<div class="space-y-1">
-											{#each drop.publishedSnapshot.songs as song, i}
-												<div class="flex items-center gap-2 text-sm p-2 bg-gray-800/30 rounded">
-													<span class="text-gray-500 w-4">{i + 1}</span>
-													<span class="text-white">{song.title}</span>
-													<code class="text-gray-500 text-xs ml-auto">{song.isrc || 'No ISRC'}</code
-													>
-												</div>
-											{/each}
-										</div>
-									</div>
-								{/if}
-							</div>
-						{/if}
 					</Card>
 				{/if}
 

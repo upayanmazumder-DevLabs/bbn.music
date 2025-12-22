@@ -36,6 +36,7 @@
 	import { languages, getLanguageName } from '$lib/data/languages';
 	import {
 		getIdByDropsByMusic,
+		getIdByDropsByAdmin,
 		patchIdByDropsByMusic,
 		postTypeByTypeByDropByMusic,
 		getArtworkByDropByMusic,
@@ -101,7 +102,7 @@
 		explicit: boolean;
 		instrumental: boolean;
 		artists: ArtistRef[];
-		isrc?: string;
+		isrc: string;
 		primaryGenre: string;
 		secondaryGenre: string;
 		year?: number;
@@ -111,7 +112,7 @@
 		explicit: false,
 		instrumental: false,
 		artists: [],
-		isrc: undefined,
+		isrc: '',
 		primaryGenre: '',
 		secondaryGenre: '',
 		year: undefined,
@@ -139,18 +140,21 @@
 
 	// Derived values
 	const secondaryGenreOptions = $derived(getSecondaryGenres(primaryGenre));
+	const isAdmin = $derived($auth.user?.isAdmin ?? false);
+	// Admins can edit any drop, users can only edit certain statuses
 	const isEditable = $derived(
-		drop?.type === 'UNSUBMITTED' ||
+		isAdmin ||
+			drop?.type === 'UNSUBMITTED' ||
 			drop?.type === 'PRIVATE' ||
 			drop?.type === 'PUBLISHED' ||
 			drop?.type === 'EDIT_UNDER_REVIEW',
 	);
-	// GTIN/ISRC cannot be changed once the drop has been published
+	// GTIN/ISRC cannot be changed once published - unless admin
 	const isGtinEditable = $derived(
-		isEditable && (drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE'),
+		isAdmin || (isEditable && (drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE')),
 	);
 	const isIsrcEditable = $derived(
-		isEditable && (drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE'),
+		isAdmin || (isEditable && (drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE')),
 	);
 	// Secondary genre options for song modal
 	const tempSongSecondaryGenreOptions = $derived(getSecondaryGenres(tempSong.primaryGenre));
@@ -161,7 +165,6 @@
 	);
 	const canCancelTakedown = $derived(drop?.type === 'TAKEDOWN_REQUESTED');
 	const canCancelEditReview = $derived(drop?.type === 'EDIT_UNDER_REVIEW');
-	const isAdmin = $derived($auth.user?.isAdmin ?? false);
 
 	onMount(async () => {
 		await loadDrop();
@@ -171,24 +174,54 @@
 		loading = true;
 		error = null;
 		try {
-			// Load all artists first for name resolution
-			try {
-				const artistsResponse = await getArtistsByMusic({
+			// Check if user is admin to determine which endpoint to use
+			const userIsAdmin = $auth.user?.isAdmin ?? false;
+
+			if (userIsAdmin) {
+				// Admin: fetch both admin data (for artistList) and drop data in parallel
+				const [adminResponse, dropResponse] = await Promise.all([
+					getIdByDropsByAdmin({
+						path: { id: dropId },
+						headers: getAuthHeaders(),
+					}),
+					getIdByDropsByMusic({
+						path: { id: dropId },
+						headers: getAuthHeaders(),
+					}),
+				]);
+
+				if (dropResponse.data) {
+					drop = dropResponse.data as FullDrop;
+				}
+
+				// Use the drop owner's artists from admin endpoint's artistList
+				if (adminResponse.data) {
+					const adminData = adminResponse.data as { artistList?: Artist[] };
+					allArtists = adminData.artistList ?? [];
+				}
+			} else {
+				// Regular user: load their own artists
+				try {
+					const artistsResponse = await getArtistsByMusic({
+						headers: getAuthHeaders(),
+					});
+					if (artistsResponse.data) {
+						allArtists = artistsResponse.data as Artist[];
+					}
+				} catch (e) {
+					console.error('Failed to load artists:', e);
+				}
+
+				const response = await getIdByDropsByMusic({
+					path: { id: dropId },
 					headers: getAuthHeaders(),
 				});
-				if (artistsResponse.data) {
-					allArtists = artistsResponse.data as Artist[];
+				if (response.data) {
+					drop = response.data as FullDrop;
 				}
-			} catch (e) {
-				console.error('Failed to load artists:', e);
 			}
 
-			const response = await getIdByDropsByMusic({
-				path: { id: dropId },
-				headers: getAuthHeaders(),
-			});
-			if (response.data) {
-				drop = response.data as FullDrop;
+			if (drop) {
 				// Copy to editable fields
 				title = drop.title;
 				release = drop.release;
@@ -322,8 +355,8 @@
 				headers: getAuthHeaders(),
 			});
 
-			// For published drops, automatically submit for review via type endpoint
-			if (drop.type === 'PUBLISHED') {
+			// For published drops edited by non-admins, automatically submit for review
+			if (drop.type === 'PUBLISHED' && !isAdmin) {
 				await postTypeByTypeByDropByMusic({
 					path: { dropId, type: 'EDIT_UNDER_REVIEW' },
 					headers: getAuthHeaders(),
@@ -428,7 +461,7 @@
 			explicit: song.explicit ?? false,
 			instrumental: song.instrumental ?? false,
 			artists: [...song.artists],
-			isrc: song.isrc,
+			isrc: song.isrc ?? '',
 			primaryGenre: song.primaryGenre ?? '',
 			secondaryGenre: song.secondaryGenre ?? '',
 			year: song.year,

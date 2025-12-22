@@ -39,6 +39,7 @@
 			bg-white dark:bg-gray-900/50 border transition-all duration-200
 			focus:outline-none focus:ring-2 focus:ring-offset-0
 			disabled:opacity-50 disabled:cursor-not-allowed
+			dark:[color-scheme:dark]
 			{error
 			? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
 			: 'border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 focus:border-orange-500 focus:ring-orange-500/20'}

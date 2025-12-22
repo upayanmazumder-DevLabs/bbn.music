@@ -5,6 +5,8 @@
 	import type { PayoutResponse } from '$lib/api/types.gen';
 	import { getPayoutsByPayment } from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
+	import { formatCurrency } from '$lib/utils/formatCurrency';
+	import { extractErrorMessage } from '$lib/utils/extractError';
 
 	let payouts = $state<PayoutResponse[]>([]);
 	let isLoading = $state(true);
@@ -32,8 +34,8 @@
 			if (response.data) {
 				payouts = response.data as PayoutResponse[];
 			}
-		} catch (err: any) {
-			error = err?.error?.message || err?.message || 'Failed to load earnings';
+		} catch (err: unknown) {
+			error = extractErrorMessage(err, 'Failed to load earnings');
 			console.error('Error loading earnings:', err);
 		} finally {
 			isLoading = false;
@@ -48,15 +50,6 @@
 	// Parse money string to number
 	function parseMoney(str: string): number {
 		return parseFloat(str.replace(/[^0-9.-]/g, '')) || 0;
-	}
-
-	// Format number as currency
-	function formatCurrency(value: number): string {
-		return new Intl.NumberFormat('en-GB', {
-			style: 'currency',
-			currency: 'GBP',
-			minimumFractionDigits: 2,
-		}).format(value);
 	}
 
 	// Format large numbers

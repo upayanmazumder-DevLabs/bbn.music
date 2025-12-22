@@ -46,7 +46,9 @@
 		getArtistsByMusic,
 	} from '$lib/api/sdk.gen.ts';
 	import { getAuthHeaders } from '$lib/apiClient';
+	import { uploadViaWebSocket as wsUpload } from '$lib/utils/wsUpload';
 	import { auth } from '$lib/stores/auth';
+	import { toast } from '$lib/stores/toast';
 	import type { FullDrop, DropType, Song, ArtistRef, Share, Artist } from '$lib/api/types.gen';
 
 	// Drop ID is always defined in this route (guaranteed by SvelteKit routing)
@@ -59,6 +61,7 @@
 	let error = $state<string | null>(null);
 	let successMessage = $state<string | null>(null);
 	let artworkUrl = $state<string | null>(null);
+	let uploadingArtwork = $state(false);
 	let allArtists = $state<Artist[]>([]);
 
 	// Helper function to resolve artist name from ID
@@ -265,6 +268,35 @@
 			}
 		} catch (e) {
 			console.error('Failed to load artwork:', e);
+		}
+	}
+
+	function handleArtworkUpload(event: Event) {
+		const input = event.target as HTMLInputElement;
+		const file = input.files?.[0];
+		if (file) {
+			uploadArtwork(file);
+		}
+		// Reset input so the same file can be selected again
+		input.value = '';
+	}
+
+	async function uploadArtwork(file: File) {
+		uploadingArtwork = true;
+		try {
+			await wsUpload({
+				path: `api/@bbn/music/drops/${dropId}/upload`,
+				file,
+			});
+			// Reload artwork to show new image
+			artworkUrl = URL.createObjectURL(file);
+			toast.show('Artwork updated successfully', 'success');
+			hasChanges = true;
+		} catch (e: any) {
+			console.error('Artwork upload failed:', e);
+			toast.show(e?.message || 'Failed to upload artwork', 'error');
+		} finally {
+			uploadingArtwork = false;
 		}
 	}
 
@@ -670,8 +702,14 @@
 			<div class="lg:col-span-1">
 				<Card variant="glass" padding="md">
 					<h3 class="text-lg font-semibold text-white mb-4">Artwork</h3>
-					<div class="aspect-square rounded-xl overflow-hidden bg-gray-800 mb-4">
-						{#if artworkUrl}
+					<div class="aspect-square rounded-xl overflow-hidden bg-gray-800 mb-4 relative">
+						{#if uploadingArtwork}
+							<div class="w-full h-full flex items-center justify-center">
+								<div
+									class="w-8 h-8 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"
+								></div>
+							</div>
+						{:else if artworkUrl}
 							<img src={artworkUrl} alt="Album artwork" class="w-full h-full object-cover" />
 						{:else if drop.artwork}
 							<div class="w-full h-full flex items-center justify-center">
@@ -686,8 +724,21 @@
 						{/if}
 					</div>
 					{#if isEditable}
-						<Button variant="secondary" class="w-full" disabled>
-							<UploadOutline class="w-4 h-4" /> Change Artwork
+						<input
+							type="file"
+							id="artwork-upload"
+							accept="image/jpeg,image/png"
+							onchange={handleArtworkUpload}
+							class="hidden"
+						/>
+						<Button
+							variant="secondary"
+							class="w-full"
+							disabled={uploadingArtwork}
+							onclick={() => document.getElementById('artwork-upload')?.click()}
+						>
+							<UploadOutline class="w-4 h-4" />
+							{uploadingArtwork ? 'Uploading...' : 'Change Artwork'}
 						</Button>
 						<p class="text-xs text-gray-500 mt-2 text-center">
 							JPG or PNG, 3000x3000px recommended
@@ -914,7 +965,7 @@
 									<p class="text-sm text-gray-400 truncate">
 										{song.artists
 											.filter((a) => a.type === 'PRIMARY')
-											.map((a) => ('name' in a ? a.name : a._id))
+											.map((a) => ('name' in a ? a.name : getArtistNameById(a._id) || a._id))
 											.join(', ') || 'No artists'}
 									</p>
 								</div>

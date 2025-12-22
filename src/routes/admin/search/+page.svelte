@@ -14,7 +14,6 @@
 		Wallet,
 		ArtistRef,
 	} from '$lib/api/types.gen';
-
 	import {
 		SearchOutline,
 		UserOutline,
@@ -22,6 +21,7 @@
 		WalletOutline,
 		ArrowRightOutline,
 	} from 'flowbite-svelte-icons';
+	import { formatCurrency } from '$lib/utils/formatCurrency';
 
 	// Type helpers for narrowing SearchReturn discriminated union
 	type UserSearchResult = Extract<SearchReturn, { _index: 'users' }>;
@@ -127,13 +127,6 @@
 		} catch (e) {
 			console.error('Failed to update wallet:', e);
 		}
-	}
-
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('en-GB', {
-			style: 'currency',
-			currency: 'GBP',
-		}).format(amount);
 	}
 
 	function getIndexIcon(index: string) {

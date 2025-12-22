@@ -7,6 +7,8 @@
 	import { uploadViaWebSocket } from '$lib/utils/wsUpload';
 	import type { PayoutList } from '$lib/api/types.gen';
 	import { CloudArrowUpOutline } from 'flowbite-svelte-icons';
+	import { formatCurrency } from '$lib/utils/formatCurrency';
+	import { extractErrorMessage } from '$lib/utils/extractError';
 
 	let payouts = $state<PayoutList[]>([]);
 	let loading = $state(true);
@@ -28,8 +30,8 @@
 			if (response.data) {
 				payouts = response.data as PayoutList[];
 			}
-		} catch (e: any) {
-			error = e?.error?.message || e?.message || 'Failed to load payouts';
+		} catch (e: unknown) {
+			error = extractErrorMessage(e, 'Failed to load payouts');
 		} finally {
 			loading = false;
 		}
@@ -65,21 +67,15 @@
 			showUploadModal = false;
 			selectedFile = null;
 			await loadPayouts();
-		} catch (e: any) {
+		} catch (e: unknown) {
 			console.error('Upload failed:', e);
-			toast.show(e?.message || 'Failed to upload payout', 'error');
+			toast.show(extractErrorMessage(e, 'Failed to upload payout'), 'error');
 		} finally {
 			uploading = false;
 		}
 	}
 
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('en-GB', {
-			style: 'currency',
-			currency: 'GBP',
-		}).format(amount);
-	}
-</script>
+	</script>
 
 <div>
 	<div class="flex items-center justify-between mb-6">

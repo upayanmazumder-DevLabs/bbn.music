@@ -2,6 +2,7 @@
 	import { Modal, Button, Input, Select } from '$lib/components/ui';
 	import ArtistSearch from '$lib/components/ui/ArtistSearch.svelte';
 	import { artistTypes, type ArtistType, type ArtistRef } from '$lib/types/drop';
+	import { getArtistTypeLabel } from '$lib/utils/artistTypes';
 
 	interface Props {
 		open: boolean;
@@ -64,21 +65,6 @@
 		}
 		return artistName.trim().length > 0 || artistId !== null;
 	});
-
-	function getArtistTypeLabel(type: ArtistType): string {
-		switch (type) {
-			case 'PRIMARY':
-				return 'Primary Artist';
-			case 'FEATURING':
-				return 'Featuring';
-			case 'SONGWRITER':
-				return 'Songwriter';
-			case 'PRODUCER':
-				return 'Producer';
-			default:
-				return type;
-		}
-	}
 
 	function handleSave() {
 		let newArtist: ArtistRef;

@@ -2,6 +2,7 @@
 	import { Button, IconButton } from '$lib/components/ui';
 	import { PlusOutline, EditOutline, TrashBinOutline, UserSolid } from 'flowbite-svelte-icons';
 	import type { ArtistRef, ArtistType } from '$lib/types/drop';
+	import { getArtistTypeLabel } from '$lib/utils/artistTypes';
 
 	interface Props {
 		artists: ArtistRef[];
@@ -26,21 +27,6 @@
 		grid = true,
 		resolveName,
 	}: Props = $props();
-
-	function getArtistTypeLabel(type: ArtistType): string {
-		switch (type) {
-			case 'PRIMARY':
-				return 'Primary Artist';
-			case 'FEATURING':
-				return 'Featuring';
-			case 'SONGWRITER':
-				return 'Songwriter';
-			case 'PRODUCER':
-				return 'Producer';
-			default:
-				return type;
-		}
-	}
 
 	function getArtistDisplayName(artist: ArtistRef): string {
 		if ('name' in artist) {

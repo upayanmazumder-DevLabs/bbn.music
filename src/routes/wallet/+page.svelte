@@ -6,6 +6,9 @@
 	import { getWallet } from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
 	import { auth } from '$lib/stores/auth';
+	import { formatCurrency } from '$lib/utils/formatCurrency';
+	import { formatDate } from '$lib/utils/formatDate';
+	import { extractErrorMessage } from '$lib/utils/extractError';
 
 	let wallet = $state<Wallet | null>(null);
 	let isLoading = $state(true);
@@ -21,46 +24,13 @@
 			if (response.data) {
 				wallet = response.data as Wallet;
 			}
-		} catch (err: any) {
-			error = err?.error?.message || err?.message || 'Failed to load wallet';
+		} catch (err: unknown) {
+			error = extractErrorMessage(err, 'Failed to load wallet');
 			console.error('Error loading wallet:', err);
 		} finally {
 			isLoading = false;
 		}
 	});
-
-	function formatCurrency(amount: number): string {
-		return `£ ${amount.toFixed(2)}`;
-	}
-
-	function formatDate(timestamp: string | number): string {
-		// Handle both ISO strings and Unix timestamps (in seconds or milliseconds)
-		let date: Date;
-		if (typeof timestamp === 'number') {
-			// If it's a small number, it's likely seconds; convert to milliseconds
-			date = new Date(timestamp < 10000000000 ? timestamp * 1000 : timestamp);
-		} else if (typeof timestamp === 'string') {
-			// Try parsing as ISO string first
-			date = new Date(timestamp);
-			// If invalid, try parsing as a number
-			if (isNaN(date.getTime())) {
-				const num = Number(timestamp);
-				date = new Date(num < 10000000000 ? num * 1000 : num);
-			}
-		} else {
-			return 'N/A';
-		}
-
-		if (isNaN(date.getTime())) {
-			return 'N/A';
-		}
-
-		return date.toLocaleDateString('en-GB', {
-			day: 'numeric',
-			month: 'short',
-			year: 'numeric',
-		});
-	}
 
 	function getAccountTypeLabel(type: string): string {
 		switch (type) {

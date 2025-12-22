@@ -4,6 +4,8 @@
 	import { getWalletsByAdmin } from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
 	import type { AdminWallet } from '$lib/api/types.gen';
+	import { formatCurrency } from '$lib/utils/formatCurrency';
+	import { extractErrorMessage } from '$lib/utils/extractError';
 
 	let loading = $state(true);
 	let error = $state<string | null>(null);
@@ -34,20 +36,14 @@
 					bbnRevenue = Object.values(bbnWallet.balance).reduce((a, b) => a + b, 0);
 				}
 			}
-		} catch (e: any) {
-			error = e?.error?.message || e?.message || 'Failed to load overview data';
+		} catch (e: unknown) {
+			error = extractErrorMessage(e, 'Failed to load overview data');
 		} finally {
 			loading = false;
 		}
 	}
 
-	function formatCurrency(amount: number): string {
-		return new Intl.NumberFormat('en-GB', {
-			style: 'currency',
-			currency: 'GBP',
-		}).format(amount);
-	}
-</script>
+	</script>
 
 <div>
 	<h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Overview</h1>

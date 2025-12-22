@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { Modal } from '$lib/components/ui';
@@ -71,8 +70,8 @@
 		ClockOutline,
 	} from 'flowbite-svelte-icons';
 
-	// Drop ID is guaranteed by SvelteKit routing
-	const dropId = $page.params.id!;
+	// Drop ID is reactive to handle navigation between drops
+	const dropId = $derived($page.params.id!);
 
 	// Template keys type
 	type TemplateKey =
@@ -162,23 +161,35 @@
 		],
 	});
 
-	onMount(async () => {
-		await loadDrop();
+	// Reload data when dropId changes (handles navigation between drops)
+	$effect(() => {
+		// Access dropId to create dependency
+		const id = dropId;
+		if (id) {
+			loadDrop(id);
+		}
 	});
 
-	async function loadDrop() {
+	async function loadDrop(id: string) {
 		loading = true;
 		error = null;
+		// Reset state when loading a new drop
+		artworkUrl = null;
+		userAvatarUrl = null;
+		shazamResults = null;
+		userDrops = [];
+		expandedLyrics = {};
+		showPublishedSnapshot = false;
 
 		try {
 			// Fetch both admin data and drop data in parallel
 			const [adminResponse, dropResponse] = await Promise.all([
 				getIdByDropsByAdmin({
-					path: { id: dropId },
+					path: { id },
 					headers: getAuthHeaders(),
 				}),
 				getIdByDropsByMusic({
-					path: { id: dropId },
+					path: { id },
 					headers: getAuthHeaders(),
 				}),
 			]);
@@ -327,7 +338,7 @@
 
 			showResponseDialog = false;
 			// Reload the page to reflect changes
-			await loadDrop();
+			await loadDrop(dropId);
 		} catch (e: any) {
 			console.error('Failed to submit response:', e);
 			toast.show(e?.error?.message || e?.message || 'Failed to submit response', 'error');
@@ -344,7 +355,7 @@
 			});
 
 			showTypeDialog = false;
-			await loadDrop();
+			await loadDrop(dropId);
 		} catch (e: any) {
 			console.error('Failed to change type:', e);
 			toast.show(e?.error?.message || e?.message || 'Failed to change drop type', 'error');

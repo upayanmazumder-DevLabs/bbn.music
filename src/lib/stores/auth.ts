@@ -170,6 +170,9 @@ async function exchangeForAccessToken(refreshToken: string): Promise<string> {
 	return data.token;
 }
 
+// Token refresh interval (5 minutes)
+const TOKEN_REFRESH_INTERVAL = 5 * 60 * 1000;
+
 function createAuthStore() {
 	const { subscribe, set, update } = writable<AuthState>({
 		user: null,
@@ -179,24 +182,10 @@ function createAuthStore() {
 		error: null,
 	});
 
-	// Initialize from localStorage on client
-	if (browser) {
-		const accessToken = localStorage.getItem('access-token');
-		if (accessToken) {
-			const apiUser = getUserFromToken(accessToken);
-			if (apiUser) {
-				const user = mapApiUser(apiUser);
-				update((state) => ({
-					...state,
-					token: accessToken,
-					user,
-					isAuthenticated: true,
-				}));
-			}
-		}
-	}
+	let refreshInterval: ReturnType<typeof setInterval> | null = null;
+	let isRefreshing = false;
 
-	return {
+	const store = {
 		subscribe,
 
 		async login(email: string, password: string) {
@@ -244,6 +233,9 @@ function createAuthStore() {
 					isLoading: false,
 					error: null,
 				});
+
+				// Start auto refresh
+				this.startAutoRefresh();
 
 				return true;
 			} catch (error: any) {
@@ -304,6 +296,9 @@ function createAuthStore() {
 					error: null,
 				});
 
+				// Start auto refresh
+				this.startAutoRefresh();
+
 				return true;
 			} catch (error: any) {
 				const errorMessage =
@@ -363,6 +358,9 @@ function createAuthStore() {
 					error: null,
 				});
 
+				// Start auto refresh
+				this.startAutoRefresh();
+
 				return true;
 			} catch (error: any) {
 				console.error('OAuth login error:', error);
@@ -408,6 +406,9 @@ function createAuthStore() {
 					error: null,
 				});
 
+				// Start auto refresh
+				this.startAutoRefresh();
+
 				return true;
 			} catch (error: any) {
 				console.error('Token login error:', error);
@@ -424,6 +425,10 @@ function createAuthStore() {
 		async refreshToken() {
 			const refreshToken = browser ? localStorage.getItem('refresh-token') : null;
 			if (!refreshToken) return false;
+
+			// Prevent concurrent refresh calls
+			if (isRefreshing) return false;
+			isRefreshing = true;
 
 			try {
 				const accessToken = await exchangeForAccessToken(refreshToken);
@@ -449,6 +454,48 @@ function createAuthStore() {
 				console.error('Token refresh failed:', error);
 				this.logout();
 				return false;
+			} finally {
+				isRefreshing = false;
+			}
+		},
+
+		// Start automatic token refresh (call after login)
+		startAutoRefresh() {
+			if (!browser) return;
+
+			// Clear any existing interval
+			this.stopAutoRefresh();
+
+			// Refresh periodically
+			refreshInterval = setInterval(() => {
+				const token = localStorage.getItem('access-token');
+				if (token) {
+					this.refreshToken();
+				}
+			}, TOKEN_REFRESH_INTERVAL);
+
+			// Refresh when tab becomes visible
+			document.addEventListener('visibilitychange', this.handleVisibilityChange);
+		},
+
+		// Stop automatic token refresh (call on logout)
+		stopAutoRefresh() {
+			if (refreshInterval) {
+				clearInterval(refreshInterval);
+				refreshInterval = null;
+			}
+			if (browser) {
+				document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+			}
+		},
+
+		// Handle visibility change - refresh token when tab becomes visible
+		handleVisibilityChange() {
+			if (document.visibilityState === 'visible') {
+				const token = localStorage.getItem('access-token');
+				if (token) {
+					auth.refreshToken();
+				}
 			}
 		},
 
@@ -478,6 +525,9 @@ function createAuthStore() {
 		},
 
 		logout() {
+			// Stop auto refresh
+			this.stopAutoRefresh();
+
 			// Clear localStorage
 			if (browser) {
 				localStorage.removeItem('access-token');
@@ -505,6 +555,27 @@ function createAuthStore() {
 			return browser ? localStorage.getItem('access-token') : null;
 		},
 	};
+
+	// Initialize from localStorage on client
+	if (browser) {
+		const accessToken = localStorage.getItem('access-token');
+		if (accessToken) {
+			const apiUser = getUserFromToken(accessToken);
+			if (apiUser) {
+				const user = mapApiUser(apiUser);
+				update((state) => ({
+					...state,
+					token: accessToken,
+					user,
+					isAuthenticated: true,
+				}));
+				// Start auto refresh for existing session
+				store.startAutoRefresh();
+			}
+		}
+	}
+
+	return store;
 }
 
 export const auth = createAuthStore();

@@ -540,7 +540,17 @@
 <div class="min-h-screen max-w-6xl mx-auto">
 	<!-- Header -->
 	<div class="flex items-center gap-4 mb-6">
-		<Button variant="secondary" href="/music/drops">
+		<Button
+			variant="secondary"
+			onclick={() => {
+				const referrer = document.referrer;
+				if (referrer && new URL(referrer).origin === window.location.origin) {
+					history.back();
+				} else {
+					goto('/music/drops');
+				}
+			}}
+		>
 			<ArrowLeftOutline class="w-4 h-4" /> Back
 		</Button>
 		<div class="flex-1">

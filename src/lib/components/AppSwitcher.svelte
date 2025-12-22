@@ -9,7 +9,7 @@
 	let showMenu = $state(false);
 
 	// App definitions with their routes and colors
-	export const apps = [
+	const apps = [
 		{
 			id: 'music',
 			logo: bbnMusicLogo,

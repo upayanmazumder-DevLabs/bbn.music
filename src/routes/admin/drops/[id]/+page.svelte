@@ -60,7 +60,6 @@
 	import {
 		ArrowLeftOutline,
 		UserOutline,
-		CalendarMonthOutline,
 		MusicOutline,
 		CheckCircleSolid,
 		CloseCircleSolid,
@@ -439,14 +438,6 @@
 			month: 'short',
 			day: 'numeric',
 		});
-	}
-
-	function getArtistNames(artists: MergedAdminDrop['artists']) {
-		if (!artists) return 'Unknown';
-		return artists
-			.filter((a: ArtistRef) => a.type === 'PRIMARY')
-			.map((a: ArtistRef) => ('name' in a ? a.name : a._id))
-			.join(', ');
 	}
 
 	function getAccountTypeColor(
@@ -1293,6 +1284,7 @@
 			<option value="UNSUBMITTED">Unsubmitted</option>
 			<option value="PRIVATE">Private</option>
 			<option value="UNDER_REVIEW">Under Review</option>
+			<option value="EDIT_UNDER_REVIEW">Edit Under Review</option>
 			<option value="REVIEW_DECLINED">Review Declined</option>
 			<option value="PUBLISHING">Publishing</option>
 			<option value="PUBLISHED">Published</option>

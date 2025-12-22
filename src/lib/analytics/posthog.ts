@@ -9,7 +9,7 @@ export function initPostHog(): void {
 	}
 
 	posthog.init('phc_JZUdortcJ5IA9FtbzYXLv5QzqFE8umJaUz2PSvo9yzJ', {
-		api_host: 'https://eu.i.posthog.com',
+		api_host: 'https://hedgehog.bbn.music',
 		capture_pageview: false, // We'll handle this manually for SPA navigation
 		capture_pageleave: true,
 		persistence: 'localStorage+cookie',

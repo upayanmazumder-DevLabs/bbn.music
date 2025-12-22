@@ -34,13 +34,7 @@
 	type CategoryPreference = { enabled: boolean; platforms: PreferencePlatform[] };
 	type Preferences = Record<NotificationCategory, CategoryPreference>;
 
-	const defaultPreferences: Preferences = {
-		drops: { enabled: true, platforms: ['email'] },
-		royalties: { enabled: true, platforms: ['email'] },
-		marketing: { enabled: false, platforms: [] },
-	};
-
-	let notificationPrefs = $state<Preferences>({ ...defaultPreferences });
+	let notificationPrefs = $state<Preferences | null>(null);
 	let loadingPrefs = $state(true);
 	let savingPref = $state<NotificationCategory | null>(null);
 
@@ -60,8 +54,7 @@
 
 		// Filter platforms to only include valid preference platforms
 		const validPlatforms: PreferencePlatform[] = ['email', 'whatsapp', 'rcs', 'sms'];
-		const filterPlatforms = (platforms: Platform[] | undefined): PreferencePlatform[] => {
-			if (!platforms) return [];
+		const filterPlatforms = (platforms: Platform[]): PreferencePlatform[] => {
 			return platforms.filter((p): p is PreferencePlatform => validPlatforms.includes(p as PreferencePlatform));
 		};
 
@@ -73,19 +66,10 @@
 
 			if (response.data) {
 				const prefs = response.data as MessagePreference;
-				// Handle case where preferences object doesn't exist yet
-				const existingPrefs = prefs.preferences ?? {};
-				// Merge with defaults to ensure all categories exist
 				notificationPrefs = {
-					drops: existingPrefs.drops
-						? { enabled: existingPrefs.drops.enabled, platforms: filterPlatforms(existingPrefs.drops.platforms) }
-						: defaultPreferences.drops,
-					royalties: existingPrefs.royalties
-						? { enabled: existingPrefs.royalties.enabled, platforms: filterPlatforms(existingPrefs.royalties.platforms) }
-						: defaultPreferences.royalties,
-					marketing: existingPrefs.marketing
-						? { enabled: existingPrefs.marketing.enabled, platforms: filterPlatforms(existingPrefs.marketing.platforms) }
-						: defaultPreferences.marketing,
+					drops: { enabled: prefs.preferences.drops!.enabled, platforms: filterPlatforms(prefs.preferences.drops!.platforms) },
+					royalties: { enabled: prefs.preferences.royalties!.enabled, platforms: filterPlatforms(prefs.preferences.royalties!.platforms) },
+					marketing: { enabled: prefs.preferences.marketing!.enabled, platforms: filterPlatforms(prefs.preferences.marketing!.platforms) },
 				};
 			}
 		} catch (e) {
@@ -96,6 +80,7 @@
 	}
 
 	async function updatePreference(category: NotificationCategory, enabled: boolean, platforms: PreferencePlatform[]) {
+		if (!notificationPrefs) return;
 		savingPref = category;
 		try {
 			await putPreferencesByMessaging({
@@ -111,6 +96,7 @@
 	}
 
 	function toggleCategory(category: NotificationCategory) {
+		if (!notificationPrefs) return;
 		const current = notificationPrefs[category];
 		const newEnabled = !current.enabled;
 		// When enabling, default to email if no platforms selected
@@ -119,6 +105,7 @@
 	}
 
 	function togglePlatform(category: NotificationCategory, platform: PreferencePlatform) {
+		if (!notificationPrefs) return;
 		const current = notificationPrefs[category];
 		const platforms = current.platforms.includes(platform)
 			? current.platforms.filter((p) => p !== platform)
@@ -210,6 +197,7 @@
 
 			// Call API to update password
 			const response = await putUserByUser({
+				headers: getAuthHeaders(),
 				body: {
 					password: newPassword,
 				},
@@ -542,7 +530,7 @@
 				</div>
 				<PhoneInput id="phone-input" bind:value={phone} bind:error={phoneError} />
 				<p class="text-xs text-gray-500 mt-1">
-					Optional: Add your phone number for account recovery
+					Optional: Add your phone number for notifications and account recovery
 				</p>
 			</div>
 		</div>
@@ -565,7 +553,7 @@
 	>
 		<h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-6">Notifications</h2>
 
-		{#if loadingPrefs}
+		{#if loadingPrefs || !notificationPrefs}
 			<div class="flex items-center justify-center py-8">
 				<div class="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
 			</div>
@@ -688,7 +676,6 @@
 				<div class="flex items-center justify-between mb-4">
 					<div>
 						<p class="text-gray-900 dark:text-white font-medium">Password</p>
-						<p class="text-sm text-gray-500 dark:text-gray-400">Last changed: Never</p>
 					</div>
 					<button
 						onclick={togglePasswordChange}

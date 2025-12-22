@@ -75,6 +75,33 @@
 
 <svelte:head>
 	<title>bbn.music - Drop in with your Audience</title>
+	<meta
+		name="description"
+		content="Your gateway to unlimited music distribution at a low cost. Keep 97% of your revenue with our free plan. Distribute to Spotify, Apple Music, and 50+ stores worldwide."
+	/>
+
+	<!-- Open Graph -->
+	<meta property="og:type" content="website" />
+	<meta property="og:site_name" content="bbn.music" />
+	<meta property="og:title" content="bbn.music - Drop in with your Audience" />
+	<meta
+		property="og:description"
+		content="Your gateway to unlimited music distribution at a low cost. Keep 97% of your revenue with our free plan. Distribute to Spotify, Apple Music, and 50+ stores worldwide."
+	/>
+	<meta property="og:image" content="https://bbn.music/og-image.png" />
+	<meta property="og:url" content="https://bbn.music" />
+
+	<!-- Twitter Card -->
+	<meta name="twitter:card" content="summary_large_image" />
+	<meta name="twitter:title" content="bbn.music - Drop in with your Audience" />
+	<meta
+		name="twitter:description"
+		content="Your gateway to unlimited music distribution at a low cost. Keep 97% of your revenue with our free plan."
+	/>
+	<meta name="twitter:image" content="https://bbn.music/og-image.png" />
+
+	<!-- Canonical -->
+	<link rel="canonical" href="https://bbn.music" />
 </svelte:head>
 
 <div class="space-y-24 -mt-8">

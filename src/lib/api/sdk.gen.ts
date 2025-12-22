@@ -134,8 +134,6 @@ import type {
 	PutReadAllByNotificationsByMessagingResponses,
 	PutSendByConversationsByMessagingData,
 	PutSendByConversationsByMessagingResponses,
-	PutStatusByConversationsByMessagingData,
-	PutStatusByConversationsByMessagingResponses,
 	PutUserByUserData,
 	PutUserByUserResponses,
 	PutWalletData,
@@ -272,8 +270,6 @@ import {
 	zPutReadAllByNotificationsByMessagingResponse,
 	zPutSendByConversationsByMessagingData,
 	zPutSendByConversationsByMessagingResponse,
-	zPutStatusByConversationsByMessagingData,
-	zPutStatusByConversationsByMessagingResponse,
 	zPutUserByUserData,
 	zPutUserByUserResponse,
 	zPutWalletData,
@@ -618,27 +614,6 @@ export const putSendByConversationsByMessaging = <ThrowOnError extends boolean =
 			await zPutSendByConversationsByMessagingResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
 		url: '/api/@bbn/messaging/conversations/send',
-		...options,
-		headers: {
-			'Content-Type': 'application/json',
-			...options?.headers,
-		},
-	});
-
-export const putStatusByConversationsByMessaging = <ThrowOnError extends boolean = false>(
-	options?: Options<PutStatusByConversationsByMessagingData, ThrowOnError>,
-) =>
-	(options?.client ?? client).put<
-		PutStatusByConversationsByMessagingResponses,
-		unknown,
-		ThrowOnError
-	>({
-		requestValidator: async (data: any) =>
-			await zPutStatusByConversationsByMessagingData.parseAsync(data),
-		responseValidator: async (data: any) =>
-			await zPutStatusByConversationsByMessagingResponse.parseAsync(data),
-		security: [{ scheme: 'bearer', type: 'http' }],
-		url: '/api/@bbn/messaging/conversations/status',
 		...options,
 		headers: {
 			'Content-Type': 'application/json',

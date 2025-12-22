@@ -372,13 +372,10 @@ export type Message = {
 	error?: string;
 };
 
-export type ConversationStatus = 'open' | 'pending' | 'resolved' | 'closed';
-
 export type Conversation = {
 	_id: string;
-	user: string;
+	user?: string;
 	platform: Platform;
-	status: ConversationStatus;
 	subject?: string;
 	assignedTo?: string;
 	createdAt: string;
@@ -1104,9 +1101,8 @@ export type PostConversationsByMessagingResponses = {
 	 */
 	200: {
 		_id: string;
-		user: string;
+		user?: string;
 		platform: Platform;
-		status: ConversationStatus;
 		subject?: string;
 		assignedTo?: string;
 		createdAt: string;
@@ -1134,9 +1130,8 @@ export type GetIdByConversationsByMessagingResponses = {
 	 */
 	200: {
 		_id: string;
-		user: string;
+		user?: string;
 		platform: Platform;
-		status: ConversationStatus;
 		subject?: string;
 		assignedTo?: string;
 		createdAt: string;
@@ -1195,37 +1190,6 @@ export type PutSendByConversationsByMessagingResponses = {
 
 export type PutSendByConversationsByMessagingResponse =
 	PutSendByConversationsByMessagingResponses[keyof PutSendByConversationsByMessagingResponses];
-
-export type PutStatusByConversationsByMessagingData = {
-	body?: {
-		conversationId: string;
-		status: 'open' | 'pending' | 'resolved' | 'closed';
-	};
-	path?: never;
-	query?: never;
-	url: '/api/@bbn/messaging/conversations/status';
-};
-
-export type PutStatusByConversationsByMessagingResponses = {
-	/**
-	 * Successful operation
-	 */
-	200: {
-		_id: string;
-		user: string;
-		platform: Platform;
-		status: ConversationStatus;
-		subject?: string;
-		assignedTo?: string;
-		createdAt: string;
-		updatedAt: string;
-		lastMessageAt?: string;
-		externalId?: string;
-	};
-};
-
-export type PutStatusByConversationsByMessagingResponse =
-	PutStatusByConversationsByMessagingResponses[keyof PutStatusByConversationsByMessagingResponses];
 
 export type GetIdByUserByMessagesByMessagingData = {
 	body?: never;
@@ -1301,9 +1265,8 @@ export type GetIdByMyConversationsByMessagingResponses = {
 	 */
 	200: {
 		_id: string;
-		user: string;
+		user?: string;
 		platform: Platform;
-		status: ConversationStatus;
 		subject?: string;
 		assignedTo?: string;
 		createdAt: string;

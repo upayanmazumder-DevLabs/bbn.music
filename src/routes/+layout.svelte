@@ -174,6 +174,7 @@
 		{ href: '/admin/reviews', label: 'Reviews' },
 		{ href: '/admin/takedown', label: 'Takedowns' },
 		{ href: '/admin/payouts', label: 'Payouts' },
+		{ href: '/admin/messaging', label: 'Messaging' },
 		{ href: '/admin/oauth', label: 'OAuth' },
 	];
 

@@ -407,13 +407,10 @@ export const zMessage = z.object({
 	error: z.optional(z.string()),
 });
 
-export const zConversationStatus = z.enum(['open', 'pending', 'resolved', 'closed']);
-
 export const zConversation = z.object({
 	_id: z.string(),
-	user: z.string(),
+	user: z.optional(z.string()),
 	platform: zPlatform,
-	status: zConversationStatus,
 	subject: z.optional(z.string()),
 	assignedTo: z.optional(z.string()),
 	createdAt: z.string(),
@@ -1141,9 +1138,8 @@ export const zPostConversationsByMessagingData = z.object({
  */
 export const zPostConversationsByMessagingResponse = z.object({
 	_id: z.string(),
-	user: z.string(),
+	user: z.optional(z.string()),
 	platform: zPlatform,
-	status: zConversationStatus,
 	subject: z.optional(z.string()),
 	assignedTo: z.optional(z.string()),
 	createdAt: z.string(),
@@ -1165,9 +1161,8 @@ export const zGetIdByConversationsByMessagingData = z.object({
  */
 export const zGetIdByConversationsByMessagingResponse = z.object({
 	_id: z.string(),
-	user: z.string(),
+	user: z.optional(z.string()),
 	platform: zPlatform,
-	status: zConversationStatus,
 	subject: z.optional(z.string()),
 	assignedTo: z.optional(z.string()),
 	createdAt: z.string(),
@@ -1217,33 +1212,6 @@ export const zPutSendByConversationsByMessagingResponse = z.object({
 	readAt: z.optional(z.string()),
 	externalId: z.optional(z.string()),
 	error: z.optional(z.string()),
-});
-
-export const zPutStatusByConversationsByMessagingData = z.object({
-	body: z.optional(
-		z.object({
-			conversationId: z.string(),
-			status: z.enum(['open', 'pending', 'resolved', 'closed']),
-		}),
-	),
-	path: z.optional(z.never()),
-	query: z.optional(z.any()),
-});
-
-/**
- * Successful operation
- */
-export const zPutStatusByConversationsByMessagingResponse = z.object({
-	_id: z.string(),
-	user: z.string(),
-	platform: zPlatform,
-	status: zConversationStatus,
-	subject: z.optional(z.string()),
-	assignedTo: z.optional(z.string()),
-	createdAt: z.string(),
-	updatedAt: z.string(),
-	lastMessageAt: z.optional(z.string()),
-	externalId: z.optional(z.string()),
 });
 
 export const zGetIdByUserByMessagesByMessagingData = z.object({
@@ -1302,9 +1270,8 @@ export const zGetIdByMyConversationsByMessagingData = z.object({
  */
 export const zGetIdByMyConversationsByMessagingResponse = z.object({
 	_id: z.string(),
-	user: z.string(),
+	user: z.optional(z.string()),
 	platform: zPlatform,
-	status: zConversationStatus,
 	subject: z.optional(z.string()),
 	assignedTo: z.optional(z.string()),
 	createdAt: z.string(),

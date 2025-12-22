@@ -9,59 +9,25 @@
 	import Toast from '$lib/components/Toast.svelte';
 	import { page } from '$app/stores';
 	import { initApiClient, getAuthHeaders } from '$lib/apiClient';
-	import { postResendVerifyEmailByMailByUser, getPictureByUserByUser } from '$lib/api/sdk.gen';
+	import { postResendVerifyEmailByMailByUser } from '$lib/api/sdk.gen';
 	import { initPostHog, trackPageView, identifyUser } from '$lib/analytics/posthog';
 	import { cookieConsent } from '$lib/stores/cookieConsent.svelte';
 	import CookieConsent from '$lib/components/CookieConsent.svelte';
+	import { avatarStore } from '$lib/stores/avatar.svelte';
 
 	const { children } = $props();
 	let hidden = $state(true);
 	let showUserMenu = $state(false);
 	let authChecked = $state(false);
 	let sendingVerification = $state(false);
-	let avatarUrl = $state<string | null>(null);
 	let mounted = $state(false);
 
-	// Load avatar image as blob when user changes
-	async function loadAvatar() {
-		if (!$auth.user?.id || !$auth.user?.profile.avatar) {
-			avatarUrl = null;
-			return;
-		}
-
-		// Check if avatar is already a full URL (OAuth providers)
-		if ($auth.user.profile.avatar.startsWith('http')) {
-			avatarUrl = $auth.user.profile.avatar;
-			return;
-		}
-
-		// Fetch avatar as blob with authentication
-		try {
-			const response = await getPictureByUserByUser({
-				path: { userId: $auth.user.id },
-				headers: getAuthHeaders(),
-			});
-
-			if (response.data) {
-				const blob = response.data as Blob;
-				// Revoke old URL if it exists
-				if (avatarUrl && !avatarUrl.startsWith('http')) {
-					URL.revokeObjectURL(avatarUrl);
-				}
-				avatarUrl = URL.createObjectURL(blob);
-			}
-		} catch (error) {
-			console.error('Failed to load avatar:', error);
-			avatarUrl = null;
-		}
-	}
-
-	// Load avatar when user changes
+	// Load avatar when user changes (using shared store)
 	$effect(() => {
 		if ($auth.user?.id) {
-			loadAvatar();
+			avatarStore.load($auth.user.id, $auth.user.profile.avatar);
 		} else {
-			avatarUrl = null;
+			avatarStore.clear();
 		}
 	});
 
@@ -332,9 +298,9 @@
 									aria-haspopup="menu"
 									aria-label="User menu"
 								>
-									{#if avatarUrl}
+									{#if avatarStore.url}
 										<img
-											src={avatarUrl}
+											src={avatarStore.url}
 											alt={$auth.user?.profile.username || 'User'}
 											class="w-full h-full object-cover"
 										/>

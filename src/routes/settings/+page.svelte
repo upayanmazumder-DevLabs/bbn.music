@@ -10,7 +10,6 @@
 	import {
 		putUserByUser,
 		postResendVerifyEmailByMailByUser,
-		getPictureByUserByUser,
 		getIdByPreferencesByMessaging,
 		putPreferencesByMessaging,
 	} from '$lib/api/sdk.gen';
@@ -18,6 +17,7 @@
 	import { getAuthHeaders, getBaseUrl } from '$lib/apiClient';
 	import { onMount } from 'svelte';
 	import PhoneInput from '$lib/components/PhoneInput.svelte';
+	import { avatarStore } from '$lib/stores/avatar.svelte';
 
 	let name = $state($auth.user?.profile.username || '');
 	let email = $state($auth.user?.profile.email || '');
@@ -25,52 +25,8 @@
 	let phoneError = $state('');
 	const emailVerified = $derived($auth.user?.profile.verified.email ?? false);
 	const phoneVerified = $derived($auth.user?.profile.verified.phone ?? false);
-	let avatarUrl = $state<string | null>(null);
 	let uploadingAvatar = $state(false);
 	let avatarError = $state('');
-
-	// Load avatar image as blob when user changes
-	async function loadAvatar() {
-		if (!$auth.user?.id || !$auth.user?.profile.avatar) {
-			avatarUrl = null;
-			return;
-		}
-
-		// Check if avatar is already a full URL (OAuth providers)
-		if ($auth.user.profile.avatar.startsWith('http')) {
-			avatarUrl = $auth.user.profile.avatar;
-			return;
-		}
-
-		// Fetch avatar as blob with authentication
-		try {
-			const response = await getPictureByUserByUser({
-				path: { userId: $auth.user.id },
-				headers: getAuthHeaders(),
-			});
-
-			if (response.data) {
-				const blob = response.data as Blob;
-				// Revoke old URL if it exists
-				if (avatarUrl && !avatarUrl.startsWith('http')) {
-					URL.revokeObjectURL(avatarUrl);
-				}
-				avatarUrl = URL.createObjectURL(blob);
-			}
-		} catch (error) {
-			console.error('Failed to load avatar:', error);
-			avatarUrl = null;
-		}
-	}
-
-	// Load avatar when user changes
-	$effect(() => {
-		if ($auth.user?.id) {
-			loadAvatar();
-		} else {
-			avatarUrl = null;
-		}
-	});
 
 	// Notification preferences
 	// API only accepts these platforms for preferences
@@ -117,16 +73,18 @@
 
 			if (response.data) {
 				const prefs = response.data as MessagePreference;
+				// Handle case where preferences object doesn't exist yet
+				const existingPrefs = prefs.preferences ?? {};
 				// Merge with defaults to ensure all categories exist
 				notificationPrefs = {
-					drops: prefs.preferences.drops
-						? { enabled: prefs.preferences.drops.enabled, platforms: filterPlatforms(prefs.preferences.drops.platforms) }
+					drops: existingPrefs.drops
+						? { enabled: existingPrefs.drops.enabled, platforms: filterPlatforms(existingPrefs.drops.platforms) }
 						: defaultPreferences.drops,
-					royalties: prefs.preferences.royalties
-						? { enabled: prefs.preferences.royalties.enabled, platforms: filterPlatforms(prefs.preferences.royalties.platforms) }
+					royalties: existingPrefs.royalties
+						? { enabled: existingPrefs.royalties.enabled, platforms: filterPlatforms(existingPrefs.royalties.platforms) }
 						: defaultPreferences.royalties,
-					marketing: prefs.preferences.marketing
-						? { enabled: prefs.preferences.marketing.enabled, platforms: filterPlatforms(prefs.preferences.marketing.platforms) }
+					marketing: existingPrefs.marketing
+						? { enabled: existingPrefs.marketing.enabled, platforms: filterPlatforms(existingPrefs.marketing.platforms) }
 						: defaultPreferences.marketing,
 				};
 			}
@@ -332,16 +290,13 @@
 			// Upload via WebSocket (no API call needed, just direct WebSocket connection)
 			await uploadViaWebSocket(file);
 
-			// Show preview immediately
-			const previewUrl = URL.createObjectURL(file);
-			if (avatarUrl && !avatarUrl.startsWith('http')) {
-				URL.revokeObjectURL(avatarUrl);
-			}
-			avatarUrl = previewUrl;
-
 			// Refresh auth to get updated avatar
 			await auth.refreshToken();
-			await loadAvatar();
+
+			// Refresh avatar in shared store
+			if ($auth.user?.id) {
+				await avatarStore.refresh($auth.user.id, $auth.user.profile.avatar);
+			}
 		} catch (e: any) {
 			avatarError = e?.error?.message || e?.message || 'Failed to upload profile picture';
 			console.error('Avatar upload error:', e);
@@ -464,8 +419,8 @@
 								class="w-8 h-8 border-2 border-white/30 border-t-white rounded-full animate-spin"
 							></div>
 						</div>
-					{:else if avatarUrl}
-						<img src={avatarUrl} alt={name || 'User'} class="w-full h-full object-cover" />
+					{:else if avatarStore.url}
+						<img src={avatarStore.url} alt={name || 'User'} class="w-full h-full object-cover" />
 					{:else}
 						<span class="text-white font-bold text-2xl">
 							{name ? name[0].toUpperCase() : 'U'}

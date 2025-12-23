@@ -12,6 +12,7 @@ export function initPostHog(): void {
 		api_host: 'https://hedgehog.bbn.music',
 		capture_pageview: false, // We'll handle this manually for SPA navigation
 		capture_pageleave: true,
+		capture_exceptions: true,
 		persistence: 'localStorage+cookie',
 	});
 

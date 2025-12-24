@@ -16,6 +16,7 @@
 	import { getAuthHeaders } from '$lib/apiClient';
 	import { auth } from '$lib/stores/auth';
 	import { toast } from '$lib/stores/toast';
+	import { formatDate } from '$lib/utils/formatDate';
 	import type {
 		SingleAdminDrop,
 		AdminDrop,
@@ -436,15 +437,7 @@
 		}
 	}
 
-	function formatDate(dateStr: string | undefined) {
-		if (!dateStr) return 'N/A';
-		return new Date(dateStr).toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-		});
-	}
-
+	
 	function getAccountTypeColor(
 		type: AccountType | undefined,
 	): 'green' | 'orange' | 'purple' | 'gray' {

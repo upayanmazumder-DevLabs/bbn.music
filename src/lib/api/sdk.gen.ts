@@ -89,8 +89,6 @@ import type {
 	GetUserinfoByOauthResponses,
 	GetWalletData,
 	GetWalletResponses,
-	GetWalletsByAdminData,
-	GetWalletsByAdminResponses,
 	GetWebhookByMetaByMessagingData,
 	GetWebhookByStatuspageByIntegrationData,
 	PatchIdByApplicationsByOauthData,
@@ -228,8 +226,6 @@ import {
 	zGetUserinfoByOauthResponse,
 	zGetWalletData,
 	zGetWalletResponse,
-	zGetWalletsByAdminData,
-	zGetWalletsByAdminResponse,
 	zGetWebhookByMetaByMessagingData,
 	zGetWebhookByStatuspageByIntegrationData,
 	zPatchIdByApplicationsByOauthData,
@@ -396,17 +392,6 @@ export const postSyncMappingByAdmin = <ThrowOnError extends boolean = false>(
 			'Content-Type': 'application/json',
 			...options?.headers,
 		},
-	});
-
-export const getWalletsByAdmin = <ThrowOnError extends boolean = false>(
-	options?: Options<GetWalletsByAdminData, ThrowOnError>,
-) =>
-	(options?.client ?? client).get<GetWalletsByAdminResponses, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zGetWalletsByAdminData.parseAsync(data),
-		responseValidator: async (data: any) => await zGetWalletsByAdminResponse.parseAsync(data),
-		security: [{ scheme: 'bearer', type: 'http' }],
-		url: '/api/@bbn/admin/wallets',
-		...options,
 	});
 
 export const getIdByWalletsByAdmin = <ThrowOnError extends boolean = false>(

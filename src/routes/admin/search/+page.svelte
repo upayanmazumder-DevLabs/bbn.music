@@ -21,8 +21,10 @@
 		UserOutline,
 		MusicOutline,
 		ArrowRightOutline,
+		PlusOutline,
 	} from 'flowbite-svelte-icons';
 	import { formatCurrency } from '$lib/utils/formatCurrency';
+	import type { PaymentType } from '$lib/api/types.gen';
 
 	// Type helpers for narrowing SearchReturn discriminated union
 	type UserSearchResult = Extract<SearchReturn, { _index: 'users' }>;
@@ -39,6 +41,75 @@
 	let wallet = $state<AdminWallet | null>(null);
 	let userDrops = $state<AdminDrop[]>([]);
 	let loadingDetails = $state(false);
+
+	// Transaction form state
+	let showTransactionForm = $state(false);
+	let txAmount = $state(0);
+	let txType = $state<PaymentType>('UNRESTRAINED');
+	let txDescription = $state('');
+	let txCounterParty = $state('');
+	let txTimestamp = $state('');
+	let txSubmitting = $state(false);
+
+	function resetTransactionForm() {
+		txAmount = 0;
+		txType = 'UNRESTRAINED';
+		txDescription = '';
+		txCounterParty = '';
+		// Set to current datetime in local timezone format for datetime-local input
+		const now = new Date();
+		txTimestamp = now.toISOString().slice(0, 16);
+		showTransactionForm = false;
+	}
+
+	function openTransactionForm() {
+		const now = new Date();
+		txTimestamp = now.toISOString().slice(0, 16);
+		showTransactionForm = true;
+	}
+
+	async function submitTransaction() {
+		if (!wallet || txSubmitting) return;
+		if (!txDescription.trim() || !txCounterParty.trim()) return;
+
+		txSubmitting = true;
+
+		try {
+			// Convert datetime-local value to milliseconds timestamp string
+			const timestampMs = String(new Date(txTimestamp).getTime());
+
+			await patchIdByWalletsByAdmin({
+				path: { id: wallet._id },
+				body: {
+					transactions: [
+						{
+							amount: txAmount,
+							timestamp: timestampMs,
+							type: txType,
+							description: txDescription.trim(),
+							counterParty: txCounterParty.trim(),
+						},
+					],
+				},
+				headers: getAuthHeaders(),
+			});
+
+			// Refresh wallet data
+			const response = await getIdByWalletsByAdmin({
+				path: { id: wallet._id },
+				headers: getAuthHeaders(),
+			});
+			if (response.data) {
+				wallet = response.data as AdminWallet;
+			}
+
+			resetTransactionForm();
+		} catch (e) {
+			console.error('Failed to add transaction:', e);
+		} finally {
+			txSubmitting = false;
+		}
+	}
 
 	async function search() {
 		if (!searchQuery.trim()) return;
@@ -319,15 +390,15 @@
 
 							<div class="grid grid-cols-2 gap-4">
 								<div>
-									<p class="text-xs text-gray-500">Unrestrained</p>
+									<p class="text-xs text-gray-500">AmpSuite</p>
 									<p class="text-gray-900 dark:text-white font-medium">
-										{formatCurrency(wallet.balance?.unrestrained || 0)}
+										{formatCurrency(wallet.balance?.ampsuite || 0)}
 									</p>
 								</div>
 								<div>
-									<p class="text-xs text-gray-500">Restrained</p>
+									<p class="text-xs text-gray-500">Symphonic</p>
 									<p class="text-gray-900 dark:text-white font-medium">
-										{formatCurrency(wallet.balance?.restrained || 0)}
+										{formatCurrency(wallet.balance?.symphonic || 0)}
 									</p>
 								</div>
 							</div>
@@ -375,6 +446,110 @@
 									></div>
 								</button>
 							</div>
+						</div>
+
+						<!-- Add Transaction Form -->
+						<div class="p-4 bg-gray-100 dark:bg-gray-700/50 rounded-lg">
+							<div class="flex items-center justify-between mb-3">
+								<h3 class="text-sm font-medium text-gray-400">Add Transaction</h3>
+								{#if !showTransactionForm}
+									<button
+										onclick={openTransactionForm}
+										class="p-1 rounded hover:bg-gray-600 transition-colors"
+										aria-label="Add transaction"
+									>
+										<PlusOutline class="w-4 h-4 text-gray-400" />
+									</button>
+								{/if}
+							</div>
+
+							{#if showTransactionForm}
+								<div class="space-y-3">
+									<div class="grid grid-cols-2 gap-3">
+										<div>
+											<label for="tx-amount" class="text-xs text-gray-500 block mb-1">Amount</label>
+											<input
+												id="tx-amount"
+												type="number"
+												step="0.01"
+												bind:value={txAmount}
+												placeholder="0.00"
+												class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+											/>
+										</div>
+										<div>
+											<label for="tx-type" class="text-xs text-gray-500 block mb-1">Type</label>
+											<select
+												id="tx-type"
+												bind:value={txType}
+												class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+											>
+												<option value="UNRESTRAINED">Unrestrained</option>
+												<option value="RESTRAINED">Restrained</option>
+											</select>
+										</div>
+									</div>
+
+									<div>
+										<label for="tx-description" class="text-xs text-gray-500 block mb-1"
+											>Description</label
+										>
+										<input
+											id="tx-description"
+											type="text"
+											bind:value={txDescription}
+											placeholder="e.g., Manual adjustment"
+											class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+										/>
+									</div>
+
+									<div>
+										<label for="tx-counterparty" class="text-xs text-gray-500 block mb-1"
+											>Counter Party</label
+										>
+										<input
+											id="tx-counterparty"
+											type="text"
+											bind:value={txCounterParty}
+											placeholder="e.g., Admin, Symphonic"
+											class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+										/>
+									</div>
+
+									<div>
+										<label for="tx-timestamp" class="text-xs text-gray-500 block mb-1"
+											>Timestamp</label
+										>
+										<input
+											id="tx-timestamp"
+											type="datetime-local"
+											bind:value={txTimestamp}
+											class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+										/>
+									</div>
+
+									<div class="flex gap-2 pt-2">
+										<Button
+											onclick={submitTransaction}
+											disabled={txSubmitting || !txDescription.trim() || !txCounterParty.trim()}
+											loading={txSubmitting}
+											variant="danger"
+											size="sm"
+											class="flex-1"
+										>
+											{txSubmitting ? 'Adding...' : 'Add Transaction'}
+										</Button>
+										<Button
+											onclick={resetTransactionForm}
+											disabled={txSubmitting}
+											variant="secondary"
+											size="sm"
+										>
+											Cancel
+										</Button>
+									</div>
+								</div>
+							{/if}
 						</div>
 
 						{#if wallet.transactions && wallet.transactions.length > 0}

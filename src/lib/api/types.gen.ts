@@ -577,8 +577,8 @@ export type AdminWallet = {
 	email: string;
 	userName: string;
 	balance: {
-		restrained: number;
-		unrestrained: number;
+		ampsuite: number;
+		symphonic: number;
 	};
 };
 
@@ -918,27 +918,6 @@ export type PostSyncMappingByAdminData = {
 	query?: never;
 	url: '/api/@bbn/admin/sync_mapping';
 };
-
-export type GetWalletsByAdminData = {
-	body?: never;
-	path?: never;
-	query?: {
-		_lastId?: string;
-		_offset?: number;
-		_limit?: number;
-	};
-	url: '/api/@bbn/admin/wallets';
-};
-
-export type GetWalletsByAdminResponses = {
-	/**
-	 * Successful operation
-	 */
-	200: Array<AdminWallet>;
-};
-
-export type GetWalletsByAdminResponse =
-	GetWalletsByAdminResponses[keyof GetWalletsByAdminResponses];
 
 export type GetIdByWalletsByAdminData = {
 	body?: never;
@@ -1445,7 +1424,17 @@ export type GetIdByPreferencesByMessagingResponses = {
 	/**
 	 * Successful operation
 	 */
-	200: MessagePreference;
+	200: {
+		_id: string;
+		user: string;
+		preferences: {
+			[key in NotificationCategory]?: {
+				enabled: boolean;
+				platforms: Array<Platform>;
+			};
+		};
+		language: string;
+	};
 };
 
 export type GetIdByPreferencesByMessagingResponse =

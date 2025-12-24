@@ -15,6 +15,7 @@
 	} from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
 	import { imageCache } from '$lib/stores/imageCache';
+	import { formatDate } from '$lib/utils/formatDate';
 
 	// Tab configuration matching the old app
 	const tabs = [
@@ -130,14 +131,6 @@
 		const url = new URL($page.url);
 		url.searchParams.set('list', tabId);
 		goto(url.toString(), { replaceState: true });
-	}
-
-	function formatDate(dateString: string) {
-		return new Date(dateString).toLocaleDateString('en-US', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-		});
 	}
 
 	function getArtistNames(artists: Drop['artists'] | undefined) {

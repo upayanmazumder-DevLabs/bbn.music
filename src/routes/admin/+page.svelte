@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { Spinner } from '$lib/components/ui';
-	import { getWalletsByAdmin } from '$lib/api/sdk.gen';
+	import { getIdByWalletsByAdmin } from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
 	import type { AdminWallet } from '$lib/api/types.gen';
 	import { formatCurrency } from '$lib/utils/formatCurrency';
@@ -23,17 +23,16 @@
 		error = null;
 
 		try {
-			const response = await getWalletsByAdmin({
+			const response = await getIdByWalletsByAdmin({
+				path: { id: BBN_USER_ID },
 				headers: getAuthHeaders(),
 			});
 
 			if (response.data) {
-				const wallets = response.data as AdminWallet[];
-
+				const bbnWallet = response.data as AdminWallet;
 				// Calculate BBN Revenue - sum of all balance values from BBN company wallet
-				const bbnWallet = wallets.find((w) => w.user === BBN_USER_ID);
-				if (bbnWallet?.balance) {
-					bbnRevenue = Object.values(bbnWallet.balance).reduce((a, b) => a + b, 0);
+				if (bbnWallet.balance) {
+					bbnRevenue = (bbnWallet.balance.ampsuite || 0) + (bbnWallet.balance.symphonic || 0);
 				}
 			}
 		} catch (e: unknown) {
@@ -42,8 +41,7 @@
 			loading = false;
 		}
 	}
-
-	</script>
+</script>
 
 <div>
 	<h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Overview</h1>

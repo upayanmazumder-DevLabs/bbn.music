@@ -28,6 +28,10 @@ export function formatDate(
 	} else if (typeof input === 'number') {
 		// If it's a small number, it's likely seconds; convert to milliseconds
 		date = new Date(input < 10000000000 ? input * 1000 : input);
+	} else if (typeof input === 'string' && /^\d+$/.test(input)) {
+		// Handle numeric strings (Unix timestamps as strings)
+		const num = parseInt(input, 10);
+		date = new Date(num < 10000000000 ? num * 1000 : num);
 	} else {
 		date = new Date(input);
 	}

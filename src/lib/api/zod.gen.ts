@@ -648,8 +648,8 @@ export const zAdminWallet = z
 				),
 			userName: z.string(),
 			balance: z.object({
-				restrained: z.number(),
-				unrestrained: z.number(),
+				ampsuite: z.number(),
+				symphonic: z.number(),
 			}),
 		}),
 	);
@@ -990,23 +990,6 @@ export const zPostSyncMappingByAdminData = z.object({
 	path: z.optional(z.never()),
 	query: z.optional(z.any()),
 });
-
-export const zGetWalletsByAdminData = z.object({
-	body: z.optional(z.never()),
-	path: z.optional(z.never()),
-	query: z.optional(
-		z.object({
-			_lastId: z.optional(z.string()),
-			_offset: z.optional(z.number()),
-			_limit: z.optional(z.number()),
-		}),
-	),
-});
-
-/**
- * Successful operation
- */
-export const zGetWalletsByAdminResponse = z.array(zAdminWallet);
 
 export const zGetIdByWalletsByAdminData = z.object({
 	body: z.optional(z.never()),
@@ -1426,7 +1409,18 @@ export const zGetIdByPreferencesByMessagingData = z.object({
 /**
  * Successful operation
  */
-export const zGetIdByPreferencesByMessagingResponse = zMessagePreference;
+export const zGetIdByPreferencesByMessagingResponse = z.object({
+	_id: z.string(),
+	user: z.string(),
+	preferences: z.record(
+		z.string(),
+		z.object({
+			enabled: z.boolean(),
+			platforms: z.array(zPlatform),
+		}),
+	),
+	language: z.string(),
+});
 
 export const zGetChatsByWhatsappByMessagingData = z.object({
 	body: z.optional(z.never()),

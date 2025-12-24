@@ -77,38 +77,28 @@
 		return { added, removed, unchanged };
 	});
 
-	// Compare songs by ISRC or by index if no ISRC
+	// Compare songs by _id first (most reliable), then ISRC, then title
 	const songChanges = $derived.by(() => {
 		const added: Song[] = [];
 		const removed: Song[] = [];
 		const modified: Array<{ current: Song; published: Song; changes: string[] }> = [];
 		const unchanged: Song[] = [];
 
-		// Map published songs by ISRC for quick lookup
-		const publishedByIsrc = new Map<string, Song>();
-		const publishedNoIsrc: Song[] = [];
+		// Map published songs by _id for quick lookup
+		const publishedById = new Map<string, Song>();
 		for (const song of published.songs) {
-			if (song.isrc) {
-				publishedByIsrc.set(song.isrc, song);
-			} else {
-				publishedNoIsrc.push(song);
-			}
+			publishedById.set(song._id, song);
 		}
 
-		// Map current songs by ISRC
-		const currentByIsrc = new Map<string, Song>();
-		const currentNoIsrc: Song[] = [];
+		// Map current songs by _id
+		const currentById = new Map<string, Song>();
 		for (const song of current.songs) {
-			if (song.isrc) {
-				currentByIsrc.set(song.isrc, song);
-			} else {
-				currentNoIsrc.push(song);
-			}
+			currentById.set(song._id, song);
 		}
 
-		// Find modified and unchanged (by ISRC)
-		for (const [isrc, pubSong] of publishedByIsrc) {
-			const curSong = currentByIsrc.get(isrc);
+		// Find modified, unchanged, and removed songs
+		for (const [id, pubSong] of publishedById) {
+			const curSong = currentById.get(id);
 			if (curSong) {
 				const changes = getSongChanges(curSong, pubSong);
 				if (changes.length > 0) {
@@ -121,31 +111,9 @@
 			}
 		}
 
-		// Find added songs (by ISRC)
-		for (const [isrc, curSong] of currentByIsrc) {
-			if (!publishedByIsrc.has(isrc)) {
-				added.push(curSong);
-			}
-		}
-
-		// Handle songs without ISRC by matching by title
-		for (const pubSong of publishedNoIsrc) {
-			const curSong = currentNoIsrc.find((s) => s.title === pubSong.title);
-			if (curSong) {
-				const changes = getSongChanges(curSong, pubSong);
-				if (changes.length > 0) {
-					modified.push({ current: curSong, published: pubSong, changes });
-				} else {
-					unchanged.push(pubSong);
-				}
-			} else {
-				removed.push(pubSong);
-			}
-		}
-
-		for (const curSong of currentNoIsrc) {
-			const found = publishedNoIsrc.find((s) => s.title === curSong.title);
-			if (!found) {
+		// Find added songs
+		for (const [id, curSong] of currentById) {
+			if (!publishedById.has(id)) {
 				added.push(curSong);
 			}
 		}
@@ -155,19 +123,19 @@
 
 	function getSongChanges(current: Song, published: Song): string[] {
 		const changes: string[] = [];
-		if (current.title !== published.title) changes.push('title');
-		if (current.file !== published.file) changes.push('file');
-		if (current.isrc !== published.isrc) changes.push('isrc');
-		if (current.explicit !== published.explicit) changes.push('explicit');
-		if (current.instrumental !== published.instrumental) changes.push('instrumental');
-		if (current.primaryGenre !== published.primaryGenre) changes.push('primaryGenre');
-		if (current.secondaryGenre !== published.secondaryGenre) changes.push('secondaryGenre');
-		if (current.year !== published.year) changes.push('year');
-		if (current.language !== published.language) changes.push('language');
-		if (current.country !== published.country) changes.push('country');
-		if (current.lyrics !== published.lyrics) changes.push('lyrics');
-		if (current.timedLyrics !== published.timedLyrics) changes.push('timedLyrics');
-		if (JSON.stringify(current.artists) !== JSON.stringify(published.artists)) changes.push('artists');
+		if (isDifferent(current.title, published.title)) changes.push('title');
+		if (isDifferent(current.file, published.file)) changes.push('file');
+		if (isDifferent(current.isrc, published.isrc)) changes.push('isrc');
+		if (isDifferent(current.explicit, published.explicit)) changes.push('explicit');
+		if (isDifferent(current.instrumental, published.instrumental)) changes.push('instrumental');
+		if (isDifferent(current.primaryGenre, published.primaryGenre)) changes.push('primaryGenre');
+		if (isDifferent(current.secondaryGenre, published.secondaryGenre)) changes.push('secondaryGenre');
+		if (isDifferent(current.year, published.year)) changes.push('year');
+		if (isDifferent(current.language, published.language)) changes.push('language');
+		if (isDifferent(current.country, published.country)) changes.push('country');
+		if (isDifferent(current.lyrics, published.lyrics)) changes.push('lyrics');
+		if (isDifferent(current.timedLyrics, published.timedLyrics)) changes.push('timedLyrics');
+		if (isDifferent(current.artists, published.artists)) changes.push('artists');
 		return changes;
 	}
 
@@ -357,9 +325,7 @@
 											{/if}
 										</div>
 										<div class="text-red-400">
-											{#if change === 'file'}
-												<span class="text-xs italic">original</span>
-											{:else if change === 'artists'}
+											{#if change === 'artists'}
 												{(pubValue as ArtistRef[])?.map((a) => getArtistDisplayName(a)).join(', ') || '(none)'}
 											{:else if change === 'lyrics' || change === 'timedLyrics'}
 												<span class="text-xs">{pubValue ? `${String(pubValue).length} chars` : '(empty)'}</span>
@@ -370,9 +336,7 @@
 											{/if}
 										</div>
 										<div class="text-green-400">
-											{#if change === 'file'}
-												<span class="text-xs font-medium">replaced</span>
-											{:else if change === 'artists'}
+											{#if change === 'artists'}
 												{(curValue as ArtistRef[])?.map((a) => getArtistDisplayName(a)).join(', ') || '(none)'}
 											{:else if change === 'lyrics' || change === 'timedLyrics'}
 												<span class="text-xs">{curValue ? `${String(curValue).length} chars` : '(empty)'}</span>

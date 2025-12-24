@@ -30,6 +30,7 @@
 	const metadataFields = $derived([
 		{ key: 'title', label: 'Title', current: current.title, published: published.title },
 		{ key: 'release', label: 'Release Date', current: current.release, published: published.release },
+		{ key: 'artwork', label: 'Artwork', current: current.artwork, published: published.artwork },
 		{ key: 'language', label: 'Language', current: current.language, published: published.language },
 		{ key: 'primaryGenre', label: 'Primary Genre', current: current.primaryGenre, published: published.primaryGenre },
 		{ key: 'secondaryGenre', label: 'Secondary Genre', current: current.secondaryGenre, published: published.secondaryGenre },
@@ -155,6 +156,7 @@
 	function getSongChanges(current: Song, published: Song): string[] {
 		const changes: string[] = [];
 		if (current.title !== published.title) changes.push('title');
+		if (current.file !== published.file) changes.push('file');
 		if (current.isrc !== published.isrc) changes.push('isrc');
 		if (current.explicit !== published.explicit) changes.push('explicit');
 		if (current.instrumental !== published.instrumental) changes.push('instrumental');
@@ -228,10 +230,18 @@
 							<tr class="bg-orange-900/10">
 								<td class="px-3 py-2 text-gray-300 font-medium">{field.label}</td>
 								<td class="px-3 py-2">
-									<span class="text-red-400 line-through">{field.published || '(empty)'}</span>
+									{#if field.key === 'artwork'}
+										<span class="text-red-400 text-xs italic">original</span>
+									{:else}
+										<span class="text-red-400 line-through">{field.published || '(empty)'}</span>
+									{/if}
 								</td>
 								<td class="px-3 py-2">
-									<span class="text-green-400">{field.current || '(empty)'}</span>
+									{#if field.key === 'artwork'}
+										<span class="text-green-400 text-xs font-medium">replaced</span>
+									{:else}
+										<span class="text-green-400">{field.current || '(empty)'}</span>
+									{/if}
 								</td>
 							</tr>
 						{/each}
@@ -339,9 +349,17 @@
 									{@const pubValue = pubSong[change as keyof Song]}
 									{@const curValue = curSong[change as keyof Song]}
 									<div class="grid grid-cols-3 gap-2 text-sm">
-										<div class="text-gray-400 font-medium">{change}</div>
+										<div class="text-gray-400 font-medium">
+											{#if change === 'file'}
+												audio file
+											{:else}
+												{change}
+											{/if}
+										</div>
 										<div class="text-red-400">
-											{#if change === 'artists'}
+											{#if change === 'file'}
+												<span class="text-xs italic">original</span>
+											{:else if change === 'artists'}
 												{(pubValue as ArtistRef[])?.map((a) => getArtistDisplayName(a)).join(', ') || '(none)'}
 											{:else if change === 'lyrics' || change === 'timedLyrics'}
 												<span class="text-xs">{pubValue ? `${String(pubValue).length} chars` : '(empty)'}</span>
@@ -352,7 +370,9 @@
 											{/if}
 										</div>
 										<div class="text-green-400">
-											{#if change === 'artists'}
+											{#if change === 'file'}
+												<span class="text-xs font-medium">replaced</span>
+											{:else if change === 'artists'}
 												{(curValue as ArtistRef[])?.map((a) => getArtistDisplayName(a)).join(', ') || '(none)'}
 											{:else if change === 'lyrics' || change === 'timedLyrics'}
 												<span class="text-xs">{curValue ? `${String(curValue).length} chars` : '(empty)'}</span>

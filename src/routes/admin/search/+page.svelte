@@ -391,6 +391,13 @@
 						<div class="p-4 bg-gray-700/50 rounded-lg space-y-3">
 							<h3 class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">Wallet</h3>
 
+							<div class="p-3 bg-gray-800/50 rounded-lg mb-2">
+								<p class="text-xs text-gray-500 mb-1">Total Balance</p>
+								<p class="text-2xl font-bold text-white">
+									{formatCurrency(wallet.balance?.total || 0)}
+								</p>
+							</div>
+
 							<div class="grid grid-cols-2 gap-4">
 								<div>
 									<p class="text-xs text-gray-500">AmpSuite</p>

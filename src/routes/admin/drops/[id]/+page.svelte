@@ -282,6 +282,11 @@
 				const newDrops = response.data as AdminDrop[];
 				userDrops = offset === 0 ? newDrops : [...userDrops, ...newDrops];
 				hasMoreUserDrops = newDrops.length === 10;
+
+				// Get accountType from user's drops (all drops have the same user accountType)
+				if (drop && !drop.accountType && newDrops.length > 0) {
+					drop.accountType = newDrops[0].accountType;
+				}
 			}
 		} catch {
 			// Failed to load user drops

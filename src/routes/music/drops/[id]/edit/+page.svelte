@@ -168,7 +168,7 @@
 	);
 	// Secondary genre options for song modal
 	const tempSongSecondaryGenreOptions = $derived(getSecondaryGenres(tempSong.primaryGenre));
-	const canSubmitForReview = $derived(drop?.type === 'UNSUBMITTED');
+	const canSubmitForReview = $derived(drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE');
 	const canCancelReview = $derived(drop?.type === 'UNDER_REVIEW');
 	const canRequestTakedown = $derived(
 		drop?.type === 'PUBLISHED' || drop?.type === 'EDIT_UNDER_REVIEW',

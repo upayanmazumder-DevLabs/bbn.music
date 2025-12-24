@@ -9,75 +9,44 @@
 
 	let { value = $bindable(''), error = $bindable(''), disabled = false, id = '' } = $props();
 
-	let selectedCountry = $state<CountryCode>('US');
+	let selectedCountry = $state<CountryCode>('DE');
 	let phoneNumber = $state('');
 	let showCountryDropdown = $state(false);
 	let searchQuery = $state('');
-	let isValid = $state(true);
+	let highlightedIndex = $state(0);
+
+	let dropdownRef = $state<HTMLDivElement | null>(null);
+	let searchInputRef = $state<HTMLInputElement | null>(null);
+	let phoneInputRef = $state<HTMLInputElement | null>(null);
 
 	// Get all countries
 	const countries = getCountries();
 
-	// Country data with names
-	const countryData: Record<string, { name: string; flag: string }> = {
-		US: { name: 'United States', flag: '🇺🇸' },
-		GB: { name: 'United Kingdom', flag: '🇬🇧' },
-		CA: { name: 'Canada', flag: '🇨🇦' },
-		AU: { name: 'Australia', flag: '🇦🇺' },
-		DE: { name: 'Germany', flag: '🇩🇪' },
-		FR: { name: 'France', flag: '🇫🇷' },
-		IT: { name: 'Italy', flag: '🇮🇹' },
-		ES: { name: 'Spain', flag: '🇪🇸' },
-		NL: { name: 'Netherlands', flag: '🇳🇱' },
-		BE: { name: 'Belgium', flag: '🇧🇪' },
-		CH: { name: 'Switzerland', flag: '🇨🇭' },
-		AT: { name: 'Austria', flag: '🇦🇹' },
-		SE: { name: 'Sweden', flag: '🇸🇪' },
-		NO: { name: 'Norway', flag: '🇳🇴' },
-		DK: { name: 'Denmark', flag: '🇩🇰' },
-		FI: { name: 'Finland', flag: '🇫🇮' },
-		PL: { name: 'Poland', flag: '🇵🇱' },
-		CZ: { name: 'Czech Republic', flag: '🇨🇿' },
-		SK: { name: 'Slovakia', flag: '🇸🇰' },
-		HU: { name: 'Hungary', flag: '🇭🇺' },
-		RO: { name: 'Romania', flag: '🇷🇴' },
-		BG: { name: 'Bulgaria', flag: '🇧🇬' },
-		GR: { name: 'Greece', flag: '🇬🇷' },
-		PT: { name: 'Portugal', flag: '🇵🇹' },
-		IE: { name: 'Ireland', flag: '🇮🇪' },
-		JP: { name: 'Japan', flag: '🇯🇵' },
-		CN: { name: 'China', flag: '🇨🇳' },
-		KR: { name: 'South Korea', flag: '🇰🇷' },
-		IN: { name: 'India', flag: '🇮🇳' },
-		BR: { name: 'Brazil', flag: '🇧🇷' },
-		MX: { name: 'Mexico', flag: '🇲🇽' },
-		AR: { name: 'Argentina', flag: '🇦🇷' },
-		ZA: { name: 'South Africa', flag: '🇿🇦' },
-		NZ: { name: 'New Zealand', flag: '🇳🇿' },
-		SG: { name: 'Singapore', flag: '🇸🇬' },
-		HK: { name: 'Hong Kong', flag: '🇭🇰' },
-		TW: { name: 'Taiwan', flag: '🇹🇼' },
-		TH: { name: 'Thailand', flag: '🇹🇭' },
-		MY: { name: 'Malaysia', flag: '🇲🇾' },
-		PH: { name: 'Philippines', flag: '🇵🇭' },
-		ID: { name: 'Indonesia', flag: '🇮🇩' },
-		VN: { name: 'Vietnam', flag: '🇻🇳' },
-		AE: { name: 'UAE', flag: '🇦🇪' },
-		SA: { name: 'Saudi Arabia', flag: '🇸🇦' },
-		IL: { name: 'Israel', flag: '🇮🇱' },
-		TR: { name: 'Turkey', flag: '🇹🇷' },
-		RU: { name: 'Russia', flag: '🇷🇺' },
-		UA: { name: 'Ukraine', flag: '🇺🇦' },
-	};
+	// Country names using Intl API (covers all countries)
+	const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
+
+	function getCountryName(code: CountryCode): string {
+		try {
+			return regionNames.of(code) || code;
+		} catch {
+			return code;
+		}
+	}
+
+	// Country flag from code (works for all countries)
+	function getCountryFlag(code: CountryCode): string {
+		const codePoints = [...code.toUpperCase()].map((c) => 0x1f1e6 - 65 + c.charCodeAt(0));
+		return String.fromCodePoint(...codePoints);
+	}
 
 	// Filtered countries based on search
 	const filteredCountries = $derived.by(() => {
 		if (!searchQuery) return countries;
 		const query = searchQuery.toLowerCase();
 		return countries.filter((code) => {
-			const data = countryData[code];
+			const name = getCountryName(code);
 			return (
-				data?.name.toLowerCase().includes(query) ||
+				name.toLowerCase().includes(query) ||
 				code.toLowerCase().includes(query) ||
 				`+${getCountryCallingCode(code)}`.includes(query)
 			);
@@ -87,45 +56,54 @@
 	// Get calling code for selected country
 	const callingCode = $derived(`+${getCountryCallingCode(selectedCountry)}`);
 
-	// Parse the initial value if provided
+	// Track if we've initialized from value
+	let initialized = false;
+
+	// Parse the initial value and sync with external changes
 	$effect(() => {
-		if (value && !phoneNumber) {
+		if (value) {
+			// Only parse if value changed externally (not from our own updates)
+			const normalizedValue = value.startsWith('+') ? value : `+${value}`;
 			try {
-				// Add + prefix if missing for proper parsing
-				const normalizedValue = value.startsWith('+') ? value : `+${value}`;
 				const parsed = parsePhoneNumber(normalizedValue);
 				if (parsed) {
-					selectedCountry = parsed.country || 'US';
-					phoneNumber = parsed.nationalNumber;
+					const newCountry = parsed.country || selectedCountry;
+					const newNational = parsed.nationalNumber;
+
+					// Only update if different to avoid loops
+					if (!initialized || newCountry !== selectedCountry || newNational !== phoneNumber.replace(/\D/g, '')) {
+						selectedCountry = newCountry;
+						// Format the national number
+						const formatter = new AsYouType(newCountry);
+						phoneNumber = formatter.input(newNational);
+						initialized = true;
+					}
 				}
 			} catch {
-				// If parsing fails, use the raw value
-				phoneNumber = value;
+				// If parsing fails and not initialized, use raw value
+				if (!initialized) {
+					phoneNumber = value.replace(/^\+\d+/, '').trim();
+					initialized = true;
+				}
 			}
+		} else if (initialized && !value) {
+			// Value was cleared externally
+			phoneNumber = '';
 		}
 	});
 
 	// Format and validate phone number as user types
 	function handleInput(e: Event) {
 		const input = e.target as HTMLInputElement;
-		let rawValue = input.value;
-		const cursorPosition = input.selectionStart || 0;
+		const rawValue = input.value;
 
-		// Handle empty input - clear everything
+		// Handle empty input
 		if (!rawValue || rawValue.trim() === '') {
 			phoneNumber = '';
 			value = '';
 			error = '';
-			isValid = true;
 			return;
 		}
-
-		// Strip any leading + or country code that user might type
-		// We only want the national number in the input field
-		rawValue = rawValue
-			.replace(/^\+/, '')
-			.replace(new RegExp(`^${getCountryCallingCode(selectedCountry)}`), '')
-			.trim();
 
 		// Remove all non-digit characters for processing
 		const digitsOnly = rawValue.replace(/\D/g, '');
@@ -135,39 +113,21 @@
 			phoneNumber = '';
 			value = '';
 			error = '';
-			isValid = true;
 			return;
 		}
 
-		// Count digits before cursor for cursor position restoration
-		const textBeforeCursor = rawValue.substring(0, cursorPosition);
-		const digitsBeforeCursor = textBeforeCursor.replace(/\D/g, '').length;
-
-		// Use AsYouType for formatting national number only
+		// Use AsYouType for formatting
 		const formatter = new AsYouType(selectedCountry);
 		const formatted = formatter.input(digitsOnly);
 
-		// Remove country code from formatted output if present
-		const nationalFormatted = formatted.replace(callingCode, '').trim();
+		// The formatter may include country code, remove it for display
+		let nationalFormatted = formatted;
+		if (formatted.startsWith(callingCode)) {
+			nationalFormatted = formatted.slice(callingCode.length).trim();
+		}
 
 		// Update the display value
 		phoneNumber = nationalFormatted;
-
-		// Calculate new cursor position
-		// Find position where we have the same number of digits
-		let newCursorPosition = 0;
-		let digitCount = 0;
-		for (let i = 0; i < nationalFormatted.length && digitCount < digitsBeforeCursor; i++) {
-			if (/\d/.test(nationalFormatted[i])) {
-				digitCount++;
-			}
-			newCursorPosition = i + 1;
-		}
-
-		// Restore cursor position after Svelte updates the DOM
-		setTimeout(() => {
-			input.setSelectionRange(newCursorPosition, newCursorPosition);
-		}, 0);
 
 		// Validate and set the full international format
 		try {
@@ -175,16 +135,13 @@
 			if (parsed && parsed.isValid()) {
 				value = parsed.number;
 				error = '';
-				isValid = true;
 			} else {
 				value = `${callingCode}${digitsOnly}`;
 				error = 'Invalid phone number';
-				isValid = false;
 			}
 		} catch {
 			value = `${callingCode}${digitsOnly}`;
 			error = 'Invalid phone number';
-			isValid = false;
 		}
 	}
 
@@ -193,44 +150,107 @@
 		selectedCountry = code;
 		showCountryDropdown = false;
 		searchQuery = '';
+		highlightedIndex = 0;
+
+		// Focus back to phone input
+		phoneInputRef?.focus();
 
 		// Re-validate with new country
 		if (phoneNumber) {
-			try {
-				const parsed = parsePhoneNumber(phoneNumber, selectedCountry);
-				if (parsed && parsed.isValid()) {
-					value = parsed.number;
-					error = '';
-					isValid = true;
-				} else {
+			const digitsOnly = phoneNumber.replace(/\D/g, '');
+			if (digitsOnly) {
+				try {
+					const parsed = parsePhoneNumber(digitsOnly, selectedCountry);
+					if (parsed && parsed.isValid()) {
+						value = parsed.number;
+						error = '';
+					} else {
+						value = `+${getCountryCallingCode(selectedCountry)}${digitsOnly}`;
+						error = 'Invalid phone number for selected country';
+					}
+				} catch {
+					value = `+${getCountryCallingCode(selectedCountry)}${digitsOnly}`;
 					error = 'Invalid phone number for selected country';
-					isValid = false;
 				}
-			} catch {
-				error = 'Invalid phone number for selected country';
-				isValid = false;
 			}
 		}
+	}
+
+	// Open dropdown and focus search
+	function openDropdown() {
+		if (disabled) return;
+		showCountryDropdown = true;
+		highlightedIndex = filteredCountries.indexOf(selectedCountry);
+		if (highlightedIndex === -1) highlightedIndex = 0;
+
+		// Focus search input after dropdown opens
+		requestAnimationFrame(() => {
+			searchInputRef?.focus();
+		});
+	}
+
+	// Close dropdown
+	function closeDropdown() {
+		showCountryDropdown = false;
+		searchQuery = '';
+		highlightedIndex = 0;
+	}
+
+	// Handle keyboard navigation in dropdown
+	function handleDropdownKeydown(e: KeyboardEvent) {
+		const list = filteredCountries;
+		if (!list.length) return;
+
+		switch (e.key) {
+			case 'ArrowDown':
+				e.preventDefault();
+				highlightedIndex = (highlightedIndex + 1) % list.length;
+				scrollToHighlighted();
+				break;
+			case 'ArrowUp':
+				e.preventDefault();
+				highlightedIndex = (highlightedIndex - 1 + list.length) % list.length;
+				scrollToHighlighted();
+				break;
+			case 'Enter':
+				e.preventDefault();
+				if (list[highlightedIndex]) {
+					selectCountry(list[highlightedIndex]);
+				}
+				break;
+			case 'Escape':
+				e.preventDefault();
+				closeDropdown();
+				phoneInputRef?.focus();
+				break;
+			case 'Tab':
+				closeDropdown();
+				break;
+		}
+	}
+
+	// Scroll highlighted item into view
+	function scrollToHighlighted() {
+		requestAnimationFrame(() => {
+			const highlighted = dropdownRef?.querySelector('[data-highlighted="true"]');
+			highlighted?.scrollIntoView({ block: 'nearest' });
+		});
 	}
 
 	// Handle click outside to close dropdown
 	function handleClickOutside(event: MouseEvent) {
 		const target = event.target as HTMLElement;
-		if (!target.closest('[data-phone-input]')) {
-			showCountryDropdown = false;
-			searchQuery = '';
+		if (showCountryDropdown && !target.closest('[data-phone-input]')) {
+			closeDropdown();
 		}
 	}
 
-	// Get country name
-	function getCountryName(code: CountryCode): string {
-		return countryData[code]?.name || code;
-	}
-
-	// Get country flag
-	function getCountryFlag(code: CountryCode): string {
-		return countryData[code]?.flag || '🏳️';
-	}
+	// Reset highlighted index when search changes
+	$effect(() => {
+		if (searchQuery !== undefined) {
+			highlightedIndex = 0;
+		}
+	});
 </script>
 
 <svelte:window onclick={handleClickOutside} />
@@ -241,13 +261,21 @@
 		<div class="relative">
 			<button
 				type="button"
-				onclick={() => (showCountryDropdown = !showCountryDropdown)}
+				onclick={openDropdown}
 				{disabled}
+				aria-haspopup="listbox"
+				aria-expanded={showCountryDropdown}
+				aria-label="Select country code"
 				class="h-full px-3 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white hover:bg-white/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 min-w-[100px]"
 			>
 				<span class="text-xl">{getCountryFlag(selectedCountry)}</span>
 				<span class="text-sm">{callingCode}</span>
-				<svg class="w-4 h-4 ml-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+				<svg
+					class="w-4 h-4 ml-auto transition-transform {showCountryDropdown ? 'rotate-180' : ''}"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+				>
 					<path
 						stroke-linecap="round"
 						stroke-linejoin="round"
@@ -260,37 +288,40 @@
 			<!-- Country Dropdown -->
 			{#if showCountryDropdown}
 				<div
+					bind:this={dropdownRef}
 					class="absolute top-full left-0 mt-2 w-80 max-h-96 overflow-auto bg-gray-800 rounded-lg shadow-xl border border-gray-700 z-50"
-					role="menu"
+					role="listbox"
+					aria-label="Countries"
 					tabindex="-1"
-					onclick={(e) => e.stopPropagation()}
-					onkeydown={(e) => {
-						if (e.key === 'Escape') {
-							showCountryDropdown = false;
-							searchQuery = '';
-						}
-					}}
+					onkeydown={handleDropdownKeydown}
 				>
 					<!-- Search -->
 					<div class="sticky top-0 p-3 bg-gray-800 border-b border-gray-700">
 						<input
+							bind:this={searchInputRef}
 							type="text"
 							bind:value={searchQuery}
 							placeholder="Search countries..."
+							aria-label="Search countries"
 							class="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none text-sm"
 						/>
 					</div>
 
 					<!-- Country List -->
 					<div class="py-1">
-						{#each filteredCountries as country}
+						{#each filteredCountries as country, index}
+							{@const isHighlighted = index === highlightedIndex}
+							{@const isSelected = country === selectedCountry}
 							<button
 								type="button"
+								role="option"
+								aria-selected={isSelected}
+								data-highlighted={isHighlighted}
 								onclick={() => selectCountry(country)}
-								class="w-full px-4 py-2 flex items-center gap-3 hover:bg-white/10 transition-colors text-left {country ===
-								selectedCountry
-									? 'bg-orange-500/20 text-orange-400'
-									: 'text-white'}"
+								onmouseenter={() => (highlightedIndex = index)}
+								class="w-full px-4 py-2 flex items-center gap-3 transition-colors text-left
+									{isHighlighted ? 'bg-white/10' : ''}
+									{isSelected ? 'text-orange-400' : 'text-white'}"
 							>
 								<span class="text-xl">{getCountryFlag(country)}</span>
 								<span class="flex-1 text-sm">{getCountryName(country)}</span>
@@ -306,20 +337,22 @@
 
 		<!-- Phone Number Input -->
 		<input
+			bind:this={phoneInputRef}
 			type="tel"
 			{id}
 			value={phoneNumber}
 			oninput={handleInput}
 			{disabled}
 			placeholder="Phone number"
-			class="flex-1 px-4 py-2.5 rounded-lg bg-white/5 border text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed {isValid
-				? 'border-white/10'
-				: 'border-red-500/50'}"
+			aria-invalid={!!error}
+			aria-describedby={error ? `${id}-error` : undefined}
+			class="flex-1 px-4 py-2.5 rounded-lg bg-white/5 border text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-colors disabled:opacity-50 disabled:cursor-not-allowed
+				{error ? 'border-red-500/50' : 'border-white/10'}"
 		/>
 	</div>
 
 	{#if error}
-		<p class="text-xs text-red-400 mt-1">{error}</p>
+		<p id="{id}-error" class="text-xs text-red-400 mt-1" role="alert">{error}</p>
 	{/if}
 </div>
 

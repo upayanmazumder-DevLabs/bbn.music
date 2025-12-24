@@ -22,7 +22,7 @@
 	} from 'flowbite-svelte-icons';
 
 	// Shared UI components
-	import { Button, Input, Select, Textarea, Card, Badge, Toggle, Alert } from '$lib/components/ui';
+	import { Button, Input, Select, SearchableSelect, Textarea, Card, Badge, Toggle, Alert } from '$lib/components/ui';
 	import ArtistModal from '$lib/components/ArtistModal.svelte';
 	import ArtistList from '$lib/components/ArtistList.svelte';
 
@@ -223,6 +223,16 @@
 	// Derived values
 	const secondaryGenreOptions = $derived(getSecondaryGenres(formState.primaryGenre));
 
+	// Options for searchable selects
+	const primaryGenreOptions = primaryGenres.map((g) => ({ value: g, label: g }));
+	const secondaryGenreSelectOptions = $derived(
+		secondaryGenreOptions.map((g) => ({ value: g, label: g }))
+	);
+	const languageOptions = Object.entries(languages).map(([code, name]) => ({
+		value: code,
+		label: name,
+	}));
+
 	// Modals
 	let showArtistModal = $state(false);
 	let showSongModal = $state(false);
@@ -251,6 +261,13 @@
 		year: undefined,
 		language: undefined,
 	});
+
+	// Song secondary genre options (derived from tempSong.primaryGenre)
+	const songSecondaryGenreOptions = $derived(
+		tempSong.primaryGenre
+			? getSecondaryGenres(tempSong.primaryGenre).map((g) => ({ value: g, label: g }))
+			: []
+	);
 
 	// Track previous values to prevent infinite loops
 	let prevExplicit = $state(false);
@@ -1029,41 +1046,33 @@
 						</div>
 
 						<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-							<Select
+							<SearchableSelect
 								bind:value={formState.primaryGenre}
+								options={primaryGenreOptions}
 								label="Primary Genre"
+								placeholder="Select genre..."
 								required
 								error={formState.errors['primaryGenre']}
-							>
-								<option value="">Select genre...</option>
-								{#each primaryGenres as genre}
-									<option value={genre}>{genre}</option>
-								{/each}
-							</Select>
+							/>
 
-							<Select
+							<SearchableSelect
 								bind:value={formState.secondaryGenre}
+								options={secondaryGenreSelectOptions}
 								label="Sub-genre"
+								placeholder="Select sub-genre..."
 								required
 								disabled={!formState.primaryGenre}
 								error={formState.errors['secondaryGenre']}
-							>
-								<option value="">Select sub-genre...</option>
-								{#each secondaryGenreOptions as genre}
-									<option value={genre}>{genre}</option>
-								{/each}
-							</Select>
+							/>
 
-							<Select
+							<SearchableSelect
 								bind:value={formState.language}
+								options={languageOptions}
 								label="Language"
+								placeholder="Select language..."
 								required
 								error={formState.errors['language']}
-							>
-								{#each Object.entries(languages) as [code, name]}
-									<option value={code}>{name}</option>
-								{/each}
-							</Select>
+							/>
 						</div>
 					</div>
 
@@ -1612,24 +1621,20 @@
 
 				<!-- Genres in two columns -->
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<Select bind:value={tempSong.primaryGenre} label="Primary Genre" required>
-						<option value="">Select primary genre...</option>
-						{#each primaryGenres as genre}
-							<option value={genre}>{genre}</option>
-						{/each}
-					</Select>
-					<Select
+					<SearchableSelect
+						bind:value={tempSong.primaryGenre}
+						options={primaryGenreOptions}
+						label="Primary Genre"
+						placeholder="Select primary genre..."
+						required
+					/>
+					<SearchableSelect
 						bind:value={tempSong.secondaryGenre}
+						options={songSecondaryGenreOptions}
 						label="Secondary Genre"
+						placeholder="Select secondary genre..."
 						disabled={!tempSong.primaryGenre}
-					>
-						<option value="">Select secondary genre...</option>
-						{#if tempSong.primaryGenre}
-							{#each getSecondaryGenres(tempSong.primaryGenre) as genre}
-								<option value={genre}>{genre}</option>
-							{/each}
-						{/if}
-					</Select>
+					/>
 				</div>
 
 				<!-- Flags - Side by side -->
@@ -1699,15 +1704,13 @@
 						placeholder="YYYY"
 						hint="Year when this song was originally recorded"
 					/>
-					<Select
+					<SearchableSelect
 						bind:value={tempSong.language}
+						options={languageOptions}
 						label="Language"
+						placeholder="Select language..."
 						hint="Language of the song (defaults to drop language)"
-					>
-						{#each Object.entries(languages) as [code, name]}
-							<option value={code}>{name}</option>
-						{/each}
-					</Select>
+					/>
 				</div>
 				<Input
 					bind:value={tempSong.isrc}

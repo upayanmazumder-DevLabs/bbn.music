@@ -10,6 +10,7 @@ export { default as Heading } from './Heading.svelte';
 export { default as IconButton } from './IconButton.svelte';
 export { default as Input } from './Input.svelte';
 export { default as Modal } from './Modal.svelte';
+export { default as SearchableSelect } from './SearchableSelect.svelte';
 export { default as Select } from './Select.svelte';
 export { default as Spinner } from './Spinner.svelte';
 export { default as Textarea } from './Textarea.svelte';

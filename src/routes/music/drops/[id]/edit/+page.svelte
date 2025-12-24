@@ -22,6 +22,7 @@
 		Button,
 		Input,
 		Select,
+		SearchableSelect,
 		Textarea,
 		Card,
 		Badge,
@@ -150,6 +151,16 @@
 
 	// Derived values
 	const secondaryGenreOptions = $derived(getSecondaryGenres(primaryGenre));
+
+	// Options for searchable selects
+	const primaryGenreOptions = primaryGenres.map((g) => ({ value: g, label: g }));
+	const secondaryGenreSelectOptions = $derived(
+		secondaryGenreOptions.map((g) => ({ value: g, label: g }))
+	);
+	const languageOptions = Object.entries(languages).map(([code, name]) => ({
+		value: code,
+		label: name,
+	}));
 	const isAdmin = $derived($auth.user?.isAdmin ?? false);
 	// Admins can edit any drop, users can only edit certain statuses
 	const isEditable = $derived(
@@ -167,7 +178,9 @@
 		isAdmin || (isEditable && (drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE')),
 	);
 	// Secondary genre options for song modal
-	const tempSongSecondaryGenreOptions = $derived(getSecondaryGenres(tempSong.primaryGenre));
+	const tempSongSecondaryGenreOptions = $derived(
+		getSecondaryGenres(tempSong.primaryGenre).map((g) => ({ value: g, label: g }))
+	);
 	const canSubmitForReview = $derived(drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE');
 	const canCancelReview = $derived(drop?.type === 'UNDER_REVIEW');
 	const canRequestTakedown = $derived(
@@ -939,40 +952,32 @@
 						</div>
 
 						<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-							<Select
+							<SearchableSelect
 								bind:value={primaryGenre}
+								options={primaryGenreOptions}
 								label="Primary Genre"
+								placeholder="Select genre..."
 								disabled={!isEditable}
 								onchange={markChanged}
-							>
-								<option value="">Select genre...</option>
-								{#each primaryGenres as genre}
-									<option value={genre}>{genre}</option>
-								{/each}
-							</Select>
+							/>
 
-							<Select
+							<SearchableSelect
 								bind:value={secondaryGenre}
+								options={secondaryGenreSelectOptions}
 								label="Sub-genre"
+								placeholder="Select sub-genre..."
 								disabled={!isEditable || !primaryGenre}
 								onchange={markChanged}
-							>
-								<option value="">Select sub-genre...</option>
-								{#each secondaryGenreOptions as genre}
-									<option value={genre}>{genre}</option>
-								{/each}
-							</Select>
+							/>
 
-							<Select
+							<SearchableSelect
 								bind:value={language}
+								options={languageOptions}
 								label="Language"
+								placeholder="Select language..."
 								disabled={!isEditable}
 								onchange={markChanged}
-							>
-								{#each Object.entries(languages) as [code, name]}
-									<option value={code}>{name}</option>
-								{/each}
-							</Select>
+							/>
 						</div>
 
 						<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1291,25 +1296,21 @@
 
 		<!-- Genre Section -->
 		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-			<Select bind:value={tempSong.primaryGenre} label="Primary Genre" disabled={!isEditable}>
-				<option value="">Select primary genre...</option>
-				{#each primaryGenres as genre}
-					<option value={genre}>{genre}</option>
-				{/each}
-			</Select>
+			<SearchableSelect
+				bind:value={tempSong.primaryGenre}
+				options={primaryGenreOptions}
+				label="Primary Genre"
+				placeholder="Select primary genre..."
+				disabled={!isEditable}
+			/>
 
-			<Select
+			<SearchableSelect
 				bind:value={tempSong.secondaryGenre}
+				options={tempSongSecondaryGenreOptions}
 				label="Secondary Genre"
+				placeholder="Select secondary genre..."
 				disabled={!isEditable || !tempSong.primaryGenre}
-			>
-				<option value="">Select secondary genre...</option>
-				{#if tempSong.primaryGenre}
-					{#each tempSongSecondaryGenreOptions as genre}
-						<option value={genre}>{genre}</option>
-					{/each}
-				{/if}
-			</Select>
+			/>
 		</div>
 
 		<!-- Content Flags -->
@@ -1358,17 +1359,14 @@
 						hint="Year when this song was originally recorded"
 						disabled={!isEditable}
 					/>
-					<Select
+					<SearchableSelect
 						bind:value={tempSong.language}
+						options={[{ value: '', label: 'Use drop language' }, ...languageOptions]}
 						label="Language"
+						placeholder="Select language..."
 						hint="Language of the song (defaults to drop language)"
 						disabled={!isEditable}
-					>
-						<option value="">Use drop language</option>
-						{#each Object.entries(languages) as [code, name]}
-							<option value={code}>{name}</option>
-						{/each}
-					</Select>
+					/>
 				</div>
 				<Input
 					bind:value={tempSong.isrc}

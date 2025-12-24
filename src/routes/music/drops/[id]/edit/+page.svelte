@@ -175,6 +175,13 @@
 	);
 	const canCancelTakedown = $derived(drop?.type === 'TAKEDOWN_REQUESTED');
 	const canCancelEditReview = $derived(drop?.type === 'EDIT_UNDER_REVIEW');
+	// Songs can only be deleted on non-published drops
+	const canDeleteSongs = $derived(
+		isEditable &&
+			drop?.type !== 'PUBLISHED' &&
+			drop?.type !== 'EDIT_UNDER_REVIEW' &&
+			drop?.type !== 'TAKEDOWN_REQUESTED',
+	);
 
 	onMount(async () => {
 		await loadDrop();
@@ -422,6 +429,11 @@
 	}
 
 	function requestStatusChange(newType: DropType) {
+		// Validate at least one song exists before submitting for review
+		if (newType === 'UNDER_REVIEW' && songs.length === 0) {
+			toast.show('You must have at least one song before submitting for review', 'error');
+			return;
+		}
 		pendingStatusChange = newType;
 		showStatusChangeModal = true;
 	}
@@ -569,6 +581,11 @@
 
 	function removeSongArtist(index: number) {
 		tempSong.artists = tempSong.artists.filter((_, i) => i !== index);
+	}
+
+	function deleteSong(index: number) {
+		songs = songs.filter((_, i) => i !== index);
+		markChanged();
 	}
 
 	function handleSongFileUpload(event: Event) {
@@ -1046,6 +1063,15 @@
 											aria-label="Edit song"
 										>
 											<EditOutline class="w-4 h-4" />
+										</IconButton>
+									{/if}
+									{#if canDeleteSongs && songs.length > 1}
+										<IconButton
+											onclick={() => deleteSong(index)}
+											class="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300"
+											aria-label="Delete song"
+										>
+											<TrashBinOutline class="w-4 h-4" />
 										</IconButton>
 									{/if}
 								</div>

@@ -826,6 +826,12 @@
 	async function submitDrop() {
 		if (!validateStep(3)) return;
 
+		// Validate at least one song exists
+		if (formState.songs.length === 0) {
+			toast.show('You must have at least one song before submitting for review', 'error');
+			return;
+		}
+
 		formState.isLoading = true;
 
 		try {

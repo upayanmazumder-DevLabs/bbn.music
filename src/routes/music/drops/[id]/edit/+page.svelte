@@ -190,6 +190,8 @@
 	async function loadDrop() {
 		loading = true;
 		error = null;
+		hasChanges = false;
+		songFileUpdates = {};
 		try {
 			// Check if user is admin to determine which endpoint to use
 			const userIsAdmin = $auth.user?.isAdmin ?? false;
@@ -377,6 +379,13 @@
 
 	async function saveDrop() {
 		if (!drop || !isEditable) return;
+
+		// Validate at least one song exists before saving
+		if (songs.length === 0) {
+			toast.show('You must have at least one song before saving', 'error');
+			return;
+		}
+
 		saving = true;
 		error = null;
 		successMessage = null;
@@ -1065,7 +1074,7 @@
 											<EditOutline class="w-4 h-4" />
 										</IconButton>
 									{/if}
-									{#if canDeleteSongs && songs.length > 1}
+									{#if canDeleteSongs}
 										<IconButton
 											onclick={() => deleteSong(index)}
 											class="opacity-0 group-hover:opacity-100 transition-opacity text-red-400 hover:text-red-300"
@@ -1151,15 +1160,20 @@
 
 				<!-- Save Button -->
 				{#if isEditable}
-					<div class="flex justify-end gap-3">
-						{#if hasChanges}
-							<Button variant="secondary" onclick={loadDrop} disabled={saving}>
-								Discard Changes
-							</Button>
+					<div class="flex flex-col items-end gap-3">
+						{#if songs.length === 0}
+							<p class="text-sm text-red-400">Add at least one song before saving</p>
 						{/if}
-						<Button onclick={saveDrop} disabled={saving || !hasChanges} loading={saving}>
-							{saving ? 'Saving...' : 'Save Changes'}
-						</Button>
+						<div class="flex gap-3">
+							{#if hasChanges}
+								<Button variant="secondary" onclick={loadDrop} disabled={saving}>
+									Discard Changes
+								</Button>
+							{/if}
+							<Button onclick={saveDrop} disabled={saving || !hasChanges || songs.length === 0} loading={saving}>
+								{saving ? 'Saving...' : 'Save Changes'}
+							</Button>
+						</div>
 					</div>
 				{/if}
 			</div>

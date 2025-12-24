@@ -47,11 +47,3 @@ export function trackPageView(url: string): void {
 		$current_url: url,
 	});
 }
-
-export function trackEvent(eventName: string, properties?: Record<string, unknown>): void {
-	if (!browser || !initialized) return;
-
-	posthog.capture(eventName, properties);
-}
-
-export { posthog };

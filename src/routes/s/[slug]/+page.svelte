@@ -57,8 +57,7 @@
 			}
 
 			loading = false;
-		} catch (e) {
-			console.error('Failed to load share page:', e);
+		} catch {
 			error = true;
 			setTimeout(() => goto('/'), 2000);
 		}

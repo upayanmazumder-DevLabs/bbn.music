@@ -36,7 +36,6 @@
 			}
 		} catch (err: unknown) {
 			error = extractErrorMessage(err, 'Failed to load earnings');
-			console.error('Error loading earnings:', err);
 		} finally {
 			isLoading = false;
 		}

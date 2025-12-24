@@ -91,8 +91,8 @@
 			if (response.data) {
 				selectedConversation = response.data as ConversationDetail;
 			}
-		} catch (e: any) {
-			console.error('Failed to load conversation:', e);
+		} catch {
+			// Failed to load conversation details
 		} finally {
 			loadingConversation = false;
 		}
@@ -115,8 +115,8 @@
 			// Reload conversation to get the new message
 			await selectConversation(selectedConversation);
 			newMessage = '';
-		} catch (e: any) {
-			console.error('Failed to send message:', e);
+		} catch {
+			// Failed to send message - UI will show stale state
 		} finally {
 			sendingMessage = false;
 		}

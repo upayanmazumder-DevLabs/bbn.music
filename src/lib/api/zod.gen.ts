@@ -613,46 +613,34 @@ export const zSingleAdminDrop = z.object({
 	publishedSnapshot: z.optional(z.union([zFullDrop, z.null()])),
 });
 
-export const zAdminWallet = z
-	.object({
-		_id: z.string(),
-		transactions: z.array(
-			z.object({
-				amount: z.number(),
-				timestamp: z.string(),
-				type: zPaymentType,
-				description: z.string(),
-				counterParty: z.string(),
-			}),
-		),
-		cut: z.number(),
-		user: z.string(),
-		userName: z.optional(z.string()),
-		email: z.optional(z.string()),
-		balance: z.optional(
-			z.object({
-				restrained: z.number(),
-				unrestrained: z.number(),
-			}),
-		),
-		stripeAccountId: z.optional(z.string()),
-		accountType: zAccountType,
-		copyrightEditable: z.boolean(),
-	})
-	.and(
+export const zAdminWallet = z.object({
+	_id: z.string(),
+	transactions: z.array(
 		z.object({
-			email: z
-				.email()
-				.regex(
-					/^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/,
-				),
-			userName: z.string(),
-			balance: z.object({
-				ampsuite: z.number(),
-				symphonic: z.number(),
-			}),
+			amount: z.number(),
+			timestamp: z.string(),
+			type: zPaymentType,
+			description: z.string(),
+			counterParty: z.string(),
 		}),
-	);
+	),
+	cut: z.number(),
+	user: z.string(),
+	userName: z.string(),
+	email: z
+		.email()
+		.regex(
+			/^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/,
+		),
+	stripeAccountId: z.optional(z.string()),
+	accountType: zAccountType,
+	copyrightEditable: z.boolean(),
+	balance: z.object({
+		ampsuite: z.number(),
+		symphonic: z.number(),
+		total: z.number(),
+	}),
+});
 
 export const zSearchReturn = z.intersection(
 	z.union([

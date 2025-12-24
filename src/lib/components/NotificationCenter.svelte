@@ -44,7 +44,6 @@
 				unreadCount = notifications.filter((n) => !n.read).length;
 			}
 		} catch (e: any) {
-			console.error('Failed to load notifications:', e);
 			error = e?.message || 'Failed to load notifications';
 		} finally {
 			loading = false;
@@ -77,11 +76,10 @@
 					body: { read: true },
 					headers: getAuthHeaders(),
 				});
-			} catch (e) {
+			} catch {
 				// Revert on error
 				notification.read = false;
 				unreadCount++;
-				console.error('Failed to mark notification as read:', e);
 			}
 		}
 	}
@@ -96,14 +94,13 @@
 			await putReadAllByNotificationsByMessaging({
 				headers: getAuthHeaders(),
 			});
-		} catch (e) {
+		} catch {
 			// Revert on error
 			previousStates.forEach((state) => {
 				const notification = notifications.find((n) => n._id === state.id);
 				if (notification) notification.read = state.read;
 			});
 			unreadCount = notifications.filter((n) => !n.read).length;
-			console.error('Failed to mark all notifications as read:', e);
 		}
 	}
 

@@ -24,6 +24,7 @@
 		PlusOutline,
 	} from 'flowbite-svelte-icons';
 	import { formatCurrency } from '$lib/utils/formatCurrency';
+	import { toast } from '$lib/stores/toast';
 	import type { PaymentType } from '$lib/api/types.gen';
 
 	// Type helpers for narrowing SearchReturn discriminated union
@@ -104,8 +105,8 @@
 			}
 
 			resetTransactionForm();
-		} catch (e) {
-			console.error('Failed to add transaction:', e);
+		} catch {
+			toast.show('Failed to add transaction', 'error');
 		} finally {
 			txSubmitting = false;
 		}
@@ -118,6 +119,7 @@
 		selectedItem = null;
 		selectedType = '';
 		wallet = null;
+		userDrops = [];
 
 		try {
 			const response = await getQueryBySearchByAdmin({
@@ -129,8 +131,8 @@
 				// Filter out wallet results - wallet info is shown in user profile
 				results = (response.data as SearchReturn[]).filter((r) => r._index !== 'wallets');
 			}
-		} catch (e) {
-			console.error('Search failed:', e);
+		} catch {
+			toast.show('Search failed', 'error');
 		} finally {
 			loading = false;
 		}
@@ -175,9 +177,10 @@
 					userDrops = dropsResponse.data as AdminDrop[];
 				}
 			}
-		} catch (e) {
+		} catch {
 			wallet = null;
 			userDrops = [];
+			toast.show('Failed to load user details', 'error');
 		} finally {
 			loadingDetails = false;
 		}
@@ -205,8 +208,8 @@
 			if (response.data) {
 				wallet = response.data as AdminWallet;
 			}
-		} catch (e) {
-			console.error('Failed to update wallet:', e);
+		} catch {
+			toast.show('Failed to update wallet', 'error');
 		}
 	}
 

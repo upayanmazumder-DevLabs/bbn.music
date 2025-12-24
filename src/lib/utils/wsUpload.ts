@@ -38,7 +38,6 @@ export async function uploadViaWebSocket(options: WsUploadOptions): Promise<stri
 
 		ws.onmessage = async ({ data }) => {
 			if (data.startsWith('failed')) {
-				console.error('Upload failed:', data);
 				ws.close();
 				reject(new Error(data));
 			} else if (data === 'file') {

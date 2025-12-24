@@ -36,8 +36,8 @@
 			if (response.data) {
 				allArtists = response.data as Artist[];
 			}
-		} catch (err) {
-			console.error('Failed to load artists:', err);
+		} catch {
+			// Failed to load artists - search will show empty results
 		}
 	});
 

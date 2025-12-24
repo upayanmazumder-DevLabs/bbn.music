@@ -30,7 +30,6 @@
 
 			success = true;
 		} catch (err: any) {
-			console.error('Password reset error:', err);
 			error =
 				err?.error?.message || err?.message || 'Failed to send reset email. Please try again.';
 		}

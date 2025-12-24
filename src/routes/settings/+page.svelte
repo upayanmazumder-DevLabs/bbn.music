@@ -18,6 +18,7 @@
 	import { onMount } from 'svelte';
 	import PhoneInput from '$lib/components/PhoneInput.svelte';
 	import { avatarStore } from '$lib/stores/avatar.svelte';
+	import { toast } from '$lib/stores/toast';
 
 	let name = $state($auth.user?.profile.username || '');
 	let email = $state($auth.user?.profile.email || '');
@@ -72,8 +73,8 @@
 					marketing: { enabled: prefs.preferences.marketing!.enabled, platforms: filterPlatforms(prefs.preferences.marketing!.platforms) },
 				};
 			}
-		} catch (e) {
-			console.error('Failed to load notification preferences:', e);
+		} catch {
+			toast.show('Failed to load notification preferences', 'error');
 		} finally {
 			loadingPrefs = false;
 		}
@@ -88,8 +89,8 @@
 				headers: getAuthHeaders(),
 			});
 			notificationPrefs[category] = { enabled, platforms };
-		} catch (e) {
-			console.error('Failed to update notification preference:', e);
+		} catch {
+			toast.show('Failed to update notification preference', 'error');
 		} finally {
 			savingPref = null;
 		}
@@ -287,7 +288,6 @@
 			}
 		} catch (e: any) {
 			avatarError = e?.error?.message || e?.message || 'Failed to upload profile picture';
-			console.error('Avatar upload error:', e);
 		} finally {
 			uploadingAvatar = false;
 			// Reset file input
@@ -313,7 +313,6 @@
 
 			ws.onmessage = async ({ data }) => {
 				if (data.startsWith('failed')) {
-					console.error('Upload failed:', data);
 					ws.close();
 					reject(new Error(data));
 				} else if (data === 'file') {

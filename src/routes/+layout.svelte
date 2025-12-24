@@ -214,8 +214,8 @@
 			await postResendVerifyEmailByMailByUser({
 				headers: getAuthHeaders(),
 			});
-		} catch (e) {
-			console.error('Failed to send verification email:', e);
+		} catch {
+			// Verification email failed to send - user can try again
 		} finally {
 			sendingVerification = false;
 		}

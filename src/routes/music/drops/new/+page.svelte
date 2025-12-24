@@ -95,8 +95,8 @@
 				if (artistsResponse.data) {
 					allArtists = artistsResponse.data as Artist[];
 				}
-			} catch (err) {
-				console.error('Failed to load artists:', err);
+			} catch {
+				toast.show('Failed to load artists', 'error');
 			}
 
 			const response = await getIdByDropsByMusic({
@@ -335,16 +335,12 @@
 				return songData;
 			});
 
-			console.log('Saving drop with data:', JSON.stringify(body, null, 2));
-
 			await patchIdByDropsByMusic({
 				path: { id: dropId },
 				headers: getAuthHeaders(),
 				body,
 			});
 		} catch (e: any) {
-			console.error('Failed to save drop:', e);
-			console.error('Error details:', JSON.stringify(e, null, 2));
 			const errorMessage = e?.error?.message || e?.message || 'Unknown error';
 			toast.show(`Failed to save progress: ${errorMessage}`, 'error');
 			throw e; // Re-throw to prevent navigation
@@ -417,7 +413,6 @@
 			} catch (e) {
 				// Error already shown in saveDrop via toast
 				// DO NOT advance to next step if save failed
-				console.error('Failed to save before advancing step:', e);
 				return; // Explicitly return to prevent any further execution
 			}
 		}
@@ -434,7 +429,6 @@
 		} catch (e) {
 			// Error already shown in saveDrop via toast
 			// DO NOT advance to next step if save failed
-			console.error('Failed to save before advancing step:', e);
 			return; // Explicitly return to prevent any further execution
 		}
 	}
@@ -753,7 +747,6 @@
 			uploadedSongFilename = file.name;
 			toast.show('Song uploaded successfully', 'success');
 		} catch (e: any) {
-			console.error('Song upload failed:', e);
 			const errorMsg = e?.error?.message || e?.message || 'Failed to upload song';
 			toast.show(errorMsg, 'error');
 		} finally {
@@ -804,7 +797,6 @@
 			formState.artwork = artworkId;
 			toast.show('Artwork uploaded successfully', 'success');
 		} catch (e: any) {
-			console.error('Artwork upload failed:', e);
 			const errorMsg = e?.error?.message || e?.message || 'Failed to upload artwork';
 			toast.show(errorMsg, 'error');
 			formState.artworkPreview = '';
@@ -849,7 +841,6 @@
 			toast.show('Drop submitted for review!', 'success');
 			goto('/music/drops');
 		} catch (e: any) {
-			console.error('Submit failed:', e);
 			const errorMsg = e?.error?.message || e?.message || 'Failed to submit drop';
 			formState.errors['submit'] = errorMsg;
 			toast.show(errorMsg, 'error');

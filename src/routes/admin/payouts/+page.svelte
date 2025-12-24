@@ -42,8 +42,8 @@
 		try {
 			await postSyncMappingByAdmin({ headers: getAuthHeaders() });
 			await loadPayouts();
-		} catch (e) {
-			console.error('Sync failed:', e);
+		} catch {
+			toast.show('Failed to sync mapping', 'error');
 		} finally {
 			syncing = false;
 		}
@@ -68,7 +68,6 @@
 			selectedFile = null;
 			await loadPayouts();
 		} catch (e: unknown) {
-			console.error('Upload failed:', e);
 			toast.show(extractErrorMessage(e, 'Failed to upload payout'), 'error');
 		} finally {
 			uploading = false;

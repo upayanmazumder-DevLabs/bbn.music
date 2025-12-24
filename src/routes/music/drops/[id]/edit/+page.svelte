@@ -218,8 +218,8 @@
 					if (artistsResponse.data) {
 						allArtists = artistsResponse.data as Artist[];
 					}
-				} catch (e) {
-					console.error('Failed to load artists:', e);
+				} catch {
+					toast.show('Failed to load artists', 'error');
 				}
 
 				const response = await getIdByDropsByMusic({
@@ -273,8 +273,8 @@
 				const blob = response.data as Blob;
 				artworkUrl = URL.createObjectURL(blob);
 			}
-		} catch (e) {
-			console.error('Failed to load artwork:', e);
+		} catch {
+			// Artwork loading failed, placeholder will be shown
 		}
 	}
 
@@ -300,7 +300,6 @@
 			toast.show('Artwork updated successfully', 'success');
 			hasChanges = true;
 		} catch (e: any) {
-			console.error('Artwork upload failed:', e);
 			toast.show(e?.message || 'Failed to upload artwork', 'error');
 		} finally {
 			uploadingArtwork = false;
@@ -316,8 +315,8 @@
 			if (response.data) {
 				share = response.data as Share;
 			}
-		} catch (e) {
-			console.error('Failed to load share:', e);
+		} catch {
+			// Share loading failed, will show create option
 		}
 	}
 
@@ -602,7 +601,6 @@
 			hasChanges = true;
 			toast.show('Audio file uploaded successfully', 'success');
 		} catch (e: any) {
-			console.error('Song file upload failed:', e);
 			toast.show(e?.message || 'Failed to upload audio file', 'error');
 		} finally {
 			uploadingSongFile = false;

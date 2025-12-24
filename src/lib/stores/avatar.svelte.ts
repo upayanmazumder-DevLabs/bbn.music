@@ -73,8 +73,7 @@ export const avatarStore = {
 					cachedUserId = userId;
 					cachedAvatarId = avatarId;
 				}
-			} catch (error) {
-				console.error('Failed to load avatar:', error);
+			} catch {
 				cachedUrl = null;
 			} finally {
 				loadingForUserId = null;

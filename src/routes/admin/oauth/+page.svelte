@@ -51,7 +51,6 @@
 			await loadApps();
 			toast.show('OAuth application deleted successfully', 'success');
 		} catch (e: any) {
-			console.error('Delete failed:', e);
 			toast.show(e?.error?.message || e?.message || 'Failed to delete OAuth application', 'error');
 		} finally {
 			appToDelete = null;

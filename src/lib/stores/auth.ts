@@ -20,8 +20,8 @@ async function registerAudioServiceWorker() {
 		audioServiceWorker = await navigator.serviceWorker.register('/audio-sw.js', {
 			scope: '/',
 		});
-	} catch (error) {
-		console.error('Failed to register audio service worker:', error);
+	} catch {
+		// Service worker registration failed - audio will still work without header injection
 	}
 }
 
@@ -239,7 +239,6 @@ function createAuthStore() {
 
 				return true;
 			} catch (error: any) {
-				console.error('Login error:', error);
 				const errorMessage = error?.response?.data?.message || error.message || 'Login failed';
 				update((state) => ({
 					...state,
@@ -363,7 +362,6 @@ function createAuthStore() {
 
 				return true;
 			} catch (error: any) {
-				console.error('OAuth login error:', error);
 				const errorMessage =
 					error?.response?.data?.message || error.message || 'OAuth login failed';
 				update((state) => ({
@@ -411,7 +409,6 @@ function createAuthStore() {
 
 				return true;
 			} catch (error: any) {
-				console.error('Token login error:', error);
 				const errorMessage = error?.response?.data?.message || error.message || 'Login failed';
 				update((state) => ({
 					...state,
@@ -450,8 +447,7 @@ function createAuthStore() {
 				}
 
 				return true;
-			} catch (error) {
-				console.error('Token refresh failed:', error);
+			} catch {
 				this.logout();
 				return false;
 			} finally {

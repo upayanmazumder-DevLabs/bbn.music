@@ -564,21 +564,15 @@ export type AdminWallet = {
 	}>;
 	cut: number;
 	user: string;
-	userName?: string;
-	email?: string;
-	balance?: {
-		restrained: number;
-		unrestrained: number;
-	};
+	userName: string;
+	email: string;
 	stripeAccountId?: string;
 	accountType: AccountType;
 	copyrightEditable: boolean;
-} & {
-	email: string;
-	userName: string;
 	balance: {
 		ampsuite: number;
 		symphonic: number;
+		total: number;
 	};
 };
 

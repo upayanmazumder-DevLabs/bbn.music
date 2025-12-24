@@ -36,7 +36,6 @@
 			}
 		} catch (err: any) {
 			error = err?.error?.message || err?.message || 'Failed to load artists';
-			console.error('Error loading artists:', err);
 		} finally {
 			isLoading = false;
 		}
@@ -96,7 +95,6 @@
 				showAddModal = false;
 			}
 		} catch (err: any) {
-			console.error('Failed to create artist:', err);
 			toast.show(err?.error?.message || err?.message || 'Failed to create artist', 'error');
 		} finally {
 			isCreating = false;

@@ -121,7 +121,6 @@
 			}
 		} catch (err: any) {
 			error = err?.error?.message || err?.message || 'Failed to load drops';
-			console.error('Error loading drops:', err);
 		} finally {
 			isLoading = false;
 		}
@@ -210,7 +209,6 @@
 
 			goto(`/music/drops/new?id=${data.id}`);
 		} catch (err: any) {
-			console.error('Failed to create drop:', err);
 			error = err?.error?.message || err?.message || 'Failed to create drop';
 			isCreating = false;
 		}

@@ -26,7 +26,6 @@
 			}
 		} catch (err: unknown) {
 			error = extractErrorMessage(err, 'Failed to load wallet');
-			console.error('Error loading wallet:', err);
 		} finally {
 			isLoading = false;
 		}

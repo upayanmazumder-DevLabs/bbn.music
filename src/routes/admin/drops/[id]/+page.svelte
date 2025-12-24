@@ -351,7 +351,6 @@
 			// Reload the page to reflect changes
 			await loadDrop(dropId);
 		} catch (e: any) {
-			console.error('Failed to submit response:', e);
 			toast.show(e?.error?.message || e?.message || 'Failed to submit response', 'error');
 		} finally {
 			submittingResponse = false;
@@ -368,7 +367,6 @@
 			showTypeDialog = false;
 			await loadDrop(dropId);
 		} catch (e: any) {
-			console.error('Failed to change type:', e);
 			toast.show(e?.error?.message || e?.message || 'Failed to change drop type', 'error');
 		}
 	}
@@ -388,8 +386,8 @@
 			if (data) {
 				shazamResults = data;
 			}
-		} catch (e) {
-			console.error('Shazam failed:', e);
+		} catch {
+			toast.show('Shazam check failed', 'error');
 		} finally {
 			loadingShazam = false;
 		}
@@ -407,7 +405,6 @@
 			toast.show('Drop published successfully: ' + JSON.stringify(response.data), 'success', 6000);
 			showPublishDialog = false;
 		} catch (e: any) {
-			console.error('Publish failed:', e);
 			toast.show(
 				'Publish failed: ' + (e?.error?.message || e?.message || 'Unknown error'),
 				'error',

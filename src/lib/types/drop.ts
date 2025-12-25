@@ -4,9 +4,11 @@ export const artistTypes = ['PRIMARY', 'FEATURING', 'SONGWRITER', 'PRODUCER'] as
 export type ArtistType = (typeof artistTypes)[number];
 
 // PRIMARY/FEATURING have _id (reference to existing artist)
+// For new artists, _id can be null and name is included temporarily
 const artistRefWithIdSchema = z.object({
 	type: z.enum(['PRIMARY', 'FEATURING'] as const),
-	_id: z.string(),
+	_id: z.string().nullable(),
+	name: z.string().optional(), // Temporary name for new artists (before server assigns _id)
 });
 
 // SONGWRITER/PRODUCER have name only (no artist reference)
@@ -76,10 +78,17 @@ export const stepOneSchema = z.object({
 		.refine(
 			(arr) => arr.some((a) => a.type === 'PRIMARY'),
 			'At least one primary artist is required',
+		)
+		.refine(
+			(arr) => arr.some((a) => a.type === 'SONGWRITER'),
+			'At least one songwriter is required',
 		),
 	compositionCopyright: z.string().min(1, 'Composition copyright is required').max(100),
 	soundRecordingCopyright: z.string().min(1, 'Sound recording copyright is required').max(100),
-	gtin: z.string().optional(),
+	gtin: z
+		.string()
+		.optional()
+		.refine((val) => !val || /^\d{12,14}$/.test(val), 'GTIN must be 12-14 digits (UPC/EAN)'),
 });
 
 export const stepTwoSchema = stepOneSchema.extend({

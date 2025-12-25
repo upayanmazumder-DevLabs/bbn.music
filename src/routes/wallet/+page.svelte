@@ -9,11 +9,14 @@
 	import { formatCurrency } from '$lib/utils/formatCurrency';
 	import { formatDate } from '$lib/utils/formatDate';
 	import { extractErrorMessage } from '$lib/utils/extractError';
+	import { kyc } from '$lib/stores/kyc';
+	import HardKycModal from '$lib/components/HardKycModal.svelte';
 
 	let wallet = $state<Wallet | null>(null);
 	let isLoading = $state(true);
 	let error = $state<string | null>(null);
 	let showPayoutModal = $state(false);
+	let showHardKycModal = $state(false);
 
 	onMount(async () => {
 		try {
@@ -45,6 +48,12 @@
 	}
 
 	function openPayoutModal() {
+		// TODO: Re-enable KYC check
+		// Check if Hard KYC is completed (required for payout requests)
+		// if ($kyc.hardKyc.status !== 'approved') {
+		// 	showHardKycModal = true;
+		// 	return;
+		// }
 		showPayoutModal = true;
 	}
 
@@ -236,3 +245,14 @@ Thank you!`;
 		</Button>
 	{/snippet}
 </Modal>
+
+<!-- Hard KYC Modal -->
+<HardKycModal
+	bind:open={showHardKycModal}
+	onclose={() => (showHardKycModal = false)}
+	oncomplete={() => {
+		showHardKycModal = false;
+		// After KYC completion, open the payout modal
+		showPayoutModal = true;
+	}}
+/>

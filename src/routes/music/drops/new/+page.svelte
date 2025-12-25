@@ -13,7 +13,6 @@
 		CheckCircleSolid,
 		EditOutline,
 		CloseOutline,
-		UserSolid,
 		MusicSolid,
 		ImageOutline,
 		ClipboardListSolid,
@@ -22,12 +21,15 @@
 	} from 'flowbite-svelte-icons';
 
 	// Shared UI components
-	import { Button, Input, Select, SearchableSelect, Textarea, Card, Badge, Toggle, Alert } from '$lib/components/ui';
+	import { Button, Input, SearchableSelect, Textarea, Card, Badge, Alert } from '$lib/components/ui';
 	import ArtistModal from '$lib/components/ArtistModal.svelte';
 	import ArtistList from '$lib/components/ArtistList.svelte';
+	import SongModal from '$lib/components/SongModal.svelte';
+	import ImageCropper from '$lib/components/ImageCropper.svelte';
 
-	import { primaryGenres, getSecondaryGenres } from '$lib/data/genres';
-	import { languages, getLanguageName } from '$lib/data/languages';
+	import { getSecondaryGenres } from '$lib/data/genres';
+	import { getLanguageName } from '$lib/data/languages';
+	import { primaryGenreOptions, languageOptions, getSecondaryGenreOptions } from '$lib/data/options';
 	import {
 		createInitialDropState,
 		stepOneSchema,
@@ -43,6 +45,7 @@
 		getArtistsByMusic,
 		postDropByDropsByMusic,
 		postTypeByTypeByDropByMusic,
+		getIdBySongsByMusic,
 	} from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
 	import { auth } from '$lib/stores/auth';
@@ -222,16 +225,7 @@
 
 	// Derived values
 	const secondaryGenreOptions = $derived(getSecondaryGenres(formState.primaryGenre));
-
-	// Options for searchable selects
-	const primaryGenreOptions = primaryGenres.map((g) => ({ value: g, label: g }));
-	const secondaryGenreSelectOptions = $derived(
-		secondaryGenreOptions.map((g) => ({ value: g, label: g }))
-	);
-	const languageOptions = Object.entries(languages).map(([code, name]) => ({
-		value: code,
-		label: name,
-	}));
+	const secondaryGenreSelectOptions = $derived(getSecondaryGenreOptions(formState.primaryGenre));
 
 	// Modals
 	let showArtistModal = $state(false);
@@ -248,45 +242,52 @@
 	// Release date warning modal
 	let showReleaseDateWarning = $state(false);
 
+	// Duplicate song detection
+	let showDuplicateSongModal = $state(false);
+	let duplicateSongId = $state<string | null>(null);
+	let pendingDuplicateFile = $state<File | null>(null);
+	let duplicateSongDetails = $state<{
+		title: string;
+		artists: ArtistRef[];
+		isrc?: string;
+		primaryGenre: string;
+		secondaryGenre: string;
+		year?: number;
+		language: string;
+		explicit: boolean;
+		instrumental: boolean;
+	} | null>(null);
+	let loadingDuplicateSong = $state(false);
+
 	// Editing state for artists
 	let editingArtist = $state<ArtistRef | null>(null);
-	let editingSongArtist = $state<ArtistRef | null>(null);
-	let editingSongArtistIndex = $state<number | null>(null);
-	let tempSong = $state<Partial<Song> & { year?: number; language?: string }>({
+
+	// Song editing state - matches SongModal's expected prop type
+	interface TempSong {
+		_id?: string;
+		file?: string;
+		title: string;
+		explicit: boolean;
+		instrumental: boolean;
+		artists: ArtistRef[];
+		primaryGenre: string;
+		secondaryGenre: string;
+		isrc: string;
+		year?: number;
+		language: string;
+	}
+
+	let tempSong = $state<TempSong>({
 		_id: crypto.randomUUID(),
 		title: '',
 		artists: [],
 		instrumental: false,
 		explicit: false,
+		primaryGenre: '',
+		secondaryGenre: '',
+		isrc: '',
 		year: undefined,
-		language: undefined,
-	});
-
-	// Song secondary genre options (derived from tempSong.primaryGenre)
-	const songSecondaryGenreOptions = $derived(
-		tempSong.primaryGenre
-			? getSecondaryGenres(tempSong.primaryGenre).map((g) => ({ value: g, label: g }))
-			: []
-	);
-
-	// Track previous values to prevent infinite loops
-	let prevExplicit = $state(false);
-	let prevInstrumental = $state(false);
-
-	// Make explicit and instrumental mutually exclusive
-	$effect(() => {
-		// If explicit was just turned on, turn off instrumental
-		if (tempSong.explicit && !prevExplicit && tempSong.instrumental) {
-			tempSong.instrumental = false;
-		}
-		// If instrumental was just turned on, turn off explicit
-		else if (tempSong.instrumental && !prevInstrumental && tempSong.explicit) {
-			tempSong.explicit = false;
-		}
-
-		// Update previous values
-		prevExplicit = tempSong.explicit ?? false;
-		prevInstrumental = tempSong.instrumental ?? false;
+		language: 'en',
 	});
 
 	// Reset secondary genre when primary changes
@@ -336,6 +337,7 @@
 
 				const songData: any = {
 					_id: song._id,
+					file: song.file,
 					title: song.title,
 					artists: song.artists,
 					explicit: song.explicit,
@@ -443,7 +445,10 @@
 			if (error.issues) {
 				error.issues.forEach((err: any) => {
 					const field = err.path.join('.');
-					formState.errors[field] = err.message;
+					// Only keep the first error per field (refinements run in order)
+					if (!formState.errors[field]) {
+						formState.errors[field] = err.message;
+					}
 
 					// Auto-expand advanced settings if there are errors in those fields
 					if (
@@ -593,9 +598,6 @@
 			year: year,
 			language: formState.language || 'en',
 		};
-		// Reset tracking variables
-		prevExplicit = false;
-		prevInstrumental = false;
 		editingSongIndex = null;
 		uploadingSong = false;
 		songUploadProgress = 0;
@@ -620,9 +622,6 @@
 			year: (song as any).year ?? defaultYear,
 			language: (song as any).language ?? (formState.language || 'en'),
 		};
-		// Initialize tracking variables with current values
-		prevExplicit = song.explicit ?? false;
-		prevInstrumental = song.instrumental ?? false;
 		editingSongIndex = index;
 		songFileUploaded = true; // Existing songs already have audio uploaded
 		uploadedSongFilename = song.file || 'Previously uploaded file';
@@ -638,6 +637,7 @@
 
 		const song: Song & { year?: number; language?: string } = {
 			_id: tempSong._id ?? crypto.randomUUID(),
+			file: tempSong.file,
 			title: tempSong.title ?? '',
 			artists: tempSong.artists ?? [],
 			instrumental: tempSong.instrumental ?? false,
@@ -655,32 +655,6 @@
 			formState.songs = [...formState.songs, song as Song];
 		}
 		showSongModal = false;
-	}
-
-	// Song artist management
-	let showSongArtistModal = $state(false);
-
-	function openAddSongArtist() {
-		editingSongArtist = null;
-		editingSongArtistIndex = null;
-		showSongArtistModal = true;
-	}
-
-	function openEditSongArtist(index: number) {
-		editingSongArtist = tempSong.artists?.[index] || null;
-		editingSongArtistIndex = index;
-		showSongArtistModal = true;
-	}
-
-	function handleSaveSongArtist(artist: ArtistRef) {
-		if (editingSongArtistIndex !== null) {
-			const artists = [...(tempSong.artists || [])];
-			artists[editingSongArtistIndex] = artist;
-			tempSong.artists = artists;
-		} else {
-			tempSong.artists = [...(tempSong.artists || []), artist];
-		}
-		showSongArtistModal = false;
 	}
 
 	function removeSong(index: number) {
@@ -789,7 +763,55 @@
 			// Step 1: Upload file via WebSocket and get file ID
 			const fileId = await uploadSongViaWebSocket(file);
 
+			// Check if this is a duplicate song
+			if (fileId.startsWith('duplicate:')) {
+				const existingSongId = fileId.substring('duplicate:'.length);
+				duplicateSongId = existingSongId;
+				pendingDuplicateFile = file;
+				uploadingSong = false;
+				songUploadProgress = 0;
+
+				// Fetch existing song details
+				loadingDuplicateSong = true;
+				showDuplicateSongModal = true;
+				try {
+					const response = await getIdBySongsByMusic({
+						path: { id: existingSongId },
+						headers: getAuthHeaders(),
+					});
+					if (response.data) {
+						duplicateSongDetails = {
+							title: response.data.title,
+							artists: response.data.artists as ArtistRef[],
+							isrc: response.data.isrc,
+							primaryGenre: response.data.primaryGenre,
+							secondaryGenre: response.data.secondaryGenre,
+							year: response.data.year,
+							language: response.data.language,
+							explicit: response.data.explicit,
+							instrumental: response.data.instrumental,
+						};
+					}
+				} catch {
+					// Failed to fetch details, modal will show without them
+				} finally {
+					loadingDuplicateSong = false;
+				}
+				return;
+			}
+
 			// Step 2: Create song record in backend with the uploaded file
+			await createSongRecord(fileId, cleanedTitle, file.name);
+		} catch (e: any) {
+			const errorMsg = e?.error?.message || e?.message || 'Failed to upload song';
+			toast.show(errorMsg, 'error');
+			uploadingSong = false;
+			songUploadProgress = 0;
+		}
+	}
+
+	async function createSongRecord(fileId: string, cleanedTitle: string, originalFilename: string) {
+		try {
 			const response = await postDropByDropsByMusic({
 				path: { dropId: dropId! },
 				headers: getAuthHeaders(),
@@ -803,24 +825,73 @@
 				throw new Error('Failed to create song record');
 			}
 
-			// Step 3: Update tempSong with the backend-returned song data
+			// Update tempSong with the backend-returned song data
 			const createdSong = response.data;
 			tempSong._id = createdSong._id;
+			tempSong.file = createdSong.file;
 			tempSong.title = tempSong.title || createdSong.title;
 			// Preserve any metadata returned from backend
 			tempSong.year = createdSong.year;
 			tempSong.language = createdSong.language;
 
 			songFileUploaded = true;
-			uploadedSongFilename = file.name;
+			uploadedSongFilename = originalFilename;
 			toast.show('Song uploaded successfully', 'success');
-		} catch (e: any) {
-			const errorMsg = e?.error?.message || e?.message || 'Failed to upload song';
-			toast.show(errorMsg, 'error');
 		} finally {
 			uploadingSong = false;
 			songUploadProgress = 0;
 		}
+	}
+
+	async function handleDuplicateSongConfirm() {
+		if (!duplicateSongId || !pendingDuplicateFile) return;
+
+		const file = pendingDuplicateFile;
+		const cleanedTitle = file.name
+			.replaceAll('_', ' ')
+			.replaceAll('-', ' ')
+			.replace(/\.[^/.]+$/, '');
+
+		// Pre-populate tempSong with existing song data if available
+		if (duplicateSongDetails) {
+			tempSong.title = duplicateSongDetails.title || tempSong.title || cleanedTitle;
+			if (duplicateSongDetails.artists.length > 0) {
+				tempSong.artists = [...duplicateSongDetails.artists];
+			}
+			tempSong.isrc = duplicateSongDetails.isrc || tempSong.isrc;
+			tempSong.primaryGenre = duplicateSongDetails.primaryGenre || tempSong.primaryGenre;
+			tempSong.secondaryGenre = duplicateSongDetails.secondaryGenre || tempSong.secondaryGenre;
+			tempSong.year = duplicateSongDetails.year ?? tempSong.year;
+			tempSong.language = duplicateSongDetails.language || tempSong.language;
+			tempSong.explicit = duplicateSongDetails.explicit;
+			tempSong.instrumental = duplicateSongDetails.instrumental;
+		}
+
+		showDuplicateSongModal = false;
+		uploadingSong = true;
+
+		try {
+			await createSongRecord(duplicateSongId, tempSong.title || cleanedTitle, file.name);
+		} catch (e: any) {
+			const errorMsg = e?.error?.message || e?.message || 'Failed to add song';
+			toast.show(errorMsg, 'error');
+		} finally {
+			duplicateSongId = null;
+			pendingDuplicateFile = null;
+			duplicateSongDetails = null;
+		}
+	}
+
+	function handleDuplicateSongCancel() {
+		showDuplicateSongModal = false;
+		duplicateSongId = null;
+		pendingDuplicateFile = null;
+		duplicateSongDetails = null;
+
+		// Reset song modal state so user can try a different file
+		tempSong.title = '';
+		songFileUploaded = false;
+		uploadedSongFilename = '';
 	}
 
 	async function uploadSongViaWebSocket(file: File): Promise<string> {
@@ -836,6 +907,10 @@
 	// Artwork upload
 	let uploadingArtwork = $state(false);
 
+	// Image cropper state
+	let showCropper = $state(false);
+	let cropperFile = $state<File | null>(null);
+
 	function handleArtworkUpload(event: Event) {
 		const input = event.target as HTMLInputElement;
 		const file = input.files?.[0];
@@ -845,12 +920,35 @@
 	async function processArtworkFile(file: File) {
 		if (!file.type.startsWith('image/')) return;
 
-		// Show preview immediately
+		// Check aspect ratio before uploading
+		const img = new Image();
 		const url = URL.createObjectURL(file);
-		formState.artworkPreview = url;
 
-		// Upload the file to get artwork ID
-		await uploadArtwork(file);
+		img.onload = () => {
+			if (img.naturalWidth !== img.naturalHeight) {
+				// Not 1:1 - show cropper
+				cropperFile = file;
+				showCropper = true;
+			} else {
+				// Already 1:1 - upload directly
+				formState.artworkPreview = url;
+				uploadArtwork(file);
+			}
+		};
+		img.src = url;
+	}
+
+	function handleCropComplete(blob: Blob) {
+		showCropper = false;
+		cropperFile = null;
+		const file = new File([blob], 'artwork.jpg', { type: 'image/jpeg' });
+		formState.artworkPreview = URL.createObjectURL(blob);
+		uploadArtwork(file);
+	}
+
+	function handleCropCancel() {
+		showCropper = false;
+		cropperFile = null;
 	}
 
 	async function uploadArtwork(file: File) {
@@ -1176,6 +1274,13 @@
 										placeholder="Leave empty to auto-generate"
 										error={formState.errors['gtin']}
 										hint="Optional - will be generated if not provided"
+										inputmode="numeric"
+										pattern="[0-9]*"
+										oninput={(e) => {
+											const input = e.currentTarget as HTMLInputElement;
+											input.value = input.value.replace(/\D/g, '');
+											formState.gtin = input.value;
+										}}
 									/>
 								</div>
 							</div>
@@ -1567,248 +1672,27 @@
 />
 
 <!-- Song Modal -->
-<Modal
+<SongModal
 	bind:open={showSongModal}
 	title={editingSongIndex !== null ? 'Edit Song' : 'Add New Song'}
-	size="xl"
->
-	<div class="space-y-8">
-		<!-- Step 1: Audio File Upload - Make this prominent and first -->
-		<div
-			class="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border-2 border-orange-500/20 rounded-2xl p-6"
-		>
-			<div class="flex items-start gap-3 mb-4">
-				<div
-					class="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0"
-				>
-					<MusicSolid class="w-5 h-5 text-orange-400" />
-				</div>
-				<div class="flex-1">
-					<h3 class="text-lg font-semibold text-white mb-1">
-						Audio File
-						{#if !editingSongIndex}
-							<span class="text-orange-400">*</span>
-						{/if}
-					</h3>
-					<p class="text-sm text-gray-400">
-						Upload your song in WAV or FLAC format (16-bit/44.1kHz minimum)
-					</p>
-				</div>
-			</div>
+	bind:song={tempSong}
+	isUploading={uploadingSong}
+	uploadProgress={songUploadProgress}
+	fileUploaded={songFileUploaded}
+	uploadedFilename={uploadedSongFilename}
+	requiresFile={editingSongIndex === null}
+	resolveName={getArtistNameById}
+	onclose={() => (showSongModal = false)}
+	onsave={saveSong}
+	onfileselect={processSongFile}
+/>
 
-			<div
-				class="border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 {uploadingSong
-					? 'border-orange-500/50 bg-orange-500/5 cursor-wait'
-					: songFileUploaded
-						? 'border-green-500/50 bg-green-500/5 cursor-pointer hover:border-green-500'
-						: 'border-gray-600 bg-gray-800/30 cursor-pointer hover:border-orange-500/50 hover:bg-orange-500/5'}"
-				role="button"
-				tabindex="0"
-				aria-labelledby="audio-file-label"
-				onclick={() => !uploadingSong && document.getElementById('song-file')?.click()}
-				onkeydown={(e) =>
-					!uploadingSong && e.key === 'Enter' && document.getElementById('song-file')?.click()}
-			>
-				{#if uploadingSong}
-					<Spinner size="xl" class="mx-auto mb-4" />
-					<p class="text-white font-semibold mb-1">Uploading... {songUploadProgress}%</p>
-					<p class="text-gray-400 text-sm">Please wait while we process your file</p>
-				{:else if songFileUploaded}
-					<div
-						class="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4"
-					>
-						<CheckCircleSolid class="w-8 h-8 text-green-400" />
-					</div>
-					<p class="text-white font-semibold mb-1">Audio file uploaded successfully!</p>
-					{#if uploadedSongFilename}
-						<p class="text-green-400 text-sm font-medium mb-2">{uploadedSongFilename}</p>
-					{/if}
-					<p class="text-gray-400 text-sm">Click to replace with a different file</p>
-				{:else}
-					<div
-						class="w-16 h-16 rounded-full bg-orange-500/10 flex items-center justify-center mx-auto mb-4"
-					>
-						<UploadOutline class="w-8 h-8 text-orange-500" />
-					</div>
-					<p class="text-white font-semibold mb-1">Drop your audio file here</p>
-					<p class="text-gray-400 text-sm mb-3">or click to browse your files</p>
-					<div
-						class="inline-flex items-center gap-2 px-4 py-2 bg-gray-800/50 rounded-lg border border-gray-700"
-					>
-						<span class="text-xs text-gray-400">Supported:</span>
-						<span class="text-xs font-medium text-orange-400">WAV</span>
-						<span class="text-xs text-gray-600">•</span>
-						<span class="text-xs font-medium text-orange-400">FLAC</span>
-					</div>
-				{/if}
-			</div>
-			<input
-				type="file"
-				id="song-file"
-				accept="audio/wav,audio/x-wav,audio/flac,audio/x-flac"
-				onchange={handleSongFileUpload}
-				class="hidden"
-				aria-label="Upload song file"
-			/>
-		</div>
-
-		<!-- Step 2: Song Details -->
-		<div class="space-y-6">
-			<div class="flex items-center gap-3">
-				<div class="w-8 h-8 rounded-lg bg-gray-700/50 flex items-center justify-center">
-					<ClipboardListSolid class="w-4 h-4 text-gray-400" />
-				</div>
-				<h3 class="text-lg font-semibold text-white">Song Details</h3>
-			</div>
-
-			<div class="grid gap-6">
-				<Input
-					bind:value={tempSong.title}
-					label="Song Title"
-					placeholder="Enter song title"
-					required
-					hint="This will appear on all streaming platforms"
-				/>
-
-				<!-- Genres in two columns -->
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<SearchableSelect
-						bind:value={tempSong.primaryGenre}
-						options={primaryGenreOptions}
-						label="Primary Genre"
-						placeholder="Select primary genre..."
-						required
-					/>
-					<SearchableSelect
-						bind:value={tempSong.secondaryGenre}
-						options={songSecondaryGenreOptions}
-						label="Secondary Genre"
-						placeholder="Select secondary genre..."
-						disabled={!tempSong.primaryGenre}
-					/>
-				</div>
-
-				<!-- Flags - Side by side -->
-				<div>
-					<span class="block text-sm font-medium text-white mb-3">Content Flags</span>
-					<div class="flex gap-6">
-						<Toggle bind:checked={tempSong.explicit} label="Explicit Content" color="red" />
-						<Toggle bind:checked={tempSong.instrumental} label="Instrumental" color="blue" />
-					</div>
-					<p class="text-xs text-gray-500 mt-2">
-						Mark if this song contains explicit lyrics or is purely instrumental (mutually
-						exclusive)
-					</p>
-				</div>
-			</div>
-		</div>
-
-		<!-- Step 3: Artists -->
-		<div class="space-y-4">
-			<div class="flex items-center gap-3">
-				<div class="w-8 h-8 rounded-lg bg-gray-700/50 flex items-center justify-center">
-					<UserSolid class="w-4 h-4 text-gray-400" />
-				</div>
-				<div class="flex-1">
-					<h3 class="text-lg font-semibold text-white">
-						Artists <span class="text-orange-400">*</span>
-					</h3>
-					<p class="text-sm text-gray-400">Add at least one artist</p>
-				</div>
-			</div>
-
-			<ArtistList
-				artists={tempSong.artists || []}
-				editable
-				compact
-				onadd={openAddSongArtist}
-				onedit={openEditSongArtist}
-				onremove={(index) => {
-					tempSong.artists = tempSong.artists?.filter((_, i) => i !== index) || [];
-				}}
-				emptyMessage="No artists assigned yet"
-				resolveName={getArtistNameById}
-			/>
-		</div>
-
-		<!-- Step 4: Advanced (ISRC, Year, Language) -->
-		<details class="group">
-			<summary class="flex items-center gap-3 cursor-pointer list-none">
-				<div class="w-8 h-8 rounded-lg bg-gray-700/50 flex items-center justify-center">
-					<ChevronDownOutline
-						class="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180"
-					/>
-				</div>
-				<h3 class="text-lg font-semibold text-white">Advanced Settings</h3>
-				<span class="text-xs text-gray-500">(Optional)</span>
-			</summary>
-			<div class="mt-4 pl-11 space-y-4">
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<Input
-						type="number"
-						value={tempSong.year?.toString() ?? ''}
-						oninput={(e) => {
-							const val = (e.target as HTMLInputElement).value;
-							tempSong.year = val ? parseInt(val, 10) : undefined;
-						}}
-						label="Recording Year"
-						placeholder="YYYY"
-						hint="Year when this song was originally recorded"
-					/>
-					<SearchableSelect
-						bind:value={tempSong.language}
-						options={languageOptions}
-						label="Language"
-						placeholder="Select language..."
-						hint="Language of the song (defaults to drop language)"
-					/>
-				</div>
-				<Input
-					bind:value={tempSong.isrc}
-					label="ISRC Code"
-					placeholder="CC-XXX-YY-NNNNN"
-					hint="International Standard Recording Code - leave empty to auto-generate"
-				/>
-			</div>
-		</details>
-	</div>
-
-	{#snippet footer()}
-		<div class="flex items-center justify-between gap-4 w-full">
-			<p class="text-sm text-gray-400">
-				{#if !songFileUploaded && !editingSongIndex}
-					<span class="text-orange-400">•</span> Audio file required
-				{:else if !tempSong.title}
-					<span class="text-orange-400">•</span> Song title required
-				{:else if !tempSong.artists || tempSong.artists.length === 0}
-					<span class="text-orange-400">•</span> At least one artist required
-				{:else}
-					<span class="text-green-400">✓</span> Ready to save
-				{/if}
-			</p>
-			<div class="flex gap-3">
-				<Button variant="secondary" onclick={() => (showSongModal = false)}>Cancel</Button>
-				<Button
-					onclick={saveSong}
-					disabled={(!songFileUploaded && !editingSongIndex) ||
-						!tempSong.title ||
-						!tempSong.artists ||
-						tempSong.artists.length === 0}
-				>
-					{editingSongIndex !== null ? 'Update Song' : 'Add Song'}
-				</Button>
-			</div>
-		</div>
-	{/snippet}
-</Modal>
-
-<!-- Song Artist Modal -->
-<ArtistModal
-	bind:open={showSongArtistModal}
-	artist={editingSongArtist}
-	onclose={() => (showSongArtistModal = false)}
-	onsave={handleSaveSongArtist}
-	title={editingSongArtistIndex !== null ? 'Edit Artist' : 'Add Artist to Song'}
+<!-- Image Cropper Modal -->
+<ImageCropper
+	bind:open={showCropper}
+	imageFile={cropperFile}
+	oncrop={handleCropComplete}
+	oncancel={handleCropCancel}
 />
 
 <!-- Release Date Warning Modal -->
@@ -1829,5 +1713,45 @@
 	{#snippet footer()}
 		<Button variant="secondary" onclick={() => (showReleaseDateWarning = false)}>Go Back</Button>
 		<Button onclick={proceedWithShortNotice}>Proceed Anyway</Button>
+	{/snippet}
+</Modal>
+
+<!-- Duplicate Song Modal -->
+<Modal bind:open={showDuplicateSongModal} title="Duplicate Song Detected" size="md">
+	<div class="space-y-4">
+		<div class="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+			<ExclamationCircleOutline class="w-6 h-6 text-blue-400 mt-0.5 flex-shrink-0" />
+			<div>
+				<p class="text-white font-medium mb-2">This audio file already exists</p>
+				<p class="text-gray-300 text-sm">
+					This exact audio file has already been uploaded to the system. Would you like to add the
+					existing song to this drop?
+				</p>
+			</div>
+		</div>
+
+		{#if loadingDuplicateSong}
+			<div class="flex items-center justify-center py-4">
+				<Spinner size="md" />
+			</div>
+		{:else if duplicateSongDetails}
+			<div class="p-4 bg-gray-800 rounded-lg">
+				<p class="text-sm text-gray-400 mb-1">Existing song:</p>
+				<p class="text-white font-medium">{duplicateSongDetails.title}</p>
+				{#if duplicateSongDetails.artists.length > 0}
+					<p class="text-sm text-gray-400 mt-1">
+						{duplicateSongDetails.artists
+							.filter((a) => a.type === 'PRIMARY' || a.type === 'FEATURING')
+							.map((a) => ('name' in a ? a.name : getArtistNameById(a._id ?? '') ?? 'Unknown'))
+							.join(', ')}
+					</p>
+				{/if}
+			</div>
+		{/if}
+	</div>
+
+	{#snippet footer()}
+		<Button variant="secondary" onclick={handleDuplicateSongCancel}>Cancel</Button>
+		<Button onclick={handleDuplicateSongConfirm} disabled={loadingDuplicateSong}>Add Existing Song</Button>
 	{/snippet}
 </Modal>

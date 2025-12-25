@@ -27,23 +27,24 @@
 			if (artist) {
 				artistType = artist.type;
 
-				if ('name' in artist) {
+				if (artist.type === 'SONGWRITER' || artist.type === 'PRODUCER') {
 					// PRODUCER/SONGWRITER have name, no _id
 					artistId = null;
 					artistName = '';
+					const name = artist.name || '';
 					// Split the name at the last space
-					const lastSpaceIndex = artist.name.lastIndexOf(' ');
+					const lastSpaceIndex = name.lastIndexOf(' ');
 					if (lastSpaceIndex > 0) {
-						firstName = artist.name.substring(0, lastSpaceIndex);
-						lastName = artist.name.substring(lastSpaceIndex + 1);
+						firstName = name.substring(0, lastSpaceIndex);
+						lastName = name.substring(lastSpaceIndex + 1);
 					} else {
-						firstName = artist.name;
+						firstName = name;
 						lastName = '';
 					}
 				} else {
-					// PRIMARY/FEATURING have _id, no name
-					artistId = artist._id;
-					artistName = '';
+					// PRIMARY/FEATURING have _id, optionally name (for new artists)
+					artistId = '_id' in artist ? artist._id : null;
+					artistName = ('name' in artist && artist.name) || '';
 					firstName = '';
 					lastName = '';
 				}
@@ -74,8 +75,12 @@
 			const fullName = [firstName.trim(), lastName.trim()].filter(Boolean).join(' ');
 			newArtist = { type: artistType, name: fullName };
 		} else {
-			// PRIMARY/FEATURING only have _id, no name
-			newArtist = { type: artistType, _id: artistId! };
+			// PRIMARY/FEATURING have _id, include name for new artists (when _id is null)
+			newArtist = {
+				type: artistType,
+				_id: artistId,
+				...(artistId === null && artistName ? { name: artistName } : {}),
+			};
 		}
 
 		onsave(newArtist);

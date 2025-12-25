@@ -7,6 +7,8 @@
 	import type { Drop, Artist, ArtistRef } from '$lib/api/types.gen';
 	import { auth } from '$lib/stores/auth';
 	import { toast } from '$lib/stores/toast';
+	import { kyc } from '$lib/stores/kyc';
+	import LightKycModal from '$lib/components/LightKycModal.svelte';
 	import {
 		getDropsByMusic,
 		getArtworkByDropByMusic,
@@ -16,6 +18,9 @@
 	import { getAuthHeaders } from '$lib/apiClient';
 	import { imageCache } from '$lib/stores/imageCache';
 	import { formatDate } from '$lib/utils/formatDate';
+
+	// KYC modal state
+	let showLightKycModal = $state(false);
 
 	// Tab configuration matching the old app
 	const tabs = [
@@ -190,6 +195,14 @@
 			toast.show('Please verify your email address before creating a drop', 'warning');
 			return;
 		}
+
+		// TODO: Re-enable KYC check
+		// Check if Light KYC is completed (required for first drop)
+		// if ($kyc.lightKyc.status !== 'approved') {
+		// 	showLightKycModal = true;
+		// 	return;
+		// }
+
 		if (isCreating) return;
 		isCreating = true;
 
@@ -390,3 +403,15 @@
 		</div>
 	{/if}
 </div>
+
+<!-- Light KYC Modal -->
+<LightKycModal
+	bind:open={showLightKycModal}
+	onclose={() => (showLightKycModal = false)}
+	oncomplete={() => {
+		showLightKycModal = false;
+		toast.show('Identity verification complete! You can now create drops.', 'success');
+		// Proceed to create the drop
+		createNewDrop();
+	}}
+/>

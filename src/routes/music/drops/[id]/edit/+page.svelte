@@ -2,39 +2,36 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { Modal } from '$lib/components/ui';
+	import { Modal, Spinner } from '$lib/components/ui';
 	import {
 		ArrowLeftOutline,
 		PlusOutline,
 		TrashBinOutline,
-		UploadOutline,
 		EditOutline,
-		UserSolid,
-		MusicSolid,
 		ImageOutline,
+		UploadOutline,
 		CheckCircleSolid,
 		CloseCircleSolid,
 		ExclamationCircleOutline,
-		ChevronDownOutline,
 	} from 'flowbite-svelte-icons';
 
 	import {
 		Button,
 		Input,
-		Select,
 		SearchableSelect,
 		Textarea,
 		Card,
 		Badge,
-		Toggle,
 		Alert,
 		IconButton,
 	} from '$lib/components/ui';
 	import ArtistModal from '$lib/components/ArtistModal.svelte';
 	import ArtistList from '$lib/components/ArtistList.svelte';
 	import AudioPlayer from '$lib/components/AudioPlayer.svelte';
-	import { primaryGenres, getSecondaryGenres } from '$lib/data/genres';
-	import { languages, getLanguageName } from '$lib/data/languages';
+	import SongModal from '$lib/components/SongModal.svelte';
+	import ImageCropper from '$lib/components/ImageCropper.svelte';
+	import { getSecondaryGenres } from '$lib/data/genres';
+	import { primaryGenreOptions, languageOptions, getSecondaryGenreOptions } from '$lib/data/options';
 	import {
 		getIdByDropsByMusic,
 		getIdByDropsByAdmin,
@@ -45,12 +42,31 @@
 		getIdByShareByDropsByMusic,
 		deleteIdByShareByDropsByMusic,
 		getArtistsByMusic,
+		getIdBySongsByMusic,
 	} from '$lib/api/sdk.gen.ts';
 	import { getAuthHeaders } from '$lib/apiClient';
 	import { uploadViaWebSocket as wsUpload } from '$lib/utils/wsUpload';
 	import { auth } from '$lib/stores/auth';
 	import { toast } from '$lib/stores/toast';
-	import type { FullDrop, DropType, Song, ArtistRef, Share, Artist } from '$lib/api/types.gen';
+	import type { FullDrop, DropType, Song, Share, Artist, ArtistRef as ApiArtistRef } from '$lib/api/types.gen';
+	import type { ArtistRef } from '$lib/types/drop';
+
+	// Transform local ArtistRef (with nullable _id) to API format
+	// The API accepts new artists with name instead of _id
+	function artistsToApi(artists: ArtistRef[]): ApiArtistRef[] {
+		return artists.map((artist) => {
+			if (artist.type === 'SONGWRITER' || artist.type === 'PRODUCER') {
+				return { type: artist.type, name: artist.name };
+			}
+			// For PRIMARY/FEATURING, if _id is null, backend will handle creation
+			const primaryArtist = artist as { type: 'PRIMARY' | 'FEATURING'; _id: string | null; name?: string };
+			return {
+				type: primaryArtist.type,
+				_id: primaryArtist._id ?? '',
+				...(primaryArtist._id === null && primaryArtist.name ? { name: primaryArtist.name } : {}),
+			} as ApiArtistRef;
+		});
+	}
 
 	// Drop ID is always defined in this route (guaranteed by SvelteKit routing)
 	const dropId = $page.params.id!;
@@ -64,6 +80,27 @@
 	let artworkUrl = $state<string | null>(null);
 	let uploadingArtwork = $state(false);
 	let allArtists = $state<Artist[]>([]);
+
+	// Image cropper state
+	let showCropper = $state(false);
+	let cropperFile = $state<File | null>(null);
+
+	// Duplicate song detection
+	let showDuplicateSongModal = $state(false);
+	let duplicateSongId = $state<string | null>(null);
+	let pendingDuplicateFile = $state<File | null>(null);
+	let duplicateSongDetails = $state<{
+		title: string;
+		artists: ArtistRef[];
+		isrc?: string;
+		primaryGenre: string;
+		secondaryGenre: string;
+		year?: number;
+		language: string;
+		explicit: boolean;
+		instrumental: boolean;
+	} | null>(null);
+	let loadingDuplicateSong = $state(false);
 
 	// Helper function to resolve artist name from ID
 	function getArtistNameById(id: string): string | undefined {
@@ -130,37 +167,10 @@
 		language: '',
 	});
 
-	// Track previous values to detect which toggle changed
-	let prevExplicit = $state(false);
-	let prevInstrumental = $state(false);
-
-	// Mutual exclusivity: explicit and instrumental cannot both be true
-	$effect(() => {
-		if (tempSong.explicit && !prevExplicit && tempSong.instrumental) {
-			tempSong.instrumental = false;
-		} else if (tempSong.instrumental && !prevInstrumental && tempSong.explicit) {
-			tempSong.explicit = false;
-		}
-		prevExplicit = tempSong.explicit;
-		prevInstrumental = tempSong.instrumental;
-	});
-
-	let showSongArtistModal = $state(false);
-	let editingSongArtistIndex = $state<number | null>(null);
-	let editingSongArtist = $state<ArtistRef | null>(null);
-
 	// Derived values
 	const secondaryGenreOptions = $derived(getSecondaryGenres(primaryGenre));
+	const secondaryGenreSelectOptions = $derived(getSecondaryGenreOptions(primaryGenre));
 
-	// Options for searchable selects
-	const primaryGenreOptions = primaryGenres.map((g) => ({ value: g, label: g }));
-	const secondaryGenreSelectOptions = $derived(
-		secondaryGenreOptions.map((g) => ({ value: g, label: g }))
-	);
-	const languageOptions = Object.entries(languages).map(([code, name]) => ({
-		value: code,
-		label: name,
-	}));
 	const isAdmin = $derived($auth.user?.isAdmin ?? false);
 	// Admins can edit any drop, users can only edit certain statuses
 	const isEditable = $derived(
@@ -178,9 +188,7 @@
 		isAdmin || (isEditable && (drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE')),
 	);
 	// Secondary genre options for song modal
-	const tempSongSecondaryGenreOptions = $derived(
-		getSecondaryGenres(tempSong.primaryGenre).map((g) => ({ value: g, label: g }))
-	);
+	const tempSongSecondaryGenreOptions = $derived(getSecondaryGenreOptions(tempSong.primaryGenre));
 	const canSubmitForReview = $derived(drop?.type === 'UNSUBMITTED' || drop?.type === 'PRIVATE');
 	const canCancelReview = $derived(drop?.type === 'UNDER_REVIEW');
 	const canRequestTakedown = $derived(
@@ -304,10 +312,42 @@
 		const input = event.target as HTMLInputElement;
 		const file = input.files?.[0];
 		if (file) {
-			uploadArtwork(file);
+			processArtworkFile(file);
 		}
 		// Reset input so the same file can be selected again
 		input.value = '';
+	}
+
+	function processArtworkFile(file: File) {
+		if (!file.type.startsWith('image/')) return;
+
+		// Check aspect ratio before uploading
+		const img = new Image();
+		const url = URL.createObjectURL(file);
+
+		img.onload = () => {
+			if (img.naturalWidth !== img.naturalHeight) {
+				// Not 1:1 - show cropper
+				cropperFile = file;
+				showCropper = true;
+			} else {
+				// Already 1:1 - upload directly
+				uploadArtwork(file);
+			}
+		};
+		img.src = url;
+	}
+
+	function handleCropComplete(blob: Blob) {
+		showCropper = false;
+		cropperFile = null;
+		const file = new File([blob], 'artwork.jpg', { type: 'image/jpeg' });
+		uploadArtwork(file);
+	}
+
+	function handleCropCancel() {
+		showCropper = false;
+		cropperFile = null;
 	}
 
 	async function uploadArtwork(file: File) {
@@ -403,12 +443,16 @@
 		error = null;
 		successMessage = null;
 		try {
-			// Apply any file updates to songs before saving
+			// Apply any file updates to songs before saving, and transform artist refs
 			const songsToSave = songs.map((song, index) => {
+				const updatedSong = {
+					...song,
+					artists: artistsToApi(song.artists as ArtistRef[]),
+				};
 				if (songFileUpdates[index]) {
-					return { ...song, file: songFileUpdates[index] };
+					return { ...updatedSong, file: songFileUpdates[index] };
 				}
-				return song;
+				return updatedSong;
 			});
 
 			// Save drop data
@@ -424,7 +468,7 @@
 					soundRecordingCopyright,
 					gtin: gtin || undefined,
 					comments: comments || undefined,
-					artists,
+					artists: artistsToApi(artists),
 					songs: songsToSave,
 				},
 				headers: getAuthHeaders(),
@@ -548,9 +592,6 @@
 			year: song.year,
 			language: song.language ?? '',
 		};
-		// Reset prev values to match the loaded song
-		prevExplicit = tempSong.explicit;
-		prevInstrumental = tempSong.instrumental;
 		editingSongIndex = index;
 		// Reset file upload state - check if we already have a pending file update for this song
 		currentSongFileUploaded = !!songFileUpdates[index];
@@ -567,7 +608,7 @@
 			title: tempSong.title,
 			explicit: tempSong.explicit,
 			instrumental: tempSong.instrumental,
-			artists: tempSong.artists,
+			artists: tempSong.artists as ApiArtistRef[],
 			isrc: tempSong.isrc,
 			primaryGenre: tempSong.primaryGenre || existingSong.primaryGenre,
 			secondaryGenre: tempSong.secondaryGenre || existingSong.secondaryGenre,
@@ -579,45 +620,9 @@
 		markChanged();
 	}
 
-	// Song artist management (within song modal)
-	function openAddSongArtist() {
-		editingSongArtist = null;
-		editingSongArtistIndex = null;
-		showSongArtistModal = true;
-	}
-
-	function openEditSongArtist(index: number) {
-		editingSongArtist = tempSong.artists[index];
-		editingSongArtistIndex = index;
-		showSongArtistModal = true;
-	}
-
-	function handleSaveSongArtist(artist: ArtistRef) {
-		if (editingSongArtistIndex !== null) {
-			tempSong.artists[editingSongArtistIndex] = artist;
-		} else {
-			tempSong.artists = [...tempSong.artists, artist];
-		}
-		showSongArtistModal = false;
-	}
-
-	function removeSongArtist(index: number) {
-		tempSong.artists = tempSong.artists.filter((_, i) => i !== index);
-	}
-
 	function deleteSong(index: number) {
 		songs = songs.filter((_, i) => i !== index);
 		markChanged();
-	}
-
-	function handleSongFileUpload(event: Event) {
-		const input = event.target as HTMLInputElement;
-		const file = input.files?.[0];
-		if (file && editingSongIndex !== null) {
-			uploadSongFile(file);
-		}
-		// Reset input so the same file can be selected again
-		input.value = '';
 	}
 
 	async function uploadSongFile(file: File) {
@@ -633,18 +638,98 @@
 					songUploadProgress = percent;
 				},
 			});
+
+			// Check if this is a duplicate song
+			if (fileId.startsWith('duplicate:')) {
+				const existingSongId = fileId.substring('duplicate:'.length);
+				duplicateSongId = existingSongId;
+				pendingDuplicateFile = file;
+				uploadingSongFile = false;
+				songUploadProgress = 0;
+
+				// Fetch existing song details
+				loadingDuplicateSong = true;
+				showDuplicateSongModal = true;
+				try {
+					const response = await getIdBySongsByMusic({
+						path: { id: existingSongId },
+						headers: getAuthHeaders(),
+					});
+					if (response.data) {
+						duplicateSongDetails = {
+							title: response.data.title,
+							artists: response.data.artists as ArtistRef[],
+							isrc: response.data.isrc,
+							primaryGenre: response.data.primaryGenre,
+							secondaryGenre: response.data.secondaryGenre,
+							year: response.data.year,
+							language: response.data.language,
+							explicit: response.data.explicit,
+							instrumental: response.data.instrumental,
+						};
+					}
+				} catch {
+					// Failed to fetch details, modal will show without them
+				} finally {
+					loadingDuplicateSong = false;
+				}
+				return;
+			}
+
 			// Store the new file ID for this song
-			songFileUpdates[editingSongIndex] = fileId;
-			currentSongFileUploaded = true;
-			currentSongFilename = file.name;
-			hasChanges = true;
-			toast.show('Audio file uploaded successfully', 'success');
+			applyFileUpdate(fileId, file.name);
 		} catch (e: any) {
 			toast.show(e?.message || 'Failed to upload audio file', 'error');
-		} finally {
 			uploadingSongFile = false;
 			songUploadProgress = 0;
 		}
+	}
+
+	function applyFileUpdate(fileId: string, filename: string) {
+		if (editingSongIndex === null) return;
+		songFileUpdates[editingSongIndex] = fileId;
+		currentSongFileUploaded = true;
+		currentSongFilename = filename;
+		hasChanges = true;
+		uploadingSongFile = false;
+		songUploadProgress = 0;
+		toast.show('Audio file uploaded successfully', 'success');
+	}
+
+	function handleDuplicateSongConfirm() {
+		if (!duplicateSongId || !pendingDuplicateFile) return;
+
+		// Pre-populate tempSong with existing song data if available
+		if (duplicateSongDetails) {
+			tempSong.title = duplicateSongDetails.title || tempSong.title;
+			if (duplicateSongDetails.artists.length > 0) {
+				tempSong.artists = [...duplicateSongDetails.artists];
+			}
+			tempSong.isrc = duplicateSongDetails.isrc || tempSong.isrc;
+			tempSong.primaryGenre = duplicateSongDetails.primaryGenre || tempSong.primaryGenre;
+			tempSong.secondaryGenre = duplicateSongDetails.secondaryGenre || tempSong.secondaryGenre;
+			tempSong.year = duplicateSongDetails.year ?? tempSong.year;
+			tempSong.language = duplicateSongDetails.language || tempSong.language;
+			tempSong.explicit = duplicateSongDetails.explicit;
+			tempSong.instrumental = duplicateSongDetails.instrumental;
+		}
+
+		applyFileUpdate(duplicateSongId, pendingDuplicateFile.name);
+		showDuplicateSongModal = false;
+		duplicateSongId = null;
+		pendingDuplicateFile = null;
+		duplicateSongDetails = null;
+	}
+
+	function handleDuplicateSongCancel() {
+		showDuplicateSongModal = false;
+		duplicateSongId = null;
+		pendingDuplicateFile = null;
+		duplicateSongDetails = null;
+
+		// Reset file upload state so user can try a different file
+		currentSongFileUploaded = false;
+		currentSongFilename = '';
 	}
 
 	function getStatusColor(type: DropType | undefined): string {
@@ -999,7 +1084,14 @@
 							bind:value={gtin}
 							label="UPC/EAN"
 							disabled={!isGtinEditable}
-							oninput={markChanged}
+							inputmode="numeric"
+							pattern="[0-9]*"
+							oninput={(e) => {
+								const input = e.currentTarget as HTMLInputElement;
+								input.value = input.value.replace(/\D/g, '');
+								gtin = input.value;
+								markChanged();
+							}}
 							hint={!isGtinEditable && drop.gtin
 								? 'Cannot be changed after publishing'
 								: drop.gtin
@@ -1224,174 +1316,68 @@
 </Modal>
 
 <!-- Song Edit Modal -->
-<Modal bind:open={showSongModal} title="Edit Song" size="xl" class="bg-gray-800">
-	<div class="space-y-6">
-		<!-- Audio File Section -->
-		{#if isEditable}
-			<div
-				class="bg-gradient-to-br from-orange-500/10 to-orange-600/5 border border-orange-500/20 rounded-xl p-4"
-			>
-				<div class="flex items-start gap-3 mb-3">
-					<div
-						class="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center flex-shrink-0"
-					>
-						<MusicSolid class="w-5 h-5 text-orange-400" />
-					</div>
-					<div class="flex-1">
-						<h3 class="text-base font-semibold text-white">Audio File</h3>
-						<p class="text-sm text-gray-400">Replace the audio file for this song</p>
-					</div>
-				</div>
+<!-- Song Modal -->
+<SongModal
+	bind:open={showSongModal}
+	title="Edit Song"
+	bind:song={tempSong}
+	isUploading={uploadingSongFile}
+	uploadProgress={songUploadProgress}
+	fileUploaded={currentSongFileUploaded}
+	uploadedFilename={currentSongFilename}
+	requiresFile={false}
+	isEditable={isEditable}
+	isIsrcEditable={isIsrcEditable}
+	resolveName={getArtistNameById}
+	onclose={() => (showSongModal = false)}
+	onsave={saveSong}
+	onfileselect={isEditable ? uploadSongFile : undefined}
+/>
 
-				<div
-					class="border-2 border-dashed rounded-lg p-6 text-center transition-all duration-200 {uploadingSongFile
-						? 'border-orange-500/50 bg-orange-500/5 cursor-wait'
-						: currentSongFileUploaded
-							? 'border-green-500/50 bg-green-500/5 cursor-pointer hover:border-green-500'
-							: 'border-gray-600 bg-gray-800/30 cursor-pointer hover:border-orange-500/50 hover:bg-orange-500/5'}"
-					role="button"
-					tabindex="0"
-					onclick={() => !uploadingSongFile && document.getElementById('song-file-input')?.click()}
-					onkeydown={(e) =>
-						!uploadingSongFile &&
-						e.key === 'Enter' &&
-						document.getElementById('song-file-input')?.click()}
-				>
-					{#if uploadingSongFile}
-						<div
-							class="w-10 h-10 border-2 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"
-						></div>
-						<p class="text-white font-medium">Uploading... {songUploadProgress}%</p>
-						<p class="text-gray-400 text-sm">Please wait while we process your file</p>
-					{:else if currentSongFileUploaded}
-						<CheckCircleSolid class="w-10 h-10 text-green-400 mx-auto mb-3" />
-						<p class="text-white font-medium">New audio file ready</p>
-						{#if currentSongFilename}
-							<p class="text-green-400 text-sm font-medium">{currentSongFilename}</p>
-						{/if}
-						<p class="text-gray-400 text-xs mt-1">Click to replace with a different file</p>
-					{:else}
-						<UploadOutline class="w-10 h-10 text-orange-500 mx-auto mb-3" />
-						<p class="text-white font-medium">Click to upload a new audio file</p>
-						<p class="text-gray-400 text-sm">WAV or FLAC format recommended</p>
-					{/if}
-				</div>
-				<input
-					type="file"
-					id="song-file-input"
-					accept="audio/wav,audio/x-wav,audio/flac,audio/x-flac,audio/*"
-					onchange={handleSongFileUpload}
-					class="hidden"
-				/>
+<!-- Image Cropper Modal -->
+<ImageCropper
+	bind:open={showCropper}
+	imageFile={cropperFile}
+	oncrop={handleCropComplete}
+	oncancel={handleCropCancel}
+/>
+
+<!-- Duplicate Song Modal -->
+<Modal bind:open={showDuplicateSongModal} title="Duplicate Song Detected" size="md">
+	<div class="space-y-4">
+		<div class="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+			<ExclamationCircleOutline class="w-6 h-6 text-blue-400 mt-0.5 flex-shrink-0" />
+			<div>
+				<p class="text-white font-medium mb-2">This audio file already exists</p>
+				<p class="text-gray-300 text-sm">
+					This exact audio file has already been uploaded to the system. Would you like to use the
+					existing file for this song?
+				</p>
+			</div>
+		</div>
+
+		{#if loadingDuplicateSong}
+			<div class="flex items-center justify-center py-4">
+				<Spinner size="md" />
+			</div>
+		{:else if duplicateSongDetails}
+			<div class="p-4 bg-gray-800 rounded-lg">
+				<p class="text-sm text-gray-400 mb-1">Existing song:</p>
+				<p class="text-white font-medium">{duplicateSongDetails.title}</p>
+				{#if duplicateSongDetails.artists.length > 0}
+					<p class="text-sm text-gray-400 mt-1">
+						{duplicateSongDetails.artists
+							.filter((a) => a.type === 'PRIMARY' || a.type === 'FEATURING')
+							.map((a) => ('name' in a ? a.name : getArtistNameById(a._id ?? '') ?? 'Unknown'))
+							.join(', ')}
+					</p>
+				{/if}
 			</div>
 		{/if}
-
-		<!-- Song Title -->
-		<Input
-			bind:value={tempSong.title}
-			label="Song Title"
-			placeholder="Enter song title"
-			disabled={!isEditable}
-		/>
-
-		<!-- Genre Section -->
-		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-			<SearchableSelect
-				bind:value={tempSong.primaryGenre}
-				options={primaryGenreOptions}
-				label="Primary Genre"
-				placeholder="Select primary genre..."
-				disabled={!isEditable}
-			/>
-
-			<SearchableSelect
-				bind:value={tempSong.secondaryGenre}
-				options={tempSongSecondaryGenreOptions}
-				label="Secondary Genre"
-				placeholder="Select secondary genre..."
-				disabled={!isEditable || !tempSong.primaryGenre}
-			/>
-		</div>
-
-		<!-- Content Flags -->
-		<div>
-			<span class="block text-sm font-medium text-white mb-3">Content Flags</span>
-			<div class="flex gap-6">
-				<Toggle bind:checked={tempSong.explicit} label="Explicit Content" disabled={!isEditable} />
-				<Toggle bind:checked={tempSong.instrumental} label="Instrumental" disabled={!isEditable} />
-			</div>
-		</div>
-
-		<!-- Song Artists -->
-		<ArtistList
-			artists={tempSong.artists}
-			editable={isEditable}
-			onadd={openAddSongArtist}
-			onedit={openEditSongArtist}
-			onremove={removeSongArtist}
-			emptyMessage="No artists added yet"
-			compact={true}
-			resolveName={getArtistNameById}
-		/>
-
-		<!-- Advanced Settings -->
-		<details class="group">
-			<summary class="flex items-center gap-3 cursor-pointer list-none">
-				<div class="w-8 h-8 rounded-lg bg-gray-700/50 flex items-center justify-center">
-					<ChevronDownOutline
-						class="w-4 h-4 text-gray-400 transition-transform group-open:rotate-180"
-					/>
-				</div>
-				<h3 class="text-lg font-semibold text-white">Advanced Settings</h3>
-				<span class="text-xs text-gray-500">(Optional)</span>
-			</summary>
-			<div class="mt-4 pl-11 space-y-4">
-				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-					<Input
-						type="number"
-						value={tempSong.year?.toString() ?? ''}
-						oninput={(e) => {
-							const val = (e.target as HTMLInputElement).value;
-							tempSong.year = val ? parseInt(val, 10) : undefined;
-						}}
-						label="Recording Year"
-						placeholder="YYYY"
-						hint="Year when this song was originally recorded"
-						disabled={!isEditable}
-					/>
-					<SearchableSelect
-						bind:value={tempSong.language}
-						options={[{ value: '', label: 'Use drop language' }, ...languageOptions]}
-						label="Language"
-						placeholder="Select language..."
-						hint="Language of the song (defaults to drop language)"
-						disabled={!isEditable}
-					/>
-				</div>
-				<Input
-					bind:value={tempSong.isrc}
-					label="ISRC Code"
-					placeholder="CC-XXX-YY-NNNNN"
-					disabled={!isIsrcEditable}
-					hint={!isIsrcEditable && tempSong.isrc
-						? 'Cannot be changed after publishing'
-						: 'International Standard Recording Code - leave empty to auto-generate'}
-				/>
-			</div>
-		</details>
 	</div>
 
 	{#snippet footer()}
-		<Button variant="secondary" onclick={() => (showSongModal = false)}>Cancel</Button>
-		<Button onclick={saveSong} disabled={!tempSong.title.trim() || !isEditable}>Save Song</Button>
+		<Button variant="secondary" onclick={handleDuplicateSongCancel}>Cancel</Button>
+		<Button onclick={handleDuplicateSongConfirm} disabled={loadingDuplicateSong}>Use Existing File</Button>
 	{/snippet}
 </Modal>
-
-<!-- Song Artist Modal -->
-<ArtistModal
-	bind:open={showSongArtistModal}
-	artist={editingSongArtist}
-	onclose={() => (showSongArtistModal = false)}
-	onsave={handleSaveSongArtist}
-	title={editingSongArtistIndex !== null ? 'Edit Song Artist' : 'Add Song Artist'}
-/>

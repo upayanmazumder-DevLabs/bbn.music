@@ -29,11 +29,16 @@
 	}: Props = $props();
 
 	function getArtistDisplayName(artist: ArtistRef): string {
-		if ('name' in artist) {
+		// SONGWRITER/PRODUCER always have name
+		if (artist.type === 'SONGWRITER' || artist.type === 'PRODUCER') {
 			return artist.name || 'Unknown';
 		}
-		// PRIMARY or FEATURING - resolve from ID
-		if ('_id' in artist && resolveName) {
+		// PRIMARY/FEATURING - check for inline name first (for new artists with _id: null)
+		if ('name' in artist && artist.name) {
+			return artist.name;
+		}
+		// Then try to resolve from ID
+		if ('_id' in artist && artist._id && resolveName) {
 			return resolveName(artist._id) || 'Unknown Artist';
 		}
 		return 'Unknown Artist';

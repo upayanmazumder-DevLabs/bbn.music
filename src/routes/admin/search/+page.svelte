@@ -83,6 +83,7 @@
 				path: { id: wallet._id },
 				body: {
 					transactions: [
+						...(wallet.transactions || []),
 						{
 							amount: txAmount,
 							timestamp: timestampMs,

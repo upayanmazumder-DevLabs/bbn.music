@@ -352,11 +352,62 @@
 				return songData;
 			});
 
-			await patchIdByDropsByMusic({
+			const response = await patchIdByDropsByMusic({
 				path: { id: dropId },
 				headers: getAuthHeaders(),
 				body,
 			});
+
+			// If we had new artists (with _id: null), refetch the artists list
+			// so they can be resolved to names in the UI
+			const hadNewArtists =
+				formState.artists.some((a) => (a as any)._id === null) ||
+				formState.songs.some((s) => s.artists?.some((a) => (a as any)._id === null));
+
+			if (hadNewArtists && response.data) {
+				// Refetch artists to get the newly created ones
+				try {
+					const artistsResponse = await getArtistsByMusic({
+						headers: getAuthHeaders(),
+					});
+					if (artistsResponse.data) {
+						allArtists = artistsResponse.data as Artist[];
+					}
+				} catch {
+					// Non-critical, continue without updated artists list
+				}
+
+				// Update formState with the new artist IDs from the response
+				const updatedDrop = response.data as any;
+				if (updatedDrop.artists) {
+					formState.artists = updatedDrop.artists.map((a: any) => {
+						if (a.type === 'PRIMARY' || a.type === 'FEATURING') {
+							return { type: a.type, _id: a._id };
+						} else {
+							return { type: a.type, name: a.name || '' };
+						}
+					});
+				}
+				if (updatedDrop.songs) {
+					formState.songs = formState.songs.map((song, idx) => {
+						const updatedSong = updatedDrop.songs[idx];
+						if (updatedSong?.artists) {
+							return {
+								...song,
+								_id: updatedSong._id || song._id,
+								artists: updatedSong.artists.map((a: any) => {
+									if (a.type === 'PRIMARY' || a.type === 'FEATURING') {
+										return { type: a.type, _id: a._id };
+									} else {
+										return { type: a.type, name: a.name || '' };
+									}
+								}),
+							};
+						}
+						return song;
+					});
+				}
+			}
 		} catch (e: any) {
 			const errorMessage = e?.error?.message || e?.message || 'Unknown error';
 			toast.show(`Failed to save progress: ${errorMessage}`, 'error');

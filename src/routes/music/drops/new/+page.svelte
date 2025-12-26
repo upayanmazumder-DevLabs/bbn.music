@@ -256,6 +256,7 @@
 		language: string;
 		explicit: boolean;
 		instrumental: boolean;
+		file?: string;
 	} | null>(null);
 	let loadingDuplicateSong = $state(false);
 
@@ -790,6 +791,7 @@
 							language: response.data.language,
 							explicit: response.data.explicit,
 							instrumental: response.data.instrumental,
+							file: response.data.file,
 						};
 					}
 				} catch {
@@ -844,7 +846,7 @@
 	}
 
 	async function handleDuplicateSongConfirm() {
-		if (!duplicateSongId || !pendingDuplicateFile) return;
+		if (!duplicateSongId || !pendingDuplicateFile || !duplicateSongDetails?.file) return;
 
 		const file = pendingDuplicateFile;
 		const cleanedTitle = file.name
@@ -871,7 +873,7 @@
 		uploadingSong = true;
 
 		try {
-			await createSongRecord(duplicateSongId, tempSong.title || cleanedTitle, file.name);
+			await createSongRecord(duplicateSongDetails.file, tempSong.title || cleanedTitle, file.name);
 		} catch (e: any) {
 			const errorMsg = e?.error?.message || e?.message || 'Failed to add song';
 			toast.show(errorMsg, 'error');

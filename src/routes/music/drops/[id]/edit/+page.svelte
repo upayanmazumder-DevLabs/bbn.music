@@ -99,6 +99,7 @@
 		language: string;
 		explicit: boolean;
 		instrumental: boolean;
+		file?: string;
 	} | null>(null);
 	let loadingDuplicateSong = $state(false);
 
@@ -666,6 +667,7 @@
 							language: response.data.language,
 							explicit: response.data.explicit,
 							instrumental: response.data.instrumental,
+							file: response.data.file,
 						};
 					}
 				} catch {
@@ -697,7 +699,7 @@
 	}
 
 	function handleDuplicateSongConfirm() {
-		if (!duplicateSongId || !pendingDuplicateFile) return;
+		if (!duplicateSongId || !pendingDuplicateFile || !duplicateSongDetails?.file) return;
 
 		// Pre-populate tempSong with existing song data if available
 		if (duplicateSongDetails) {
@@ -714,7 +716,7 @@
 			tempSong.instrumental = duplicateSongDetails.instrumental;
 		}
 
-		applyFileUpdate(duplicateSongId, pendingDuplicateFile.name);
+		applyFileUpdate(duplicateSongDetails.file, pendingDuplicateFile.name);
 		showDuplicateSongModal = false;
 		duplicateSongId = null;
 		pendingDuplicateFile = null;

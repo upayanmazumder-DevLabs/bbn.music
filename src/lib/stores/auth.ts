@@ -447,8 +447,14 @@ function createAuthStore() {
 				}
 
 				return true;
-			} catch {
-				this.logout();
+			} catch (error: any) {
+				// Only logout on actual auth failures (401/403), not network errors
+				// Network errors (backend down, timeout) should keep the user session
+				const status = error?.response?.status || error?.status;
+				if (status === 401 || status === 403) {
+					this.logout();
+				}
+				// For network errors, keep the user logged in with their existing token
 				return false;
 			} finally {
 				isRefreshing = false;

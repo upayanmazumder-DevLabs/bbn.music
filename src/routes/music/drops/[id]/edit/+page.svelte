@@ -699,24 +699,28 @@
 	}
 
 	function handleDuplicateSongConfirm() {
-		if (!duplicateSongId || !pendingDuplicateFile || !duplicateSongDetails?.file) return;
+		if (!duplicateSongId || !duplicateSongDetails) return;
+		if (editingSongIndex === null) return;
 
-		// Pre-populate tempSong with existing song data if available
-		if (duplicateSongDetails) {
-			tempSong.title = duplicateSongDetails.title || tempSong.title;
-			if (duplicateSongDetails.artists.length > 0) {
-				tempSong.artists = [...duplicateSongDetails.artists];
-			}
-			tempSong.isrc = duplicateSongDetails.isrc || tempSong.isrc;
-			tempSong.primaryGenre = duplicateSongDetails.primaryGenre || tempSong.primaryGenre;
-			tempSong.secondaryGenre = duplicateSongDetails.secondaryGenre || tempSong.secondaryGenre;
-			tempSong.year = duplicateSongDetails.year ?? tempSong.year;
-			tempSong.language = duplicateSongDetails.language || tempSong.language;
-			tempSong.explicit = duplicateSongDetails.explicit;
-			tempSong.instrumental = duplicateSongDetails.instrumental;
-		}
+		// Replace the current song with the existing song (one song record per file)
+		const existingSong = {
+			_id: duplicateSongId,
+			file: duplicateSongDetails.file!,
+			title: duplicateSongDetails.title,
+			artists: [...duplicateSongDetails.artists],
+			explicit: duplicateSongDetails.explicit,
+			instrumental: duplicateSongDetails.instrumental,
+			isrc: duplicateSongDetails.isrc,
+			primaryGenre: duplicateSongDetails.primaryGenre,
+			secondaryGenre: duplicateSongDetails.secondaryGenre,
+			year: duplicateSongDetails.year,
+			language: duplicateSongDetails.language,
+		} as Song;
 
-		applyFileUpdate(duplicateSongDetails.file, pendingDuplicateFile.name);
+		songs = songs.map((s, i) => (i === editingSongIndex ? existingSong : s));
+		showSongModal = false;
+		markChanged();
+		toast.show('Song replaced with existing recording', 'success');
 		showDuplicateSongModal = false;
 		duplicateSongId = null;
 		pendingDuplicateFile = null;

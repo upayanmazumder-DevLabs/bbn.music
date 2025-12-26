@@ -873,43 +873,35 @@
 		}
 	}
 
-	async function handleDuplicateSongConfirm() {
-		if (!duplicateSongId || !pendingDuplicateFile || !duplicateSongDetails?.file) return;
+	function handleDuplicateSongConfirm() {
+		if (!duplicateSongId || !duplicateSongDetails) return;
 
-		const file = pendingDuplicateFile;
-		const cleanedTitle = file.name
-			.replaceAll('_', ' ')
-			.replaceAll('-', ' ')
-			.replace(/\.[^/.]+$/, '');
+		// Add the existing song directly to the drop (don't create a new song record)
+		const existingSong = {
+			_id: duplicateSongId,
+			file: duplicateSongDetails.file!,
+			title: duplicateSongDetails.title,
+			artists: [...duplicateSongDetails.artists],
+			explicit: duplicateSongDetails.explicit,
+			instrumental: duplicateSongDetails.instrumental,
+			isrc: duplicateSongDetails.isrc,
+			primaryGenre: duplicateSongDetails.primaryGenre,
+			secondaryGenre: duplicateSongDetails.secondaryGenre,
+			year: duplicateSongDetails.year,
+			language: duplicateSongDetails.language,
+		} as Song;
 
-		// Pre-populate tempSong with existing song data if available
-		if (duplicateSongDetails) {
-			tempSong.title = duplicateSongDetails.title || tempSong.title || cleanedTitle;
-			if (duplicateSongDetails.artists.length > 0) {
-				tempSong.artists = [...duplicateSongDetails.artists];
-			}
-			tempSong.isrc = duplicateSongDetails.isrc || tempSong.isrc;
-			tempSong.primaryGenre = duplicateSongDetails.primaryGenre || tempSong.primaryGenre;
-			tempSong.secondaryGenre = duplicateSongDetails.secondaryGenre || tempSong.secondaryGenre;
-			tempSong.year = duplicateSongDetails.year ?? tempSong.year;
-			tempSong.language = duplicateSongDetails.language || tempSong.language;
-			tempSong.explicit = duplicateSongDetails.explicit;
-			tempSong.instrumental = duplicateSongDetails.instrumental;
-		}
-
+		formState.songs = [...formState.songs, existingSong];
+		showSongModal = false;
 		showDuplicateSongModal = false;
-		uploadingSong = true;
+		toast.show('Song added to drop', 'success');
 
-		try {
-			await createSongRecord(duplicateSongDetails.file, tempSong.title || cleanedTitle, file.name);
-		} catch (e: any) {
-			const errorMsg = e?.error?.message || e?.message || 'Failed to add song';
-			toast.show(errorMsg, 'error');
-		} finally {
-			duplicateSongId = null;
-			pendingDuplicateFile = null;
-			duplicateSongDetails = null;
-		}
+		// Reset state
+		duplicateSongId = null;
+		pendingDuplicateFile = null;
+		duplicateSongDetails = null;
+		uploadingSong = false;
+		songUploadProgress = 0;
 	}
 
 	function handleDuplicateSongCancel() {

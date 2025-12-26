@@ -298,62 +298,74 @@
 		}
 	});
 
-	// Save drop data to backend
-	async function saveDrop() {
+	// Save drop data to backend - only saves data relevant to the specified step
+	async function saveDrop(step?: number) {
 		if (!dropId) return;
 
 		try {
-			// Build body object
-			const body: any = {
-				title: formState.title,
-				release: formState.release,
-				language: formState.language,
-				primaryGenre: formState.primaryGenre,
-				secondaryGenre: formState.secondaryGenre,
-				artists: formState.artists,
-				compositionCopyright: formState.compositionCopyright,
-				soundRecordingCopyright: formState.soundRecordingCopyright,
-				comments: formState.comments,
-			};
+			let body: any = {};
 
-			// Only include gtin if it has a value
-			if (formState.gtin) {
-				body.gtin = formState.gtin;
-			}
-
-			// Include artwork if it has a valid ID
-			if (formState.artwork) {
-				body.artwork = formState.artwork;
-			}
-
-			// Map songs with required fields
-			body.songs = formState.songs.map((song) => {
-				// Use song-specific year/language if available, otherwise fall back to drop-level values
-				const year =
-					(song as any).year ??
-					(formState.release
-						? new Date(formState.release).getFullYear()
-						: new Date().getFullYear());
-				const language = (song as any).language ?? formState.language;
-
-				const songData: any = {
-					_id: song._id,
-					file: song.file,
-					title: song.title,
-					artists: song.artists,
-					explicit: song.explicit,
-					instrumental: song.instrumental,
-					year: year,
-					language: language,
+			// Step 1: Details only
+			if (step === 1 || step === undefined) {
+				body = {
+					...body,
+					title: formState.title,
+					release: formState.release,
+					language: formState.language,
+					primaryGenre: formState.primaryGenre,
+					secondaryGenre: formState.secondaryGenre,
+					artists: formState.artists,
+					compositionCopyright: formState.compositionCopyright,
+					soundRecordingCopyright: formState.soundRecordingCopyright,
+					comments: formState.comments,
 				};
 
-				// Only include optional fields if they have values
-				if (song.primaryGenre) songData.primaryGenre = song.primaryGenre;
-				if (song.secondaryGenre) songData.secondaryGenre = song.secondaryGenre;
-				if (song.isrc) songData.isrc = song.isrc;
+				// Only include gtin if it has a value
+				if (formState.gtin) {
+					body.gtin = formState.gtin;
+				}
+			}
 
-				return songData;
-			});
+			// Step 2: Artwork only (artwork is uploaded separately, this just confirms it)
+			if (step === 2) {
+				if (formState.artwork) {
+					body.artwork = formState.artwork;
+				}
+			}
+
+			// Step 3: Songs only
+			if (step === 3 || step === undefined) {
+				body.songs = formState.songs.map((song) => {
+					// Use song-specific year/language if available, otherwise fall back to drop-level values
+					const year =
+						(song as any).year ??
+						(formState.release
+							? new Date(formState.release).getFullYear()
+							: new Date().getFullYear());
+					const language = (song as any).language ?? formState.language;
+
+					const songData: any = {
+						_id: song._id,
+						file: song.file,
+						title: song.title,
+						artists: song.artists,
+						explicit: song.explicit,
+						instrumental: song.instrumental,
+						year: year,
+						language: language,
+					};
+
+					// Only include optional fields if they have values
+					if (song.primaryGenre) songData.primaryGenre = song.primaryGenre;
+					if (song.secondaryGenre) songData.secondaryGenre = song.secondaryGenre;
+					if (song.isrc) songData.isrc = song.isrc;
+
+					return songData;
+				});
+			}
+
+			// Skip API call if there's nothing to save
+			if (Object.keys(body).length === 0) return;
 
 			const response = await patchIdByDropsByMusic({
 				path: { id: dropId },
@@ -444,6 +456,8 @@
 			return true;
 		} catch (error: any) {
 			if (error.issues) {
+				const currentStepErrors: string[] = [];
+
 				error.issues.forEach((err: any) => {
 					const field = err.path.join('.');
 					// Only keep the first error per field (refinements run in order)
@@ -459,7 +473,21 @@
 					) {
 						showAdvancedSettings = true;
 					}
+
+					// Collect errors relevant to current step for toast
+					if (step === 1 && field !== 'artwork' && field !== 'songs') {
+						currentStepErrors.push(err.message);
+					} else if (step === 2 && field === 'artwork') {
+						currentStepErrors.push(err.message);
+					} else if (step === 3 && field === 'songs') {
+						currentStepErrors.push(err.message);
+					}
 				});
+
+				// Show toast with first relevant error
+				if (currentStepErrors.length > 0) {
+					toast.show(currentStepErrors[0], 'error');
+				}
 			}
 			return false;
 		}
@@ -479,9 +507,9 @@
 				}
 			}
 
-			// Save progress before moving to next step
+			// Save progress before moving to next step (only save current step's data)
 			try {
-				await saveDrop();
+				await saveDrop(formState.currentStep);
 				// Only advance if save was successful
 				formState.currentStep++;
 			} catch (e) {
@@ -495,9 +523,9 @@
 	async function proceedWithShortNotice() {
 		showReleaseDateWarning = false;
 
-		// Save progress before moving to next step
+		// Save progress before moving to next step (step 1 data only)
 		try {
-			await saveDrop();
+			await saveDrop(1);
 			// Only advance if save was successful
 			formState.currentStep++;
 		} catch (e) {
@@ -1003,8 +1031,8 @@
 		formState.isLoading = true;
 
 		try {
-			// Save any final changes
-			await saveDrop();
+			// Save songs data (step 3) before submitting
+			await saveDrop(3);
 
 			// Submit drop for review by changing type to UNDER_REVIEW
 			await postTypeByTypeByDropByMusic({
@@ -1373,6 +1401,12 @@
 						aria-label="Upload artwork"
 					/>
 
+					{#if formState.errors['artwork']}
+						<div class="flex justify-center">
+							<p class="text-sm text-red-400">{formState.errors['artwork']}</p>
+						</div>
+					{/if}
+
 					<div class="flex flex-col items-center gap-4">
 						<Button
 							size="lg"
@@ -1414,6 +1448,10 @@
 							<PlusOutline class="w-4 h-4" /> Add Song
 						</Button>
 					</div>
+
+					{#if formState.errors['songs']}
+						<p class="text-sm text-red-400">{formState.errors['songs']}</p>
+					{/if}
 
 					<div class="space-y-1" role="list">
 						{#each formState.songs as song, index}

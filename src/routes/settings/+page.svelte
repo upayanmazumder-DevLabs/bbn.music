@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { auth } from '$lib/stores/auth';
-	import { Badge, Toggle } from '$lib/components/ui';
+	import { Badge, Toggle, Input } from '$lib/components/ui';
+	import { extractErrorMessage, extractFieldErrors, type FieldErrors } from '$lib/utils/extractError';
 	import {
 		ExclamationCircleOutline,
 		CheckCircleSolid,
@@ -19,6 +20,7 @@
 	import PhoneInput from '$lib/components/PhoneInput.svelte';
 	import { avatarStore } from '$lib/stores/avatar.svelte';
 	import { toast } from '$lib/stores/toast';
+	import { cookieConsent } from '$lib/stores/cookieConsent.svelte';
 
 	let name = $state($auth.user?.profile.username || '');
 	let email = $state($auth.user?.profile.email || '');
@@ -119,6 +121,7 @@
 	let saving = $state(false);
 	let saved = $state(false);
 	let error = $state('');
+	let fieldErrors = $state<FieldErrors>({});
 
 	// Password change state
 	let showPasswordChange = $state(false);
@@ -140,6 +143,7 @@
 
 		saving = true;
 		error = '';
+		fieldErrors = {};
 
 		try {
 			// Normalize phone number (add + if missing, then strip for backend)
@@ -172,7 +176,11 @@
 			saved = true;
 			setTimeout(() => (saved = false), 3000);
 		} catch (e: any) {
-			error = e?.error?.message || e?.message || 'Failed to save settings';
+			const errors = extractFieldErrors(e, 'Failed to save settings');
+			if (errors._general) {
+				error = errors._general;
+			}
+			fieldErrors = errors;
 		} finally {
 			saving = false;
 		}
@@ -217,7 +225,7 @@
 				showPasswordChange = false;
 			}, 3000);
 		} catch (e: any) {
-			passwordError = e?.error?.message || e?.message || 'Failed to change password';
+			passwordError = extractErrorMessage(e, 'Failed to change password');
 		} finally {
 			passwordSaving = false;
 		}
@@ -242,7 +250,7 @@
 			verificationEmailSent = true;
 			setTimeout(() => (verificationEmailSent = false), 5000);
 		} catch (e: any) {
-			error = e?.error?.message || e?.message || 'Failed to send verification email';
+			error = extractErrorMessage(e, 'Failed to send verification email');
 		} finally {
 			sendingVerification = false;
 		}
@@ -287,7 +295,7 @@
 				await avatarStore.refresh($auth.user.id, $auth.user.profile.avatar);
 			}
 		} catch (e: any) {
-			avatarError = e?.error?.message || e?.message || 'Failed to upload profile picture';
+			avatarError = extractErrorMessage(e, 'Failed to upload profile picture');
 		} finally {
 			uploadingAvatar = false;
 			// Reset file input
@@ -451,27 +459,19 @@
 				/>
 			</div>
 			<div class="flex-1">
-				<div>
-					<label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-						>Display Name</label
-					>
-					<input
-						id="name"
-						type="text"
-						bind:value={name}
-						class="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-colors"
-						placeholder="Your name"
-					/>
-				</div>
+				<Input
+					label="Display Name"
+					bind:value={name}
+					placeholder="Your name"
+					error={fieldErrors.name}
+				/>
 			</div>
 		</div>
 
 		<div class="space-y-4">
 			<div>
 				<div class="flex items-center gap-2 mb-2">
-					<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300"
-						>Email</label
-					>
+					<span class="text-sm font-medium text-gray-700 dark:text-gray-300">Email</span>
 					{#if emailVerified}
 						<Badge color="green" size="sm"><CheckCircleSolid class="w-3 h-3 mr-1" />Verified</Badge>
 					{:else}
@@ -480,12 +480,11 @@
 						>
 					{/if}
 				</div>
-				<input
-					id="email"
+				<Input
 					type="email"
 					bind:value={email}
-					class="w-full px-4 py-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-colors"
 					placeholder="your.email@example.com"
+					error={fieldErrors.email}
 				/>
 
 				{#if !emailVerified}
@@ -528,9 +527,13 @@
 					{/if}
 				</div>
 				<PhoneInput id="phone-input" bind:value={phone} bind:error={phoneError} />
-				<p class="text-xs text-gray-500 mt-1">
-					Optional: Add your phone number for notifications and account recovery
-				</p>
+				{#if fieldErrors.phone}
+					<p class="text-red-400 text-sm mt-1">{fieldErrors.phone}</p>
+				{:else}
+					<p class="text-xs text-gray-500 mt-1">
+						Optional: Add your phone number for notifications and account recovery
+					</p>
+				{/if}
 			</div>
 		</div>
 
@@ -719,53 +722,31 @@
 							</div>
 						{/if}
 
-						<div>
-							<label
-								for="newPassword"
-								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-							>
-								New Password
-							</label>
-							<div class="relative">
-								<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-									<LockSolid class="w-5 h-5 text-gray-500" />
-								</div>
-								<input
-									type="password"
-									id="newPassword"
-									bind:value={newPassword}
-									placeholder="Enter new password"
-									required
-									minlength="8"
-									autocomplete="new-password"
-									class="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-colors"
-								/>
-							</div>
-						</div>
+						<Input
+							label="New Password"
+							type="password"
+							id="newPassword"
+							bind:value={newPassword}
+							placeholder="Enter new password"
+							required
+							minlength={8}
+							autocomplete="new-password"
+						>
+							{#snippet icon()}<LockSolid class="w-5 h-5" />{/snippet}
+						</Input>
 
-						<div>
-							<label
-								for="confirmPassword"
-								class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-							>
-								Confirm New Password
-							</label>
-							<div class="relative">
-								<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-									<LockSolid class="w-5 h-5 text-gray-500" />
-								</div>
-								<input
-									type="password"
-									id="confirmPassword"
-									bind:value={confirmPassword}
-									placeholder="Confirm new password"
-									required
-									minlength="8"
-									autocomplete="new-password"
-									class="w-full pl-10 pr-4 py-2.5 rounded-lg bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 text-gray-900 dark:text-white placeholder-gray-500 focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none transition-colors"
-								/>
-							</div>
-						</div>
+						<Input
+							label="Confirm New Password"
+							type="password"
+							id="confirmPassword"
+							bind:value={confirmPassword}
+							placeholder="Confirm new password"
+							required
+							minlength={8}
+							autocomplete="new-password"
+						>
+							{#snippet icon()}<LockSolid class="w-5 h-5" />{/snippet}
+						</Input>
 
 						<button
 							type="submit"
@@ -793,6 +774,33 @@
 					class="px-4 py-2 rounded-lg bg-white/5 text-gray-500 cursor-not-allowed text-sm font-medium"
 				>
 					Setup
+				</button>
+			</div>
+		</div>
+	</section>
+
+	<!-- Privacy Settings -->
+	<section class="bg-white/5 border border-white/10 rounded-2xl p-6">
+		<h2 class="text-xl font-bold text-white mb-6">Privacy</h2>
+		<div class="space-y-4">
+			<div class="flex items-center justify-between">
+				<div>
+					<p class="text-white font-medium">Analytics Cookies</p>
+					<p class="text-sm text-gray-400">
+						{#if cookieConsent.state === 'accepted'}
+							You have accepted analytics cookies (PostHog)
+						{:else if cookieConsent.state === 'declined'}
+							You have declined analytics cookies
+						{:else}
+							No preference set
+						{/if}
+					</p>
+				</div>
+				<button
+					onclick={() => cookieConsent.reset()}
+					class="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-colors"
+				>
+					Change Preference
 				</button>
 			</div>
 		</div>

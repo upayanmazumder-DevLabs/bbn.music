@@ -48,7 +48,9 @@
 		getIdBySongsByMusic,
 	} from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
+	import { prettifyZodMessage, extractErrorMessage } from '$lib/utils/extractError';
 	import { auth } from '$lib/stores/auth';
+	import { getArtistNameById as getArtistNameByIdUtil } from '$lib/utils/artist';
 	import { uploadViaWebSocket as wsUpload } from '$lib/utils/wsUpload';
 	import type {
 		FullDrop,
@@ -79,11 +81,8 @@
 	let copyrightDisabled = $state(true); // Disable by default, enable based on copyrightEditable
 	let allArtists = $state<Artist[]>([]); // For resolving artist IDs to names
 
-	// Helper function to resolve artist name from ID
-	function getArtistNameById(id: string): string | undefined {
-		const artist = allArtists.find((a) => a._id === id);
-		return artist?.name;
-	}
+	// Helper function to resolve artist name from ID (wraps shared utility with local state)
+	const getArtistNameById = (id: string) => getArtistNameByIdUtil(allArtists, id);
 
 	// Load existing drop data on mount
 	onMount(async () => {
@@ -199,7 +198,7 @@
 				}
 			}
 		} catch (e: any) {
-			loadError = e?.error?.message || e?.message || 'Failed to load drop data';
+			loadError = extractErrorMessage(e, 'Failed to load drop data');
 		} finally {
 			initialLoading = false;
 		}
@@ -424,8 +423,7 @@
 				}
 			}
 		} catch (e: any) {
-			const errorMessage = e?.error?.message || e?.message || 'Unknown error';
-			toast.show(`Failed to save progress: ${errorMessage}`, 'error');
+			toast.show(`Failed to save progress: ${extractErrorMessage(e, 'Unknown error')}`, 'error');
 			throw e; // Re-throw to prevent navigation
 		}
 	}
@@ -460,9 +458,12 @@
 
 				error.issues.forEach((err: any) => {
 					const field = err.path.join('.');
+					const fieldName = err.path[err.path.length - 1];
+					const prettyMessage = prettifyZodMessage(err.message, fieldName);
+
 					// Only keep the first error per field (refinements run in order)
 					if (!formState.errors[field]) {
-						formState.errors[field] = err.message;
+						formState.errors[field] = prettyMessage;
 					}
 
 					// Auto-expand advanced settings if there are errors in those fields
@@ -476,11 +477,11 @@
 
 					// Collect errors relevant to current step for toast
 					if (step === 1 && field !== 'artwork' && field !== 'songs') {
-						currentStepErrors.push(err.message);
+						currentStepErrors.push(prettyMessage);
 					} else if (step === 2 && field === 'artwork') {
-						currentStepErrors.push(err.message);
+						currentStepErrors.push(prettyMessage);
 					} else if (step === 3 && field === 'songs') {
-						currentStepErrors.push(err.message);
+						currentStepErrors.push(prettyMessage);
 					}
 				});
 
@@ -833,8 +834,7 @@
 			// Step 2: Create song record in backend with the uploaded file
 			await createSongRecord(fileId, cleanedTitle, file.name);
 		} catch (e: any) {
-			const errorMsg = e?.error?.message || e?.message || 'Failed to upload song';
-			toast.show(errorMsg, 'error');
+			toast.show(extractErrorMessage(e, 'Failed to upload song'), 'error');
 			uploadingSong = false;
 			songUploadProgress = 0;
 		}
@@ -985,8 +985,7 @@
 			formState.artwork = artworkId;
 			toast.show('Artwork uploaded successfully', 'success');
 		} catch (e: any) {
-			const errorMsg = e?.error?.message || e?.message || 'Failed to upload artwork';
-			toast.show(errorMsg, 'error');
+			toast.show(extractErrorMessage(e, 'Failed to upload artwork'), 'error');
 			formState.artworkPreview = '';
 			formState.artwork = '';
 		} finally {
@@ -1035,7 +1034,7 @@
 			toast.show('Drop submitted for review!', 'success');
 			goto('/music/drops');
 		} catch (e: any) {
-			const errorMsg = e?.error?.message || e?.message || 'Failed to submit drop';
+			const errorMsg = extractErrorMessage(e, 'Failed to submit drop');
 			formState.errors['submit'] = errorMsg;
 			toast.show(errorMsg, 'error');
 		} finally {

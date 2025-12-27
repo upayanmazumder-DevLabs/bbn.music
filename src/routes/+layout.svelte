@@ -10,7 +10,13 @@
 	import { page } from '$app/stores';
 	import { initApiClient, getAuthHeaders } from '$lib/apiClient';
 	import { postResendVerifyEmailByMailByUser } from '$lib/api/sdk.gen';
-	import { initPostHog, trackPageView, identifyUser } from '$lib/analytics/posthog';
+	import {
+	initPostHog,
+	trackPageView,
+	identifyUser,
+	acceptTracking,
+	declineTracking,
+} from '$lib/analytics/posthog';
 	import { cookieConsent } from '$lib/stores/cookieConsent.svelte';
 	import CookieConsent from '$lib/components/CookieConsent.svelte';
 	import { avatarStore } from '$lib/stores/avatar.svelte';
@@ -31,9 +37,9 @@
 		}
 	});
 
-	// Identify user in PostHog when authenticated (only if consent given)
+	// Identify user in PostHog when authenticated (only works if consent given)
 	$effect(() => {
-		if ($auth.user?.id && cookieConsent.state === 'accepted') {
+		if ($auth.user?.id) {
 			identifyUser({
 				id: $auth.user.id,
 				email: $auth.user.profile.email,
@@ -43,9 +49,18 @@
 		}
 	});
 
+	// Handle consent state changes (for when user changes preference via settings)
+	$effect(() => {
+		if (cookieConsent.state === 'accepted') {
+			acceptTracking();
+		} else if (cookieConsent.state === 'declined') {
+			declineTracking();
+		}
+	});
+
 	const publicRoutes = [
 		'/signin',
-		'/register',
+		'/signup',
 		'/privacy',
 		'/terms',
 		'/imprint',
@@ -86,7 +101,7 @@
 			return false;
 		}
 
-		if (isAuthenticated && (pathname === '/signin' || pathname === '/register')) {
+		if (isAuthenticated && (pathname === '/signin' || pathname === '/signup')) {
 			goto('/music/drops', { replaceState: true });
 			return false;
 		}
@@ -102,11 +117,19 @@
 		// Initialize API client with any localStorage overrides
 		initApiClient();
 
-		// Initialize PostHog analytics only if user has already consented
+		// Initialize PostHog analytics (uses cookieless_mode: 'on_reject' for GDPR compliance)
+		// This must be called before any consent decision to enable tracking
+		initPostHog();
+
+		// Apply stored consent state
 		if (cookieConsent.state === 'accepted') {
-			initPostHog();
-			trackPageView(window.location.href);
+			acceptTracking();
+		} else if (cookieConsent.state === 'declined') {
+			declineTracking();
 		}
+
+		// Track initial pageview
+		trackPageView(window.location.href);
 
 		// Mark as mounted so we can show auth UI without flash
 		mounted = true;
@@ -118,10 +141,8 @@
 
 	afterNavigate(({ to }) => {
 		if (to?.url.pathname) {
-			// Track page view on navigation (only if consent given)
-			if (cookieConsent.state === 'accepted') {
-				trackPageView(to.url.href);
-			}
+			// Track page view on navigation (PostHog handles consent state internally)
+			trackPageView(to.url.href);
 
 			authChecked = false;
 			if (checkAuth(to.url.pathname)) {
@@ -361,7 +382,7 @@
 									Sign In
 								</a>
 								<a
-									href="/register"
+									href="/signup"
 									class="bg-gradient-to-r from-orange-500 to-orange-400 text-white px-4 py-1.5 rounded-full text-sm hover:opacity-90 transition-opacity"
 								>
 									Sign Up
@@ -514,6 +535,11 @@
 							href="/accessibility"
 							class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
 							>Accessibility</a
+						>
+						<button
+							onclick={() => cookieConsent.reset()}
+							class="text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+							>Cookie Settings</button
 						>
 					</div>
 

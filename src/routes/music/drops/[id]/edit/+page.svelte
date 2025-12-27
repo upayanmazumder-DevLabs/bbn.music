@@ -45,6 +45,8 @@
 		getIdBySongsByMusic,
 	} from '$lib/api/sdk.gen.ts';
 	import { getAuthHeaders } from '$lib/apiClient';
+	import { extractErrorMessage } from '$lib/utils/extractError';
+	import { getArtistNameById as getArtistNameByIdUtil } from '$lib/utils/artist';
 	import { uploadViaWebSocket as wsUpload } from '$lib/utils/wsUpload';
 	import { auth } from '$lib/stores/auth';
 	import { toast } from '$lib/stores/toast';
@@ -103,11 +105,8 @@
 	} | null>(null);
 	let loadingDuplicateSong = $state(false);
 
-	// Helper function to resolve artist name from ID
-	function getArtistNameById(id: string): string | undefined {
-		const artist = allArtists.find((a) => a._id === id);
-		return artist?.name;
-	}
+	// Helper function to resolve artist name from ID (wraps shared utility with local state)
+	const getArtistNameById = (id: string) => getArtistNameByIdUtil(allArtists, id);
 
 	// Edit state - track what's been modified
 	let hasChanges = $state(false);
@@ -288,7 +287,7 @@
 				}
 			}
 		} catch (e: any) {
-			error = e?.error?.message || e?.message || 'Failed to load drop';
+			error = extractErrorMessage(e, 'Failed to load drop');
 		} finally {
 			loading = false;
 		}
@@ -362,8 +361,8 @@
 			artworkUrl = URL.createObjectURL(file);
 			toast.show('Artwork updated successfully', 'success');
 			hasChanges = true;
-		} catch (e: any) {
-			toast.show(e?.message || 'Failed to upload artwork', 'error');
+		} catch (e: unknown) {
+			toast.show(extractErrorMessage(e, 'Failed to upload artwork'), 'error');
 		} finally {
 			uploadingArtwork = false;
 		}
@@ -398,7 +397,7 @@
 				setTimeout(() => (successMessage = null), 3000);
 			}
 		} catch (e: any) {
-			error = e?.error?.message || e?.message || 'Failed to create share link';
+			error = extractErrorMessage(e, 'Failed to create share link');
 		} finally {
 			shareLoading = false;
 		}
@@ -417,7 +416,7 @@
 			successMessage = 'Share link deleted successfully!';
 			setTimeout(() => (successMessage = null), 3000);
 		} catch (e: any) {
-			error = e?.error?.message || e?.message || 'Failed to delete share link';
+			error = extractErrorMessage(e, 'Failed to delete share link');
 		} finally {
 			shareLoading = false;
 		}
@@ -489,7 +488,7 @@
 			songFileUpdates = {}; // Clear file updates after successful save
 			await loadDrop();
 		} catch (e: any) {
-			error = e?.error?.message || e?.message || 'Failed to save drop';
+			error = extractErrorMessage(e, 'Failed to save drop');
 		} finally {
 			saving = false;
 		}
@@ -520,7 +519,7 @@
 			await loadDrop();
 			successMessage = 'Status updated successfully';
 		} catch (e: any) {
-			error = e?.error?.message || e?.message || 'Failed to update status';
+			error = extractErrorMessage(e, 'Failed to update status');
 		} finally {
 			saving = false;
 			pendingStatusChange = null;
@@ -680,8 +679,8 @@
 
 			// Store the new file ID for this song
 			applyFileUpdate(fileId, file.name);
-		} catch (e: any) {
-			toast.show(e?.message || 'Failed to upload audio file', 'error');
+		} catch (e: unknown) {
+			toast.show(extractErrorMessage(e, 'Failed to upload audio file'), 'error');
 			uploadingSongFile = false;
 			songUploadProgress = 0;
 		}

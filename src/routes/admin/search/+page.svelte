@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { Badge, Button, Spinner } from '$lib/components/ui';
+	import { Badge, Button, Input, Spinner } from '$lib/components/ui';
 	import {
 		getQueryBySearchByAdmin,
 		getIdByWalletsByAdmin,
@@ -257,17 +257,16 @@
 	<h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Search</h1>
 
 	<!-- Search Input -->
-	<div class="flex gap-4 mb-6">
-		<div class="flex-1 relative">
-			<SearchOutline class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-			<input
-				type="text"
+	<div class="flex gap-4 mb-6 items-end">
+		<div class="flex-1">
+			<Input
 				bind:value={searchQuery}
 				onkeydown={handleKeydown}
 				placeholder="Search users, drops, songs..."
 				aria-label="Search users, drops, songs"
-				class="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500"
-			/>
+			>
+				{#snippet icon()}<SearchOutline class="w-5 h-5" />{/snippet}
+			</Input>
 		</div>
 		<Button onclick={search} disabled={loading || !searchQuery.trim()} variant="danger" {loading}>
 			{loading ? 'Searching...' : 'Search'}
@@ -415,14 +414,14 @@
 							</div>
 
 							<div>
-								<label for="user-account-type" class="text-xs text-gray-500 block mb-1"
+								<label for="user-account-type" class="block text-sm font-medium text-gray-900 dark:text-white mb-2"
 									>Account Type</label
 								>
 								<select
 									id="user-account-type"
 									value={wallet.accountType}
 									onchange={(e) => updateWallet('accountType', e.currentTarget.value)}
-									class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+									class="w-full px-4 py-2.5 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white hover:border-gray-400 dark:hover:border-gray-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 focus:outline-none transition-all"
 								>
 									<option value="DEFAULT">Default</option>
 									<option value="SUBSCRIBED">Subscribed</option>
@@ -430,16 +429,13 @@
 								</select>
 							</div>
 
-							<div>
-								<label for="user-cut" class="text-xs text-gray-500 block mb-1">Cut (%)</label>
-								<input
-									id="user-cut"
-									type="number"
-									value={wallet.cut}
-									onchange={(e) => updateWallet('cut', e.currentTarget.value)}
-									class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
-								/>
-							</div>
+							<Input
+								label="Cut (%)"
+								id="user-cut"
+								type="number"
+								value={String(wallet.cut ?? '')}
+								onchange={(e) => updateWallet('cut', (e.target as HTMLInputElement).value)}
+							/>
 
 							<div class="flex items-center justify-between">
 								<span class="text-xs text-gray-500">Copyright Editable</span>
@@ -478,22 +474,22 @@
 								<div class="space-y-3">
 									<div class="grid grid-cols-2 gap-3">
 										<div>
-											<label for="tx-amount" class="text-xs text-gray-500 block mb-1">Amount</label>
+											<label for="tx-amount" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">Amount</label>
 											<input
 												id="tx-amount"
 												type="number"
 												step="0.01"
 												bind:value={txAmount}
 												placeholder="0.00"
-												class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+												class="w-full px-4 py-2.5 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 focus:outline-none transition-all"
 											/>
 										</div>
 										<div>
-											<label for="tx-type" class="text-xs text-gray-500 block mb-1">Type</label>
+											<label for="tx-type" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">Type</label>
 											<select
 												id="tx-type"
 												bind:value={txType}
-												class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
+												class="w-full px-4 py-2.5 bg-white dark:bg-gray-900/50 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white hover:border-gray-400 dark:hover:border-gray-500 focus:border-orange-500 focus:ring-2 focus:ring-orange-500/20 focus:outline-none transition-all"
 											>
 												<option value="UNRESTRAINED">Unrestrained</option>
 												<option value="RESTRAINED">Restrained</option>
@@ -501,43 +497,26 @@
 										</div>
 									</div>
 
-									<div>
-										<label for="tx-description" class="text-xs text-gray-500 block mb-1"
-											>Description</label
-										>
-										<input
-											id="tx-description"
-											type="text"
-											bind:value={txDescription}
-											placeholder="e.g., Manual adjustment"
-											class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
-										/>
-									</div>
+									<Input
+										label="Description"
+										id="tx-description"
+										bind:value={txDescription}
+										placeholder="e.g., Manual adjustment"
+									/>
 
-									<div>
-										<label for="tx-counterparty" class="text-xs text-gray-500 block mb-1"
-											>Counter Party</label
-										>
-										<input
-											id="tx-counterparty"
-											type="text"
-											bind:value={txCounterParty}
-											placeholder="e.g., Admin, Symphonic"
-											class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
-										/>
-									</div>
+									<Input
+										label="Counter Party"
+										id="tx-counterparty"
+										bind:value={txCounterParty}
+										placeholder="e.g., Admin, Symphonic"
+									/>
 
-									<div>
-										<label for="tx-timestamp" class="text-xs text-gray-500 block mb-1"
-											>Timestamp</label
-										>
-										<input
-											id="tx-timestamp"
-											type="datetime-local"
-											bind:value={txTimestamp}
-											class="w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded text-gray-900 dark:text-white text-sm"
-										/>
-									</div>
+									<Input
+										label="Timestamp"
+										id="tx-timestamp"
+										type="datetime-local"
+										bind:value={txTimestamp}
+									/>
 
 									<div class="flex gap-2 pt-2">
 										<Button

@@ -2,6 +2,7 @@
 	import type { FullDrop, ArtistRef, Song, Artist } from '$lib/api/types.gen';
 	import { Badge, Card } from '$lib/components/ui';
 	import { ChevronDownOutline, ChevronUpOutline } from 'flowbite-svelte-icons';
+	import { getArtistDisplayName as getArtistName } from '$lib/utils/artist';
 
 	interface Props {
 		current: FullDrop;
@@ -14,12 +15,9 @@
 	// Track expanded sections
 	let expandedSongs = $state<Record<string, boolean>>({});
 
-	function resolveArtistName(artistId: string): string {
-		return artistList.find((a) => a._id === artistId)?.name ?? artistId;
-	}
-
 	function getArtistDisplayName(artist: ArtistRef): string {
-		return 'name' in artist ? artist.name : resolveArtistName(artist._id);
+		const fallback = '_id' in artist ? artist._id : 'Unknown';
+		return getArtistName(artist, artistList, fallback);
 	}
 
 	function isDifferent(a: unknown, b: unknown): boolean {

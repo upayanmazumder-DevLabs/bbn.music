@@ -7,10 +7,11 @@
 		putUserByUser,
 	} from '$lib/api/sdk.gen';
 	import { APITools } from '$lib/apiClient';
-	import { Alert, Button, Spinner } from '$lib/components/ui';
+	import { Alert, Button, Input, Spinner } from '$lib/components/ui';
 	import { auth } from '$lib/stores/auth';
 	import { CheckCircleSolid, EnvelopeSolid, LockSolid } from 'flowbite-svelte-icons';
 	import { onMount } from 'svelte';
+	import { extractErrorMessage } from '$lib/utils/extractError';
 
 	type ViewState = 'login' | 'processing' | 'reset-password' | 'email-verified';
 
@@ -76,11 +77,8 @@
 				} else {
 					throw new Error('Failed to authenticate');
 				}
-			} catch (err: any) {
-				error =
-					err?.error?.message ||
-					err?.message ||
-					'Invalid or expired reset link. Please request a new one.';
+			} catch (err: unknown) {
+				error = extractErrorMessage(err, 'Invalid or expired reset link. Please request a new one.');
 				viewState = 'login';
 			}
 			isLoading = false;
@@ -106,8 +104,8 @@
 				// Refresh user token to get updated email verification status
 				await auth.refreshToken();
 				viewState = 'email-verified';
-			} catch (err: any) {
-				error = err?.error?.message || err?.message || 'Invalid or expired verification link.';
+			} catch (err: unknown) {
+				error = extractErrorMessage(err, 'Invalid or expired verification link.');
 				viewState = 'login';
 			}
 			isLoading = false;
@@ -143,8 +141,8 @@
 
 			// Password updated, redirect to drops
 			goto('/music/drops');
-		} catch (err: any) {
-			error = err?.error?.message || err?.message || 'Failed to update password. Please try again.';
+		} catch (err: unknown) {
+			error = extractErrorMessage(err, 'Failed to update password. Please try again.');
 		}
 
 		isLoading = false;
@@ -219,53 +217,31 @@
 						aria-hidden="true"
 						style="position: absolute; left: -9999px; width: 1px; height: 1px;"
 					/>
-					<div>
-						<label
-							for="newPassword"
-							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-							>New Password</label
-						>
-						<div class="relative">
-							<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-								<LockSolid class="w-5 h-5 text-gray-500" />
-							</div>
-							<input
-								type="password"
-								id="newPassword"
-								name="newPassword"
-								bind:value={newPassword}
-								placeholder="Enter new password"
-								required
-								minlength="8"
-								autocomplete="new-password"
-								class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 hover:border-gray-400 dark:hover:border-white/20 transition-all"
-							/>
-						</div>
-					</div>
+					<Input
+						label="New Password"
+						type="password"
+						name="newPassword"
+						bind:value={newPassword}
+						placeholder="Enter new password"
+						required
+						minlength={8}
+						autocomplete="new-password"
+					>
+						{#snippet icon()}<LockSolid class="w-5 h-5" />{/snippet}
+					</Input>
 
-					<div>
-						<label
-							for="confirmNewPassword"
-							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-							>Confirm Password</label
-						>
-						<div class="relative">
-							<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-								<LockSolid class="w-5 h-5 text-gray-500" />
-							</div>
-							<input
-								type="password"
-								id="confirmNewPassword"
-								name="confirmNewPassword"
-								bind:value={confirmNewPassword}
-								placeholder="Confirm new password"
-								required
-								minlength="8"
-								autocomplete="new-password"
-								class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 hover:border-gray-400 dark:hover:border-white/20 transition-all"
-							/>
-						</div>
-					</div>
+					<Input
+						label="Confirm Password"
+						type="password"
+						name="confirmNewPassword"
+						bind:value={confirmNewPassword}
+						placeholder="Confirm new password"
+						required
+						minlength={8}
+						autocomplete="new-password"
+					>
+						{#snippet icon()}<LockSolid class="w-5 h-5" />{/snippet}
+					</Input>
 
 					<Button
 						type="submit"
@@ -323,50 +299,29 @@
 
 				<!-- Sign In Form -->
 				<form onsubmit={handleSubmit} class="space-y-5">
-					<div>
-						<label
-							for="email"
-							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label
-						>
-						<div class="relative">
-							<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-								<EnvelopeSolid class="w-5 h-5 text-gray-500" />
-							</div>
-							<input
-								type="email"
-								id="email"
-								name="email"
-								bind:value={email}
-								placeholder="you@example.com"
-								required
-								autocomplete="email"
-								class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 hover:border-gray-400 dark:hover:border-white/20 transition-all"
-							/>
-						</div>
-					</div>
+					<Input
+						label="Email"
+						type="email"
+						name="email"
+						bind:value={email}
+						placeholder="you@example.com"
+						required
+						autocomplete="email"
+					>
+						{#snippet icon()}<EnvelopeSolid class="w-5 h-5" />{/snippet}
+					</Input>
 
-					<div>
-						<label
-							for="password"
-							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-							>Password</label
-						>
-						<div class="relative">
-							<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-								<LockSolid class="w-5 h-5 text-gray-500" />
-							</div>
-							<input
-								type="password"
-								id="password"
-								name="password"
-								bind:value={password}
-								placeholder="Enter your password"
-								required
-								autocomplete="current-password"
-								class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 hover:border-gray-400 dark:hover:border-white/20 transition-all"
-							/>
-						</div>
-					</div>
+					<Input
+						label="Password"
+						type="password"
+						name="password"
+						bind:value={password}
+						placeholder="Enter your password"
+						required
+						autocomplete="current-password"
+					>
+						{#snippet icon()}<LockSolid class="w-5 h-5" />{/snippet}
+					</Input>
 
 					<div class="flex justify-end">
 						<a href="/forgot-password" class="text-sm text-orange-400 hover:text-orange-300">
@@ -446,7 +401,7 @@
 				<p class="text-center text-sm text-gray-500 dark:text-gray-400">
 					Don't have an account?
 					<a
-						href="/register"
+						href="/signup"
 						class="font-medium text-orange-500 dark:text-orange-400 hover:text-orange-600 dark:hover:text-orange-300"
 						>Sign up</a
 					>

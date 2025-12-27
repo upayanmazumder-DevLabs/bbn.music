@@ -185,6 +185,48 @@ function createAuthStore() {
 	let refreshInterval: ReturnType<typeof setInterval> | null = null;
 	let isRefreshing = false;
 
+	// Shared helper to complete login after obtaining tokens
+	function completeLogin(refreshToken: string, accessToken: string): boolean {
+		// Store tokens
+		if (browser) {
+			localStorage.setItem('refresh-token', refreshToken);
+			localStorage.setItem('access-token', accessToken);
+			sendTokenToServiceWorker(accessToken);
+		}
+
+		// Decode user from access token
+		const apiUser = getUserFromToken(accessToken);
+		if (!apiUser) {
+			throw new Error('Failed to decode user from token');
+		}
+
+		const user = mapApiUser(apiUser);
+
+		set({
+			user,
+			token: accessToken,
+			isAuthenticated: true,
+			isLoading: false,
+			error: null,
+		});
+
+		// Start auto refresh
+		store.startAutoRefresh();
+
+		return true;
+	}
+
+	// Shared error handler for auth operations
+	function handleAuthError(error: any, fallbackMessage: string): false {
+		const errorMessage = error?.response?.data?.message || error.message || fallbackMessage;
+		update((state) => ({
+			...state,
+			isLoading: false,
+			error: errorMessage,
+		}));
+		return false;
+	}
+
 	const store = {
 		subscribe,
 
@@ -192,7 +234,6 @@ function createAuthStore() {
 			update((state) => ({ ...state, isLoading: true, error: null }));
 
 			try {
-				// Step 1: Login to get refresh token
 				const response = await postEmailByAuth({
 					body: { email, password },
 				});
@@ -207,45 +248,11 @@ function createAuthStore() {
 				}
 
 				const refreshToken = responseData.token;
-
-				// Step 2: Exchange refresh token for access token
 				const accessToken = await exchangeForAccessToken(refreshToken);
 
-				// Step 3: Store both tokens
-				if (browser) {
-					localStorage.setItem('refresh-token', refreshToken);
-					localStorage.setItem('access-token', accessToken);
-					sendTokenToServiceWorker(accessToken);
-				}
-
-				// Step 4: Decode user from access token
-				const apiUser = getUserFromToken(accessToken);
-				if (!apiUser) {
-					throw new Error('Failed to decode user from token');
-				}
-
-				const user = mapApiUser(apiUser);
-
-				set({
-					user,
-					token: accessToken,
-					isAuthenticated: true,
-					isLoading: false,
-					error: null,
-				});
-
-				// Start auto refresh
-				this.startAutoRefresh();
-
-				return true;
+				return completeLogin(refreshToken, accessToken);
 			} catch (error: any) {
-				const errorMessage = error?.response?.data?.message || error.message || 'Login failed';
-				update((state) => ({
-					...state,
-					isLoading: false,
-					error: errorMessage,
-				}));
-				return false;
+				return handleAuthError(error, 'Login failed');
 			}
 		},
 
@@ -253,7 +260,6 @@ function createAuthStore() {
 			update((state) => ({ ...state, isLoading: true, error: null }));
 
 			try {
-				// Step 1: Register to get refresh token
 				const response = await postRegisterByAuth({
 					body: { email, password, name },
 				});
@@ -268,46 +274,11 @@ function createAuthStore() {
 				}
 
 				const refreshToken = responseData.token;
-
-				// Step 2: Exchange refresh token for access token
 				const accessToken = await exchangeForAccessToken(refreshToken);
 
-				// Step 3: Store both tokens
-				if (browser) {
-					localStorage.setItem('refresh-token', refreshToken);
-					localStorage.setItem('access-token', accessToken);
-					sendTokenToServiceWorker(accessToken);
-				}
-
-				// Step 4: Decode user from access token
-				const apiUser = getUserFromToken(accessToken);
-				if (!apiUser) {
-					throw new Error('Failed to decode user from token');
-				}
-
-				const user = mapApiUser(apiUser);
-
-				set({
-					user,
-					token: accessToken,
-					isAuthenticated: true,
-					isLoading: false,
-					error: null,
-				});
-
-				// Start auto refresh
-				this.startAutoRefresh();
-
-				return true;
+				return completeLogin(refreshToken, accessToken);
 			} catch (error: any) {
-				const errorMessage =
-					error?.response?.data?.message || error.message || 'Registration failed';
-				update((state) => ({
-					...state,
-					isLoading: false,
-					error: errorMessage,
-				}));
-				return false;
+				return handleAuthError(error, 'Registration failed');
 			}
 		},
 
@@ -315,7 +286,6 @@ function createAuthStore() {
 			update((state) => ({ ...state, isLoading: true, error: null }));
 
 			try {
-				// Exchange OAuth code for refresh token
 				const response = await postCodeByProviderByOauthByAuth({
 					path: { provider, code },
 				});
@@ -330,46 +300,11 @@ function createAuthStore() {
 				}
 
 				const refreshToken = responseData.token;
-
-				// Exchange refresh token for access token
 				const accessToken = await exchangeForAccessToken(refreshToken);
 
-				// Store both tokens
-				if (browser) {
-					localStorage.setItem('refresh-token', refreshToken);
-					localStorage.setItem('access-token', accessToken);
-					sendTokenToServiceWorker(accessToken);
-				}
-
-				// Decode user from access token
-				const apiUser = getUserFromToken(accessToken);
-				if (!apiUser) {
-					throw new Error('Failed to decode user from token');
-				}
-
-				const user = mapApiUser(apiUser);
-
-				set({
-					user,
-					token: accessToken,
-					isAuthenticated: true,
-					isLoading: false,
-					error: null,
-				});
-
-				// Start auto refresh
-				this.startAutoRefresh();
-
-				return true;
+				return completeLogin(refreshToken, accessToken);
 			} catch (error: any) {
-				const errorMessage =
-					error?.response?.data?.message || error.message || 'OAuth login failed';
-				update((state) => ({
-					...state,
-					isLoading: false,
-					error: errorMessage,
-				}));
-				return false;
+				return handleAuthError(error, 'OAuth login failed');
 			}
 		},
 
@@ -378,44 +313,11 @@ function createAuthStore() {
 			update((state) => ({ ...state, isLoading: true, error: null }));
 
 			try {
-				// Exchange refresh token for access token
 				const accessToken = await exchangeForAccessToken(refreshToken);
 
-				// Store both tokens
-				if (browser) {
-					localStorage.setItem('refresh-token', refreshToken);
-					localStorage.setItem('access-token', accessToken);
-					sendTokenToServiceWorker(accessToken);
-				}
-
-				// Decode user from access token
-				const apiUser = getUserFromToken(accessToken);
-				if (!apiUser) {
-					throw new Error('Failed to decode user from token');
-				}
-
-				const user = mapApiUser(apiUser);
-
-				set({
-					user,
-					token: accessToken,
-					isAuthenticated: true,
-					isLoading: false,
-					error: null,
-				});
-
-				// Start auto refresh
-				this.startAutoRefresh();
-
-				return true;
+				return completeLogin(refreshToken, accessToken);
 			} catch (error: any) {
-				const errorMessage = error?.response?.data?.message || error.message || 'Login failed';
-				update((state) => ({
-					...state,
-					isLoading: false,
-					error: errorMessage,
-				}));
-				return false;
+				return handleAuthError(error, 'Login failed');
 			}
 		},
 

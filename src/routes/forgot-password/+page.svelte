@@ -1,7 +1,8 @@
 <script lang="ts">
-	import { Alert, Button, Spinner } from '$lib/components/ui';
+	import { Alert, Button, Input, Spinner } from '$lib/components/ui';
 	import { EnvelopeSolid, CheckCircleSolid } from 'flowbite-svelte-icons';
 	import { postResetPasswordByAuth } from '$lib/api/sdk.gen';
+	import { extractErrorMessage } from '$lib/utils/extractError';
 
 	let email = $state('');
 	let isLoading = $state(false);
@@ -29,9 +30,8 @@
 			}
 
 			success = true;
-		} catch (err: any) {
-			error =
-				err?.error?.message || err?.message || 'Failed to send reset email. Please try again.';
+		} catch (err: unknown) {
+			error = extractErrorMessage(err, 'Failed to send reset email. Please try again.');
 		}
 
 		isLoading = false;
@@ -89,27 +89,17 @@
 
 				<!-- Reset Form -->
 				<form onsubmit={handleSubmit} class="space-y-5">
-					<div>
-						<label
-							for="email"
-							class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Email</label
-						>
-						<div class="relative">
-							<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-								<EnvelopeSolid class="w-5 h-5 text-gray-500" />
-							</div>
-							<input
-								type="email"
-								id="email"
-								name="email"
-								bind:value={email}
-								placeholder="you@example.com"
-								required
-								autocomplete="email"
-								class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 hover:border-gray-400 dark:hover:border-white/20 transition-all"
-							/>
-						</div>
-					</div>
+					<Input
+						label="Email"
+						type="email"
+						name="email"
+						bind:value={email}
+						placeholder="you@example.com"
+						required
+						autocomplete="email"
+					>
+						{#snippet icon()}<EnvelopeSolid class="w-5 h-5" />{/snippet}
+					</Input>
 
 					<Button
 						type="submit"

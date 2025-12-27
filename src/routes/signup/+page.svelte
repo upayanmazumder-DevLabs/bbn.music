@@ -1,9 +1,10 @@
 <script lang="ts">
-	import { Alert, Button, Spinner } from '$lib/components/ui';
+	import { Alert, Button, Input, Spinner } from '$lib/components/ui';
 	import { EnvelopeSolid, LockSolid, UserCircleOutline } from 'flowbite-svelte-icons';
 	import { auth } from '$lib/stores/auth';
 	import { goto } from '$app/navigation';
 	import { APITools } from '$lib/apiClient';
+	import { extractFieldErrors } from '$lib/utils/extractError';
 
 	let name = $state('');
 	let email = $state('');
@@ -70,9 +71,23 @@
 		if (success) {
 			goto('/music/drops');
 		} else {
-			// Get error from auth state, or use fallback
+			// Get error from auth state and parse for field-specific errors
 			const authState = $auth;
-			error = authState.error || 'Registration failed';
+			if (authState.error) {
+				const fieldErrors = extractFieldErrors({ message: authState.error }, 'Registration failed');
+
+				// Map server field errors to our validation errors
+				if (fieldErrors.name) validationErrors.name = fieldErrors.name;
+				if (fieldErrors.email) validationErrors.email = fieldErrors.email;
+				if (fieldErrors.password) validationErrors.password = fieldErrors.password;
+
+				// Show general error if there's one or if no field errors were mapped
+				if (fieldErrors._general || (!fieldErrors.name && !fieldErrors.email && !fieldErrors.password)) {
+					error = fieldErrors._general || authState.error;
+				}
+			} else {
+				error = 'Registration failed';
+			}
 		}
 		isLoading = false;
 	}
@@ -104,134 +119,58 @@
 
 			<!-- Registration Form -->
 			<form onsubmit={handleSubmit} class="space-y-5">
-				<div>
-					<label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-						>Full Name</label
-					>
-					<div class="relative">
-						<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-							<UserCircleOutline class="w-5 h-5 text-gray-500" />
-						</div>
-						<input
-							type="text"
-							id="name"
-							name="name"
-							bind:value={name}
-							placeholder="John Doe"
-							required
-							autocomplete="name"
-							aria-invalid={!!validationErrors.name}
-							aria-describedby={validationErrors.name ? 'name-error' : undefined}
-							class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-white/5 border rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all {validationErrors.name
-								? 'border-red-500'
-								: 'border-gray-300 dark:border-white/10 hover:border-gray-400 dark:hover:border-white/20'}"
-						/>
-					</div>
-					{#if validationErrors.name}
-						<p id="name-error" role="alert" class="mt-1.5 text-sm text-red-400">
-							{validationErrors.name}
-						</p>
-					{/if}
-				</div>
+				<Input
+					label="Full Name"
+					type="text"
+					name="name"
+					bind:value={name}
+					placeholder="John Doe"
+					required
+					autocomplete="name"
+					error={validationErrors.name}
+				>
+					{#snippet icon()}<UserCircleOutline class="w-5 h-5" />{/snippet}
+				</Input>
 
-				<div>
-					<label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-						>Email</label
-					>
-					<div class="relative">
-						<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-							<EnvelopeSolid class="w-5 h-5 text-gray-500" />
-						</div>
-						<input
-							type="email"
-							id="email"
-							name="email"
-							bind:value={email}
-							placeholder="you@example.com"
-							required
-							autocomplete="email"
-							aria-invalid={!!validationErrors.email}
-							aria-describedby={validationErrors.email ? 'email-error' : undefined}
-							class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-white/5 border rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all {validationErrors.email
-								? 'border-red-500'
-								: 'border-gray-300 dark:border-white/10 hover:border-gray-400 dark:hover:border-white/20'}"
-						/>
-					</div>
-					{#if validationErrors.email}
-						<p id="email-error" role="alert" class="mt-1.5 text-sm text-red-400">
-							{validationErrors.email}
-						</p>
-					{/if}
-				</div>
+				<Input
+					label="Email"
+					type="email"
+					name="email"
+					bind:value={email}
+					placeholder="you@example.com"
+					required
+					autocomplete="email"
+					error={validationErrors.email}
+				>
+					{#snippet icon()}<EnvelopeSolid class="w-5 h-5" />{/snippet}
+				</Input>
 
-				<div>
-					<label
-						for="password"
-						class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Password</label
-					>
-					<div class="relative">
-						<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-							<LockSolid class="w-5 h-5 text-gray-500" />
-						</div>
-						<input
-							type="password"
-							id="password"
-							name="password"
-							bind:value={password}
-							placeholder="Minimum 8 characters"
-							required
-							autocomplete="new-password"
-							aria-invalid={!!validationErrors.password}
-							aria-describedby={validationErrors.password ? 'password-error' : 'password-hint'}
-							class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-white/5 border rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all {validationErrors.password
-								? 'border-red-500'
-								: 'border-gray-300 dark:border-white/10 hover:border-gray-400 dark:hover:border-white/20'}"
-						/>
-					</div>
-					{#if validationErrors.password}
-						<p id="password-error" role="alert" class="mt-1.5 text-sm text-red-400">
-							{validationErrors.password}
-						</p>
-					{:else}
-						<p id="password-hint" class="mt-1.5 text-sm text-gray-500">
-							Use 8 or more characters with letters, numbers & symbols
-						</p>
-					{/if}
-				</div>
+				<Input
+					label="Password"
+					type="password"
+					name="password"
+					bind:value={password}
+					placeholder="Minimum 8 characters"
+					required
+					autocomplete="new-password"
+					error={validationErrors.password}
+					hint={validationErrors.password ? undefined : 'Use 8 or more characters with letters, numbers & symbols'}
+				>
+					{#snippet icon()}<LockSolid class="w-5 h-5" />{/snippet}
+				</Input>
 
-				<div>
-					<label
-						for="confirmPassword"
-						class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-						>Confirm Password</label
-					>
-					<div class="relative">
-						<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-							<LockSolid class="w-5 h-5 text-gray-500" />
-						</div>
-						<input
-							type="password"
-							id="confirmPassword"
-							name="confirmPassword"
-							bind:value={confirmPassword}
-							placeholder="Repeat your password"
-							required
-							autocomplete="new-password"
-							aria-invalid={!!validationErrors.confirmPassword}
-							aria-describedby={validationErrors.confirmPassword
-								? 'confirm-password-error'
-								: undefined}
-							class="w-full pl-10 pr-4 py-3 bg-gray-100 dark:bg-white/5 border rounded-lg text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/50 focus:border-orange-500 transition-all {validationErrors.confirmPassword
-								? 'border-red-500'
-								: 'border-gray-300 dark:border-white/10 hover:border-gray-400 dark:hover:border-white/20'}"
-						/>
-					</div>
-					{#if validationErrors.confirmPassword}
-						<p id="confirm-password-error" role="alert" class="mt-1.5 text-sm text-red-400">
-							{validationErrors.confirmPassword}
-						</p>
-					{/if}
-				</div>
+				<Input
+					label="Confirm Password"
+					type="password"
+					name="confirmPassword"
+					bind:value={confirmPassword}
+					placeholder="Repeat your password"
+					required
+					autocomplete="new-password"
+					error={validationErrors.confirmPassword}
+				>
+					{#snippet icon()}<LockSolid class="w-5 h-5" />{/snippet}
+				</Input>
 
 				<div class="flex items-start">
 					<input

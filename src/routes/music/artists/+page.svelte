@@ -7,6 +7,7 @@
 	import { getAuthHeaders } from '$lib/apiClient';
 	import { toast } from '$lib/stores/toast';
 	import { auth } from '$lib/stores/auth';
+	import { extractErrorMessage } from '$lib/utils/extractError';
 
 	// Check if user has verified email
 	const hasVerifiedEmail = $derived($auth.user?.profile.verified.email ?? false);
@@ -34,8 +35,8 @@
 				artists = response.data as Artist[];
 				filteredArtists = artists;
 			}
-		} catch (err: any) {
-			error = err?.error?.message || err?.message || 'Failed to load artists';
+		} catch (err: unknown) {
+			error = extractErrorMessage(err, 'Failed to load artists');
 		} finally {
 			isLoading = false;
 		}
@@ -94,8 +95,8 @@
 				toast.show('Artist created successfully', 'success');
 				showAddModal = false;
 			}
-		} catch (err: any) {
-			toast.show(err?.error?.message || err?.message || 'Failed to create artist', 'error');
+		} catch (err: unknown) {
+			toast.show(extractErrorMessage(err, 'Failed to create artist'), 'error');
 		} finally {
 			isCreating = false;
 		}
@@ -119,15 +120,15 @@
 	</div>
 
 	<!-- Search Bar -->
-	<div class="relative max-w-md">
-		<SearchOutline class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-		<input
+	<div class="max-w-md">
+		<Input
 			type="search"
 			placeholder="Search artists..."
 			aria-label="Search artists"
 			bind:value={searchTerm}
-			class="w-full pl-10 pr-4 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-		/>
+		>
+			{#snippet icon()}<SearchOutline class="w-5 h-5" />{/snippet}
+		</Input>
 	</div>
 
 	<!-- Loading State -->

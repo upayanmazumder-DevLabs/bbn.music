@@ -18,6 +18,8 @@
 	import { getAuthHeaders } from '$lib/apiClient';
 	import { imageCache } from '$lib/stores/imageCache';
 	import { formatDate } from '$lib/utils/formatDate';
+	import { extractErrorMessage } from '$lib/utils/extractError';
+	import { formatArtistNames } from '$lib/utils/artist';
 
 	// KYC modal state
 	let showLightKycModal = $state(false);
@@ -124,8 +126,8 @@
 					}
 				}
 			}
-		} catch (err: any) {
-			error = err?.error?.message || err?.message || 'Failed to load drops';
+		} catch (err: unknown) {
+			error = extractErrorMessage(err, 'Failed to load drops');
 		} finally {
 			isLoading = false;
 		}
@@ -138,25 +140,7 @@
 	}
 
 	function getArtistNames(artists: Drop['artists'] | undefined) {
-		if (!artists || artists.length === 0) return 'Unknown Artist';
-
-		const primaryArtists = artists.filter((artist) => artist.type === 'PRIMARY');
-		if (primaryArtists.length === 0) return 'Unknown Artist';
-
-		return (
-			primaryArtists
-				.map((artist) => {
-					// If artist has name directly (PRODUCER/SONGWRITER types)
-					if ('name' in artist) return artist.name;
-					// If artist has _id, look it up in allArtists
-					if ('_id' in artist) {
-						const found = allArtists.find((a) => a._id === artist._id);
-						if (found) return found.name;
-					}
-					return 'Unknown';
-				})
-				.join(', ') || 'Unknown Artist'
-		);
+		return formatArtistNames(artists, allArtists, 'PRIMARY');
 	}
 
 	function getStatusBadge(type: string | undefined): {
@@ -221,8 +205,8 @@
 			}
 
 			goto(`/music/drops/new?id=${data.id}`);
-		} catch (err: any) {
-			error = err?.error?.message || err?.message || 'Failed to create drop';
+		} catch (err: unknown) {
+			error = extractErrorMessage(err, 'Failed to create drop');
 			isCreating = false;
 		}
 	}

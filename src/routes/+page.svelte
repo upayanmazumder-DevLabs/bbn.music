@@ -182,7 +182,7 @@
 					<p class="text-7xl font-black text-white">100%</p>
 				</div>
 
-				<p class="text-3xl font-bold text-white/60 mb-8">1€ per Year</p>
+				<p class="text-3xl font-bold text-white/60 mb-8">12€ per Year</p>
 
 				<ul class="space-y-4 mb-8">
 					{#each paidPlanFeatures as feature}

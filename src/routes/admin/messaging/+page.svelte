@@ -7,6 +7,7 @@
 		putSendByConversationsByMessaging,
 	} from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
+	import { extractErrorMessage } from '$lib/utils/extractError';
 	import type { Conversation, Message, Platform } from '$lib/api/types.gen';
 	import {
 		EnvelopeSolid,
@@ -72,7 +73,7 @@
 				hasMore = newConversations.length === LIMIT;
 			}
 		} catch (e: any) {
-			error = e?.error?.message || e?.message || 'Failed to load conversations';
+			error = extractErrorMessage(e, 'Failed to load conversations');
 		} finally {
 			loading = false;
 			loadingMore = false;

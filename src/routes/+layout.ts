@@ -1,7 +1,7 @@
 import type { LayoutLoad } from './$types';
 
 // Public routes that don't require authentication
-const publicRoutes = ['/signin', '/register', '/privacy', '/terms', '/imprint', '/s'];
+const publicRoutes = ['/signin', '/signup', '/privacy', '/terms', '/imprint', '/s'];
 
 export const load: LayoutLoad = async ({ url }) => {
 	const pathname = url.pathname;

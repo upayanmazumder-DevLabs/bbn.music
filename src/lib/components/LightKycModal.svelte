@@ -2,6 +2,7 @@
 	import { Modal, Button, Input, SearchableSelect } from '$lib/components/ui';
 	import { kyc, type LightKycData, type VerificationType } from '$lib/stores/kyc';
 	import { CheckCircleSolid, ExclamationCircleOutline, UserSolid, BuildingSolid } from 'flowbite-svelte-icons';
+	import { extractErrorMessage } from '$lib/utils/extractError';
 
 	interface Props {
 		open: boolean;
@@ -173,8 +174,8 @@
 			await new Promise((resolve) => setTimeout(resolve, 500));
 
 			oncomplete();
-		} catch (e: any) {
-			error = e?.message || 'Failed to submit verification. Please try again.';
+		} catch (e: unknown) {
+			error = extractErrorMessage(e, 'Failed to submit verification. Please try again.');
 		} finally {
 			submitting = false;
 		}
@@ -275,20 +276,14 @@
 					/>
 				</div>
 
-				<div>
-					<label class="block text-sm font-medium text-white mb-2">
-						Date of Birth <span class="text-orange-400">*</span>
-					</label>
-					<input
-						type="date"
-						bind:value={dateOfBirth}
-						max={new Date().toISOString().split('T')[0]}
-						class="w-full px-4 py-2.5 rounded-lg bg-gray-900/50 border border-gray-600 text-white focus:border-orange-500 focus:ring-1 focus:ring-orange-500 focus:outline-none"
-					/>
-					{#if dateOfBirth && !isAgeValid}
-						<p class="text-sm text-red-400 mt-1">You must be at least 16 years old</p>
-					{/if}
-				</div>
+				<Input
+					label="Date of Birth"
+					type="date"
+					bind:value={dateOfBirth}
+					max={new Date().toISOString().split('T')[0]}
+					required
+					error={dateOfBirth && !isAgeValid ? 'You must be at least 16 years old' : undefined}
+				/>
 			</div>
 		{/if}
 

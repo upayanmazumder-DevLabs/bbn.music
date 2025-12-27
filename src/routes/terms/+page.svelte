@@ -1,470 +1,556 @@
 <script lang="ts">
 	import { Heading } from '$lib/components/ui';
+	import { ChevronDownOutline } from 'flowbite-svelte-icons';
+
+	const sections = [
+		{ num: 1, title: 'Geltungsbereich und Begriffsbestimmungen' },
+		{ num: 2, title: 'Vertragsgegenstand und Leistungen' },
+		{ num: 3, title: 'Vertragsschluss und Kontoerstellung' },
+		{ num: 4, title: 'Pflichten des Nutzers' },
+		{ num: 5, title: 'Vergütung und Preise' },
+		{ num: 6, title: 'Abrechnung und Auszahlungen' },
+		{ num: 7, title: 'Widerrufsrecht für Verbraucher' },
+		{ num: 8, title: 'Vertragslaufzeit und Kündigung' },
+		{ num: 9, title: 'Änderungen dieser AGB' },
+		{ num: 10, title: 'Haftung von BBN Music' },
+		{ num: 11, title: 'Rechte Dritter und Freistellung' },
+		{ num: 12, title: 'Datenschutz' },
+		{ num: 13, title: 'Kontakt und Streitbeilegung' },
+		{ num: 14, title: 'Schlussbestimmungen' },
+	];
 </script>
 
 <svelte:head>
-	<title>Terms and Conditions - bbn.music</title>
+	<title>Allgemeine Geschäftsbedingungen (AGB) - bbn.music</title>
 </svelte:head>
 
-<div class="max-w-4xl mx-auto space-y-6">
-	<Heading tag="h1" class="text-gray-900 dark:text-white">Terms and Conditions</Heading>
+<div class="max-w-6xl mx-auto">
+	<!-- Header -->
+	<div class="mb-8">
+		<Heading tag="h1" class="text-gray-900 dark:text-white mb-2"
+			>Allgemeine Geschäftsbedingungen (AGB)</Heading
+		>
+		<p class="text-gray-500 dark:text-gray-400">
+			für die Nutzung der Plattform bbn.music der BBN Music GmbH
+		</p>
+		<p class="text-sm text-gray-400 dark:text-gray-500 mt-1">Stand: Februar 2024</p>
+	</div>
 
-	<div class="prose dark:prose-invert max-w-none space-y-6 text-gray-600 dark:text-gray-300">
-		<section>
-			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Definitions</Heading
-			>
-			<p>
-				To facilitate the understanding of these Terms of Use, the following principal expressions
-				will have these meanings:
-			</p>
-			<ul class="list-none space-y-3">
-				<li>
-					<strong>"Customer":</strong> refers to any individual that accesses or makes use of a Digital
-					Music Service.
-				</li>
-				<li>
-					<strong>"Digital Distribution":</strong> means the transferring by any means of data transmission
-					or communication, through the internet, internet radio, kiosks, in-store listening posts, mobile,
-					wireless, satellite and similar communication systems, whether now known or existing in the
-					future, of the End User Content in multiple digital formats including but not limited to clips,
-					permanent downloads, subscriptions, streams and timeout-downloads, ring-tones and ring-back
-					tones and any other means.
-				</li>
-				<li>
-					<strong>"Digital Music Service":</strong> means any digital outlet, such as music download portals,
-					music and video streaming services, mobile music platforms, digital (and terrestrial) radio
-					stations, digital (and terrestrial) television networks, and mobile networks (each a "DMS",
-					i.e.: Apple iTunes, Spotify, Tidal, Google Play, etc.), that enables Customers to purchase and/or
-					listen to End User Content.
-				</li>
-				<li>
-					<strong>"End User":</strong> that's You (hereinafter, the End User), which is an artist, songwriter,
-					author, producer, agent (including royalty recipients), rights holder or others who are authorized
-					and entitled to exploit certain music (including the composition and the recording) and to use
-					the Platform, the Platform API or portions thereof.
-				</li>
-				<li>
-					<strong>"End User Content":</strong> means all intellectual property works (including without
-					limitation musical works, recordings, video clips, ring-tones, real-tones, lyrics, logos, covers
-					and photos) as to which the End User has the necessary exploitation rights, including "Neighboring
-					Rights".
-				</li>
-				<li>
-					<strong>"Platform":</strong> refers to the digital music distribution platform available at
-					https://bbn.music/c/music or your designated subdomain.
-				</li>
-				<li>
-					<strong>"Service":</strong> means the service provided by Us through the Platform, in order
-					to make the End User Content available on Digital Music Services (here, the Digital Distribution
-					Services).
-				</li>
-			</ul>
-			<p>Hence, these are the rights and obligations of each of us:</p>
-		</section>
+	<div class="lg:grid lg:grid-cols-[280px_1fr] lg:gap-8">
+		<!-- Table of Contents - Sticky Sidebar -->
+		<aside class="hidden lg:block">
+			<div class="sticky top-24">
+				<div class="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+					<h2 class="font-semibold text-gray-900 dark:text-white text-sm mb-3">Inhaltsverzeichnis</h2>
+					<nav class="space-y-1">
+						{#each sections as section}
+							<a
+								href="#section-{section.num}"
+								class="block text-sm py-1.5 px-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-orange-600 dark:hover:text-orange-400 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+							>
+								<span class="font-medium">{section.num}.</span>
+								{section.title}
+							</a>
+						{/each}
+					</nav>
+				</div>
+			</div>
+		</aside>
 
-		<section>
-			<Heading tag="h2" class="text-white text-xl font-bold"
-				>General Conditions; Access to and use of the Services</Heading
-			>
-			<p>
-				<strong>2.1</strong> During the Duration and subject to compliance by You with these Terms of
-				Use, You have the right to access the Platform and enjoy the Service provided by Us through it.
-			</p>
-			<p>
-				<strong>2.2</strong> For information purposes, the features of the Platform include but are not
-				limited to:
-			</p>
-			<ul class="list-disc pl-6 space-y-1">
-				<li>
-					Upload of the End User Content to the Platform for its availability on Digital Music
-					Services.
-				</li>
-				<li>
-					Selection of the channels, territories and Digital Music Services where End Users want
-					their content to be available at.
-				</li>
-				<li>Optional services, including quality control, distribution, updates and storage.</li>
-				<li>Pay directly the corresponding fees for the contracting services.</li>
-				<li>Hosting of the End User Content.</li>
-				<li>Qualification, transformation and transmission to Digital Music Services.</li>
-				<li>Updating of distributed works in Digital Music Services.</li>
-				<li>Takedown of content.</li>
-				<li>Assigning codes (ISRC, UPC, ISWC).</li>
-				<li>
-					Accessing sales and usage reports of the End User Content in the Digital Music Services.
-				</li>
-				<li>Request out-payment of the Royalties generated by the End User Content.</li>
-				<li>Manage and receive neighboring rights.</li>
-			</ul>
-			<p>
-				Nonetheless, We reserve the right to include new functionalities or eliminate any of the
-				features of the Service, to change the characteristics, design, appearance or presentation
-				of the Platform and the Service. In such case, if You are unsatisfied with the resulting
-				Platform, You may terminate the relationship pursuant to Section 5.
-			</p>
-			<p>
-				<strong>2.3</strong> Furthermore, You warrant that You have all necessary rights in respect of
-				Your Content to exploit it through the Platform and, therefore, authorize Us to administer Your
-				Content as requested by You at each time, in the terms described in Section 6. This authorization
-				is granted on an exclusive basis for those Digital Music Services on which You decide to make
-				Your Content available through our Service; this means that if You use the Service to make Your
-				Content available in a specific Digital Music Service, You may not make the same content available
-				in the same Digital Music Service using a service different from the Service and the Platform.
-			</p>
-		</section>
+		<!-- Main Content -->
+		<main class="space-y-6">
+			<!-- Mobile TOC Toggle -->
+			<details class="lg:hidden bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-200 dark:border-gray-700">
+				<summary class="p-4 cursor-pointer font-medium text-gray-900 dark:text-white flex items-center justify-between">
+					<span>Inhaltsverzeichnis</span>
+					<ChevronDownOutline class="w-5 h-5" />
+				</summary>
+				<nav class="px-4 pb-4 space-y-1">
+					{#each sections as section}
+						<a
+							href="#section-{section.num}"
+							class="block text-sm py-1.5 px-2 rounded-lg text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700"
+						>
+							<span class="font-medium">{section.num}.</span>
+							{section.title}
+						</a>
+					{/each}
+				</nav>
+			</details>
 
-		<section>
-			<Heading tag="h2" class="text-white text-xl font-bold"
-				>What You can do and what you can't do</Heading
-			>
-			<p class="font-semibold">Use of the Platform</p>
-			<p>
-				<strong>3.1</strong> By registering and uploading Your Content on the Platform, You assume and
-				undertake the following obligations:
-			</p>
-			<ul class="list-disc pl-6 space-y-1">
-				<li>
-					You shall use the Platform diligently and upload information and content whose rights
-					belong to You or for which You are authorized by the rights holder.
-				</li>
-				<li>
-					You shall provide all the necessary information to use the Service, which We will request
-					during the use of the Service.
-				</li>
-				<li>
-					You shall pay all the applicable fees for the Services rendered by Us, as described below.
-				</li>
-				<li>You shall inform Us of any activity that is inconsistent with these Terms of Use.</li>
-				<li>
-					You shall indicate through the Platform if Your Content contains "explicit" content. The
-					term "explicit" content refers to content that evokes sexual, racist, violent or any other
-					harmful connotations.
-				</li>
-				<li>
-					You shall not perform illegal activities through the Platform or the Services, and/or
-					actions that could harm or damage any party, including Us.
-				</li>
-			</ul>
-			<p><strong>3.2</strong> You undertake to use diligently the Platform and agree:</p>
-			<ul class="list-disc pl-6 space-y-1">
-				<li>
-					not to grant access to the Platform to any third party or to employees that, due to their
-					position in the company, reasonably should not access the Platform;
-				</li>
-				<li>not to access the source code of the Platform;</li>
-				<li>
-					not to use the information, rules or instructions contained in the Platform for purposes
-					different than those established in these Terms of Use;
-				</li>
-				<li>
-					not to disclose to any third party any of the information obtained through the Platform;
-				</li>
-				<li>
-					not to permit the public to access or use the Platform (including, without limitation, via
-					the internet);
-				</li>
-				<li>
-					not to use the Platform to upload content not owned by You or for which You do not have an
-					explicit license to commercially exploit;
-				</li>
-				<li>not to reproduce the Platform, in whole or in part, for any purposes;</li>
-				<li>not to copy and/or distribute the Platform, in whole or in part, by any manner;</li>
-				<li>
-					not to create any form of "frame" or "mirror" for (any part of) the Platform on any other
-					server or wireless or Internet-based device;
-				</li>
-				<li>not to transfer the Platform to any third party;</li>
-				<li>
-					not to assign, sell, resell, rent, lease, lend, sublicense, outsource or otherwise
-					transfer the Platform and/or the Service to any third party, or authorize or appoint any
-					third party to do so;
-				</li>
-				<li>not to modify the Platform or provide any person with the means to do the same;</li>
-				<li>
-					not to circumvent the technological protection measures incorporated in the Platform.
-				</li>
-			</ul>
-			<p>
-				<strong>3.3</strong> In general, You agree to use the Platform in a lawful and diligent manner
-				and will not do anything forbidden by law or by these Terms of Use. You will be liable to Us for
-				any breach of these Terms, as described in Section 9.
-			</p>
+			<!-- Section 1 -->
+			<section id="section-1" class="bg-white dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+				<div class="p-4 border-b border-gray-100 dark:border-gray-700/50">
+					<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+						<span class="text-orange-500">1.</span> Geltungsbereich und Begriffsbestimmungen
+					</h2>
+				</div>
+				<div class="p-4 space-y-4 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+					<p>
+						<strong class="text-gray-900 dark:text-white">1.1 Anwendungsbereich:</strong> Diese AGB regeln die Geschäftsbeziehung zwischen der
+						BBN Music GmbH (nachfolgend „BBN Music", „wir" oder „uns") und den Nutzerinnen und Nutzern
+						der Online-Plattform bbn.music (nachfolgend „Nutzer"). Die AGB gelten für alle Verträge, die
+						über die Plattform zwischen BBN Music und den Nutzern geschlossen werden, unabhängig davon,
+						ob der Nutzer Verbraucher oder Unternehmer ist. Individuell getroffene Vereinbarungen mit dem
+						Nutzer (einschließlich Nebenabreden und Sonderkonditionen, z. B. für Großkunden wie
+						Musiklabels) haben stets Vorrang vor diesen AGB, soweit sie von diesen Bestimmungen
+						abweichen.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">1.2 Verbraucher und Unternehmer:</strong> Verbraucher im Sinne von § 13 BGB ist jede
+						natürliche Person, die ein Rechtsgeschäft zu Zwecken abschließt, die überwiegend weder ihrer
+						gewerblichen noch ihrer selbständigen beruflichen Tätigkeit zugerechnet werden können.
+						Unternehmer im Sinne von § 14 BGB ist eine natürliche oder juristische Person oder
+						rechtsfähige Personengesellschaft, die bei Abschluss eines Vertrags in Ausübung ihrer
+						gewerblichen oder selbständigen beruflichen Tätigkeit handelt. In diesen AGB werden
+						Verbraucher und Unternehmer einheitlich als „Nutzer" bezeichnet, soweit nicht ausdrücklich
+						zwischen ihnen unterschieden wird.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">1.3 Sprachen und Hinweise:</strong> Vertragssprache ist Deutsch. Rechtliche Hinweise
+						in diesen AGB, die sich speziell auf Verbraucher beziehen, gelten nicht für Nutzer, die
+						Unternehmer sind, und umgekehrt, sofern nicht ausdrücklich angegeben. BBN Music erkennt
+						abweichende allgemeine Geschäftsbedingungen des Nutzers nicht an, es sei denn, wir stimmen
+						ihrer Geltung ausdrücklich schriftlich zu.
+					</p>
+				</div>
+			</section>
 
-			<p class="font-semibold mt-4">User Warranties</p>
-			<p>
-				<strong>3A.1</strong> You represent and warrant that you own or have obtained all rights, licenses,
-				consents and permissions necessary to upload, reproduce, distribute and otherwise exploit Your
-				Content via the Service in each territory selected. Such rights shall be irrevocable with respect
-				to any distribution already made.
-			</p>
-			<p>
-				<strong>3A.2</strong> You undertake that no portion of Your Content is subject to a right of revocation
-				that would allow You or any third party to demand removal once the Content has been distributed
-				through the Platform.
-			</p>
-		</section>
+			<!-- Section 2 -->
+			<section id="section-2" class="bg-white dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+				<div class="p-4 border-b border-gray-100 dark:border-gray-700/50">
+					<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+						<span class="text-orange-500">2.</span> Vertragsgegenstand und Leistungen von BBN Music
+					</h2>
+				</div>
+				<div class="p-4 space-y-4 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+					<p>
+						<strong class="text-gray-900 dark:text-white">2.1 Plattform und Servicebeschreibung:</strong> BBN Music betreibt unter der Adresse
+						bbn.music eine Online-Plattform, über welche Rechteinhaber von Musik (z. B. Musikerinnen,
+						Labels, andere Inhaber von Urheber- und Leistungsschutzrechten) ihre Musikinhalte digital
+						vertreiben lassen können. Dies umfasst insbesondere die Distribution von Audioaufnahmen
+						(nebst zugehörigen Metadaten, Cover-Artwork usw.) an verschiedene digitale Musikdienste wie
+						Streaming- und Download-Plattformen (z. B. Spotify, Apple Music, YouTube Music, Amazon,
+						Deezer und weitere – nachfolgend gemeinsam „Stores" genannt).
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">2.2 Leistungsumfang:</strong> BBN Music stellt dem Nutzer ein persönliches
+						Online-Konto (Nutzerkonto) bereit. Die Hauptleistungen umfassen:
+					</p>
+					<ul class="list-none space-y-2 ml-4">
+						<li class="flex gap-2">
+							<span class="text-orange-500">•</span>
+							<span><strong>Upload & Verwaltung:</strong> Hochladen von Audio-Dateien samt Metadaten und Coverbildern</span>
+						</li>
+						<li class="flex gap-2">
+							<span class="text-orange-500">•</span>
+							<span><strong>Digitale Distribution:</strong> Übermittlung an ausgewählte Stores</span>
+						</li>
+						<li class="flex gap-2">
+							<span class="text-orange-500">•</span>
+							<span><strong>Identifikationscodes:</strong> ISRC, UPC/EAN und Katalognummern</span>
+						</li>
+						<li class="flex gap-2">
+							<span class="text-orange-500">•</span>
+							<span><strong>Updates & Takedowns:</strong> Änderungen und Entfernungen auf Wunsch</span>
+						</li>
+						<li class="flex gap-2">
+							<span class="text-orange-500">•</span>
+							<span><strong>Reporting:</strong> Nutzungs- und Verkaufsdaten einsehen</span>
+						</li>
+						<li class="flex gap-2">
+							<span class="text-orange-500">•</span>
+							<span><strong>Abrechnung & Auszahlung:</strong> Einnahmen verwalten und auszahlen</span>
+						</li>
+					</ul>
+					<p>
+						<strong class="text-gray-900 dark:text-white">2.3 Keine Erfolgsgarantie:</strong> BBN Music schuldet dem Nutzer nicht den Erfolg
+						einer bestimmten Vermarktung. Insbesondere übernimmt BBN Music keine Gewähr für die Aufnahme
+						oder dauerhafte Verfügbarkeit der Inhalte in bestimmten Stores.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">2.4 Qualitätsprüfung:</strong> BBN Music ist berechtigt, aber nicht verpflichtet,
+						die vom Nutzer eingestellten Inhalte vor der Distribution auf offensichtliche Rechtsverstöße
+						oder Verstöße gegen Vorgaben der Stores zu prüfen.
+					</p>
+				</div>
+			</section>
 
-		<section>
-			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Fees</Heading>
-			<p>
-				<strong>4.1</strong> By using the Service, You shall pay to Us the fees corresponding to the Services
-				contracted, which can be found at any time in the "My Account > Pricing" section of your Account.
-			</p>
-			<p>
-				Additionally, You will receive 100.00% of the net incomes (deducting expenses and taxes)
-				which We receive from Digital Music Services from the exploitation of Your Content. If
-				applicable, You authorize Us to deduct 0% sales commission percentage from the net incomes
-				received by Us from Digital Music Services.
-			</p>
-			<p>
-				The abovementioned Service fees, sales commission percentage and the minimum payment
-				threshold for You are listed in the Platform, in the "My Account > Pricing" section.
-			</p>
-			<p>
-				<strong>4.2</strong> All payments and associated claims: (i) will be made through the corresponding
-				"Sales->Balance" section of the Platform; (ii) will be made in the currency stated by Us; and
-				(iii) will be payable via PayPal or bank-to-bank wire transfer to the account designated by You.
-				If any authority imposes a duty, tax, levy, or fee, You agree to pay that amount or supply exemption
-				documentation.
-			</p>
-			<p>
-				Payment of generated sales fees under these Terms of Use shall be made on a once a month,
-				within days from receipt of an out payment request from you, provided always that the due
-				amount exceeds the corresponding minimum payment threshold for the relevant requested
-				payout.
-			</p>
-			<p>
-				<strong>4.3</strong> If any Digital Music Service deducts any amount due to any passed contingency,
-				overpayment or conclusion in relation to Your Content or an investigation by Us reasonably demonstrates
-				that any of Your fees for any prior month should have been lesser, We may, at the conclusion of
-				such investigation and at our sole discretion, provide a revised sales report for the applicable
-				month(s) and deduct the corresponding amount from future payments, what You acknowledge and accept.
-			</p>
-			<p>
-				<strong>4.4</strong> Therefore, You expressly and irrevocably authorize Us to collect all incomes
-				from the exploitation of Your Content through the Platform, including but not limited to author
-				rights, performing and recording rights, any levy established by law for private copies, or for
-				any other concept, without limitation.
-			</p>
-			<p>
-				<strong>4.5</strong> We will make any corresponding invoices and receipts, including mandatory
-				taxes, available to You according to the applicable regulations.
-			</p>
-			<p>
-				<strong>4.6</strong> We reserve the right to change in the future the Service price, the sales
-				commission percentage or the minimum payment threshold, in which case the new terms will be notified
-				to You not less than thirty (30) days prior to the effective date and will be applicable to future
-				incomes.
-			</p>
-			<p>
-				<strong>4.7</strong> We may decide not to charge you initially for the use of the Service and
-				any optional service, however, You authorize Us to deduct the corresponding amounts from your
-				future payments.
-			</p>
-			<p>
-				<strong>4.8</strong> Audits: We will maintain accurate and complete records of account including
-				all documentation needed by You to compute and verify the fees payable to You in connection with
-				the performance of our agreement.
-			</p>
-		</section>
+			<!-- Section 3 -->
+			<section id="section-3" class="bg-white dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+				<div class="p-4 border-b border-gray-100 dark:border-gray-700/50">
+					<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+						<span class="text-orange-500">3.</span> Vertragsschluss und Kontoerstellung
+					</h2>
+				</div>
+				<div class="p-4 space-y-4 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+					<p>
+						<strong class="text-gray-900 dark:text-white">3.1 Registrierung:</strong> Um die Dienste von BBN Music nutzen zu können, muss der
+						Nutzer zunächst ein Nutzerkonto auf der Plattform bbn.music erstellen. Die Registrierung
+						erfordert die Angabe einer gültigen E-Mail-Adresse und eines Passworts sowie – je nach
+						gewähltem Modell – weiterer Informationen.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">3.2 Vertragsschluss:</strong> Der Vertrag zwischen BBN Music und dem Nutzer kommt
+						zustande, sobald BBN Music das Angebot des Nutzers annimmt. Die Annahme kann entweder
+						ausdrücklich durch eine Bestätigungs-E-Mail erfolgen oder konkludent dadurch, dass BBN Music
+						das Nutzerkonto freischaltet.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">3.3 Kostenmodelle:</strong> Im Rahmen der Registrierung wählt
+						der Nutzer eines der angebotenen Preismodelle (siehe Abschnitt 5). Bei kostenpflichtigem Modell wird der Preis von 12 €/Jahr explizit angezeigt.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">3.4 Voraussetzungen:</strong> Nutzer müssen mindestens 18 Jahre alt sein. BBN Music behält sich vor, Registrierungen bei begründeten Zweifeln abzulehnen.
+					</p>
+				</div>
+			</section>
 
-		<section>
-			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold"
-				>Duration and Termination</Heading
-			>
-			<p>
-				<strong>5.1</strong> The duration of our contractual relationship is initially undetermined. It
-				shall begin when registering at the Platform and upon the explicit acceptance of these Terms of
-				Use, and You or Us may elect to terminate the Service at any time by providing notice, in accordance
-				with these Terms of Use, of thirty (30) days from the termination date.
-			</p>
-			<p>
-				In the event of termination, You must pay all outstanding amounts to Us in a maximum period
-				of five (5) days from the notification date or We will transfer to you any positive balance,
-				whichever is the case.
-			</p>
-			<p><strong>5.2</strong> Additionally, We may terminate our relationship and the Service:</p>
-			<ul class="list-disc pl-6 space-y-1">
-				<li>
-					in the event You breach any term or condition established by Us and You fail to remedy
-					such breach within two (2) days of the date of notice from Us;
-				</li>
-				<li>in case the outstanding balance is not paid as per Section 4.7;</li>
-				<li>
-					if You become the subject of any proceeding related to your liquidation or insolvency;
-				</li>
-				<li>if You infringe our Intellectual Property Rights;</li>
-				<li>if You infringe our Anti-Fraud Policy;</li>
-				<li>in case you commit any unlawful activity using the Platform or the Service.</li>
-			</ul>
-			<p>
-				<strong>5.3</strong> In all cases, all costs due for any Service provided by Us until the termination
-				date, must be duly paid by You.
-			</p>
-			<p>
-				<strong>5.4</strong> We will not be liable to You for damages of any kind because of the termination
-				of our relationship in accordance with these Terms of Use.
-			</p>
-		</section>
+			<!-- Section 4 -->
+			<section id="section-4" class="bg-white dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+				<div class="p-4 border-b border-gray-100 dark:border-gray-700/50">
+					<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+						<span class="text-orange-500">4.</span> Pflichten und Verantwortlichkeiten des Nutzers
+					</h2>
+				</div>
+				<div class="p-4 space-y-4 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+					<p>
+						<strong class="text-gray-900 dark:text-white">4.1 Wahrheit und Aktualität:</strong> Der Nutzer ist verpflichtet, sämtliche Angaben
+						wahrheitsgemäß und vollständig zu machen und sein Profil bei Änderungen unverzüglich zu aktualisieren.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">4.2 Zugangsdaten:</strong> Der Nutzer muss die Zugangsdaten zu seinem Nutzerkonto
+						geheim halten und den Zugang vor unbefugten Dritten schützen.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">4.3 Inhaltsvoraussetzungen:</strong> Der Nutzer darf ausschließlich Inhalte hochladen,
+						an denen er alle erforderlichen Rechte besitzt.
+					</p>
 
-		<section>
-			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold"
-				>Intellectual Property Rights</Heading
-			>
-			<p>
-				<strong>6.1</strong> Nothing contained herein shall be construed as granting or conferring any
-				property rights in the Platform or any part thereof to You; therefore, We are not granting to
-				You by means of this Terms of Use, the right to exploit our Intellectual Property (including but
-				not limited to copyright, patent, trademarks, registered marks, trade secrets, and confidential
-				and proprietary information relating thereto).
-			</p>
-			<p>
-				<strong>6.2</strong> When You upload any of Your Content to our servers through the Platform,
-				you are recognizing the following:
-			</p>
-			<ul class="list-disc pl-6 space-y-1">
-				<li>
-					that We are authorized to administrate, directly or through third parties, Your Content
-					through the Digital Music Services selected by You;
-				</li>
-				<li>
-					that You own and/or control all rights in and to the Your Content and/or have the full
-					right and ability to upload Your Content and exploit it;
-				</li>
-				<li>
-					that Your Content does not infringe the copyrights or any other right, of any third party;
-				</li>
-				<li>
-					that We are authorised during the Duration of the agreement, to grant to third parties
-					synchronisation licences of Your Content for the entire world.
-				</li>
-			</ul>
-		</section>
+					<div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-3 my-3">
+						<p class="font-medium text-red-800 dark:text-red-300 text-sm mb-2">4.4 Verbotene Inhalte:</p>
+						<ul class="text-red-700 dark:text-red-400 text-xs space-y-1">
+							<li>• Volksverhetzende, rassistische oder extremistische Inhalte</li>
+							<li>• Gewaltverherrlichende Inhalte</li>
+							<li>• Pornografische oder jugendgefährdende Inhalte (ohne Kennzeichnung)</li>
+							<li>• Beleidigende oder diskriminierende Aussagen</li>
+							<li>• Urheberrechtsverletzungen (z.B. nicht genehmigte Samples)</li>
+							<li>• Persönlichkeitsrechtsverletzungen</li>
+						</ul>
+					</div>
 
-		<section>
-			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Fraud</Heading>
-			<p>
-				<strong>7.1</strong> We work very hard and invest extensive resources to avoid automated and fraudulent
-				behaviors. For this reason, we have created a specific Anti-Fraud Policy. When you accept these
-				Terms of Use, you also acknowledge and accept our Anti-Fraud Policy and, therefore, You accept
-				that, among other commitments, You will not, and will not authorize any third party to, directly
-				or indirectly, generate automated, fraudulent, or otherwise invalid playback actions, especially
-				in Digital Music Services.
-			</p>
-			<p>
-				<strong>7.2</strong> In this Anti-Fraud Policy we have implemented a 3-strike policy; therefore,
-				please, read carefully such policy as We will be very strict applying it.
-			</p>
-		</section>
+					<p>
+						<strong class="text-gray-900 dark:text-white">4.5 Kennzeichnungspflichten:</strong> Explizite Inhalte müssen als solche gekennzeichnet werden.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">4.6 Keine Doppelverwertung:</strong> Keine parallele Distribution über andere Dienste in dieselben Stores.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">4.7 Store-Richtlinien:</strong> Der Nutzer muss die Richtlinien der Stores beachten.
+					</p>
 
-		<section>
-			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold">Privacy</Heading>
-			<p>
-				<strong>8.1</strong> Our data protection policy is described in the Privacy Policy. The Privacy
-				Policy is part of our relationship and, therefore, when you accept these Terms of Use, you are
-				also acknowledging and accepting our Privacy Policy.
-			</p>
-		</section>
+					<div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3 my-3">
+						<p class="font-medium text-yellow-800 dark:text-yellow-300 text-sm mb-2">4.8 Anti-Fraud Policy:</p>
+						<ul class="text-yellow-700 dark:text-yellow-400 text-xs space-y-1">
+							<li>• Keine Manipulation von Streaming-/Download-Zahlen</li>
+							<li>• Keine Bots, Klickfarmen oder automatisierte Streams</li>
+							<li>• Keine Umgehung von Schutzmechanismen</li>
+							<li>• Keine Mehrfachkonten oder Identitätstäuschung</li>
+						</ul>
+					</div>
 
-		<section>
-			<Heading tag="h2" class="text-white text-xl font-bold"
-				>Warranty. Limitation of Liability</Heading
-			>
-			<p>
-				<strong>9.1</strong> We cannot warrant to You that the Platform and the Service will meet your
-				requirements. Except as expressly provided in these Terms of Use, We provide the Services and
-				the Platform "as is" and without warranty.
-			</p>
-			<p>
-				<strong>9.2</strong> You will assume all liability and defend, indemnify, and hold Us and any
-				party, harmless for the use of the Platform and the Service.
-			</p>
-			<p>
-				<strong>9.3</strong> Our liability under or in connection with the Platform and the Service shall
-				be limited to the value of the fees paid by You to Us during the 12 months prior to the claim.
-			</p>
-			<p>
-				<strong>9.4</strong> We shall not be liable for any loss of profits, savings, goodwill, reputation,
-				revenue, anticipated savings, business or opportunity or any other special, indirect, consequential
-				or incidental losses or damages.
-			</p>
-			<p>
-				<strong>9.5</strong> We respect the rights of others (including copyright, image and personality
-				rights, etc.) and expect our clients to do the same.
-			</p>
-		</section>
+					<p>
+						<strong class="text-gray-900 dark:text-white">4.9-4.11:</strong> Der Nutzer trägt die volle Verantwortung für seine Inhalte und räumt BBN Music die erforderlichen Nutzungsrechte für die Distribution ein.
+					</p>
+				</div>
+			</section>
 
-		<section>
-			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold"
-				>Miscellaneous</Heading
-			>
-			<p>
-				<strong>10.1</strong> Non-assignment: You may not assign your account or any interest therein
-				to any third party, without our express prior written consent.
-			</p>
-			<p>
-				<strong>10.2</strong> Severability: If any provision of this Agreement is found invalid or unenforceable,
-				that provision will be enforced to the maximum extent permissible, and the other provisions of
-				this Agreement will remain in force.
-			</p>
-			<p>
-				<strong>10.3</strong> Promotion: We are not obliged to effectuate any online promotion and/or
-				marketing of Your Content under these Terms of Use.
-			</p>
-			<p>
-				<strong>10.4</strong> Notifications: Any notice that You or Us need to effectuate in connection
-				with the development and performance of these Terms of Use shall be by email at the addresses
-				listed on your account on the Platform.
-			</p>
-		</section>
+			<!-- Section 5 - Pricing (highlighted) -->
+			<section id="section-5" class="bg-gradient-to-br from-orange-50 to-white dark:from-orange-900/20 dark:to-gray-800/30 rounded-xl border border-orange-200 dark:border-orange-800/50 overflow-hidden">
+				<div class="p-4 border-b border-orange-100 dark:border-orange-800/30">
+					<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+						<span class="text-orange-500">5.</span> Vergütung, Preise und Abrechnungsmodelle
+					</h2>
+				</div>
+				<div class="p-4 space-y-4 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+					<p><strong class="text-gray-900 dark:text-white">5.1 Kostenmodelle:</strong></p>
 
-		<section>
-			<Heading tag="h2" class="text-white text-xl font-bold"
-				>License Irrevocability and Takedown Policy</Heading
-			>
-			<p>
-				<strong>11.1</strong> Irrevocable Grant: You acknowledge and agree that any rights and licenses
-				granted to BBN Music GmbH in respect of Your Content are irrevocable with regard to all exploitations
-				and distributions already made or initiated prior to any attempted revocation.
-			</p>
-			<p>
-				<strong>11.2</strong> Prohibition of Abusive Notices: You may not, under any circumstances, submit
-				or instruct any third party to submit a takedown notice against BBN Music GmbH, its partners,
-				or any Content distributed by BBN Music GmbH that You have previously licensed or otherwise authorised.
-			</p>
-			<p>
-				<strong>11.3</strong> Internal Resolution Process: Should You believe that Your rights have been
-				violated, You must first notify Us in writing and engage in our internal resolution process. We
-				will investigate and attempt to resolve the matter within thirty (30) days.
-			</p>
-			<p>
-				<strong>11.4</strong> Consequences of Breach: Any User who submits a false, fraudulent, or abusive
-				takedown notice, or otherwise breaches this Section, will be deemed in material breach of these
-				Terms of Use.
-			</p>
-			<p>
-				<strong>11.5</strong> Indemnity: To the fullest extent permitted by applicable law, You agree
-				to indemnify and hold harmless BBN Music GmbH, its affiliates, officers, directors, employees,
-				and agents from and against any claims, losses, liabilities, damages, costs and expenses arising
-				out of or related to Your breach of this Section 11.
-			</p>
-		</section>
+					<div class="grid md:grid-cols-2 gap-4 my-4">
+						<div class="bg-white dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+							<div class="text-lg font-bold text-gray-900 dark:text-white mb-1">Free-Modell</div>
+							<div class="text-3xl font-black text-gray-900 dark:text-white">97%</div>
+							<div class="text-sm text-gray-500 mb-3">deiner Einnahmen</div>
+							<ul class="text-xs text-gray-600 dark:text-gray-400 space-y-1">
+								<li>• Keine Grundgebühr</li>
+								<li>• 3% Provision für BBN Music</li>
+								<li>• Unbegrenzte Releases</li>
+							</ul>
+						</div>
+						<div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-4 text-white">
+							<div class="text-lg font-bold mb-1">Paid-Modell</div>
+							<div class="text-3xl font-black">100%</div>
+							<div class="text-sm text-white/80 mb-3">deiner Einnahmen</div>
+							<ul class="text-xs text-white/90 space-y-1">
+								<li>• 12 € pro Jahr</li>
+								<li>• 0% Provision</li>
+								<li>• Unbegrenzte Releases</li>
+							</ul>
+						</div>
+					</div>
 
-		<section>
-			<Heading tag="h2" class="text-gray-900 dark:text-white text-xl font-bold"
-				>Dispute Resolution</Heading
-			>
-			<p>
-				<strong>12.1</strong> Any dispute arising out of or relating to these Terms of Use shall first
-				be submitted to Our internal resolution process described in Section 11.3. You agree to cooperate
-				in good faith and supply all information reasonably requested.
-			</p>
-			<p>
-				<strong>12.2</strong> If the dispute remains unresolved after completion of the internal process,
-				it shall be finally settled in accordance with Section 10.7 (Law and Jurisdiction).
-			</p>
-		</section>
+					<p>
+						<strong class="text-gray-900 dark:text-white">5.2 Netto-Royalties:</strong> Nettoeinnahmen nach Abzug von Store-Anteilen und Steuern.
+						Beispiel: 100 € vom Store = 97 € (Free) bzw. 100 € (Paid) für dich.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">5.3-5.6:</strong> Preisänderungen werden rechtzeitig angekündigt. Zahlung erfolgt vorab via Kreditkarte, SEPA oder PayPal. Bei Zahlungsverzug kann das Konto gesperrt oder auf Free heruntergestuft werden.
+					</p>
+				</div>
+			</section>
 
-		<p class="text-sm text-gray-400 mt-8">Last updated: 2025-07-18</p>
+			<!-- Section 6 -->
+			<section id="section-6" class="bg-white dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+				<div class="p-4 border-b border-gray-100 dark:border-gray-700/50">
+					<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+						<span class="text-orange-500">6.</span> Abrechnung und Auszahlungen
+					</h2>
+				</div>
+				<div class="p-4 space-y-4 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+					<p>
+						<strong class="text-gray-900 dark:text-white">6.1 Erfassung:</strong> BBN Music erfasst alle Einnahmen (Streams, Downloads, Content ID, etc.) und stellt Sales-Reports bereit.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">6.2 Abrechnungszeitraum:</strong> Abrechnungen erfolgen regelmäßig basierend auf den Store-Daten.
+					</p>
+
+					<div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3 my-3">
+						<p class="font-medium text-blue-800 dark:text-blue-300 text-sm">6.3 Auszahlungsschwelle: <span class="font-bold">5 EUR</span></p>
+						<p class="text-blue-700 dark:text-blue-400 text-xs mt-1">Guthaben unterhalb werden vorgetragen. Bei Vertragsende erfolgt Auszahlung unabhängig von der Schwelle.</p>
+					</div>
+
+					<p>
+						<strong class="text-gray-900 dark:text-white">6.4 Zahlungswege:</strong> Banküberweisung (SEPA), PayPal oder Wise. Auszahlung in Euro.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">6.5 Steuern:</strong> Der Nutzer ist für die steuerliche Erklärung seiner Einnahmen selbst verantwortlich.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">6.6-6.8:</strong> Bei Korrekturen durch Stores können bereits erstellte Abrechnungen berichtigt werden. Store-Gebühren bei Regelverstößen können weiterbelastet werden.
+					</p>
+				</div>
+			</section>
+
+			<!-- Section 7 - Consumer Rights (highlighted) -->
+			<section id="section-7" class="bg-gradient-to-br from-green-50 to-white dark:from-green-900/20 dark:to-gray-800/30 rounded-xl border border-green-200 dark:border-green-800/50 overflow-hidden">
+				<div class="p-4 border-b border-green-100 dark:border-green-800/30">
+					<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+						<span class="text-orange-500">7.</span> Widerrufsrecht für Verbraucher
+					</h2>
+				</div>
+				<div class="p-4 space-y-4 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+					<div class="bg-green-100 dark:bg-green-900/30 rounded-lg p-4">
+						<p class="font-bold text-green-800 dark:text-green-300 mb-2">Widerrufsbelehrung</p>
+						<p class="text-green-700 dark:text-green-400 text-sm">
+							Sie haben das Recht, binnen <strong>14 Tagen</strong> ohne Angabe von Gründen diesen Vertrag zu widerrufen.
+						</p>
+					</div>
+
+					<p>
+						<strong class="text-gray-900 dark:text-white">Widerruf an:</strong><br>
+						BBN Music GmbH<br>
+						Rosa-Luxemburg-Str. 37, 14482 Potsdam<br>
+						E-Mail: support@bbn.music
+					</p>
+
+					<p>
+						<strong class="text-gray-900 dark:text-white">Folgen des Widerrufs:</strong> Rückzahlung aller Zahlungen binnen 14 Tagen. Bei bereits genutzten Leistungen ist anteiliger Wertersatz zu leisten.
+					</p>
+
+					<details class="bg-gray-100 dark:bg-gray-800 rounded-lg">
+						<summary class="p-3 cursor-pointer font-medium text-gray-700 dark:text-gray-300 text-sm">Muster-Widerrufsformular anzeigen</summary>
+						<div class="p-3 pt-0 text-xs text-gray-600 dark:text-gray-400 space-y-2">
+							<p>An: BBN Music GmbH, Rosa-Luxemburg-Str. 37, 14482 Potsdam – E-Mail: support@bbn.music</p>
+							<p>Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag über die Erbringung der folgenden Dienstleistung: _______</p>
+							<p>Bestellt/registriert am: _______ / Name: _______ / Anschrift: _______</p>
+							<p>Datum: _______ / Unterschrift (nur bei Papier): _______</p>
+							<p class="text-gray-400">(*) Unzutreffendes streichen.</p>
+						</div>
+					</details>
+				</div>
+			</section>
+
+			<!-- Section 8 -->
+			<section id="section-8" class="bg-white dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+				<div class="p-4 border-b border-gray-100 dark:border-gray-700/50">
+					<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+						<span class="text-orange-500">8.</span> Vertragslaufzeit, Kündigung und Sperrung
+					</h2>
+				</div>
+				<div class="p-4 space-y-4 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+					<div class="grid md:grid-cols-2 gap-4">
+						<div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+							<p class="font-bold text-gray-900 dark:text-white text-sm mb-1">Free-Modell</p>
+							<p class="text-xs text-gray-600 dark:text-gray-400">Unbefristet, kündbar mit 30 Tagen Frist zum Monatsende</p>
+						</div>
+						<div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3">
+							<p class="font-bold text-gray-900 dark:text-white text-sm mb-1">Paid-Modell</p>
+							<p class="text-xs text-gray-600 dark:text-gray-400">1 Jahr, automatische Verlängerung, kündbar 14 Tage vor Ablauf</p>
+						</div>
+					</div>
+
+					<p>
+						<strong class="text-gray-900 dark:text-white">8.3 Wechsel:</strong> Von Free zu Paid jederzeit möglich. Von Paid zu Free zum Ende der bezahlten Laufzeit.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">8.4 Beschwerden:</strong> Bei Maßnahmen gegen den Nutzer besteht ein 14-tägiges Beschwerderecht.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">8.5 Außerordentliche Kündigung:</strong> Bei schweren Verstößen (Rechtsverletzungen, Streaming-Manipulation, etc.) kann BBN Music fristlos kündigen.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">8.6 Nach Vertragsende:</strong> Konto wird gesperrt, Inhalte aus Stores entfernt. Offene Guthaben werden ausgezahlt.
+					</p>
+				</div>
+			</section>
+
+			<!-- Section 9 -->
+			<section id="section-9" class="bg-white dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+				<div class="p-4 border-b border-gray-100 dark:border-gray-700/50">
+					<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+						<span class="text-orange-500">9.</span> Änderungen dieser AGB
+					</h2>
+				</div>
+				<div class="p-4 space-y-4 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+					<p>
+						<strong class="text-gray-900 dark:text-white">9.1-9.2:</strong> Änderungen werden mindestens 6 Wochen vorher per E-Mail angekündigt.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">9.3 Zustimmung:</strong> Verbraucher müssen ausdrücklich zustimmen. Unternehmer: Schweigen gilt als Zustimmung nach 30 Tagen.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">9.4 Ablehnung:</strong> Bei Ablehnung gelten die alten AGB weiter. BBN Music kann dann zum Inkrafttreten kündigen.
+					</p>
+				</div>
+			</section>
+
+			<!-- Section 10 -->
+			<section id="section-10" class="bg-white dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+				<div class="p-4 border-b border-gray-100 dark:border-gray-700/50">
+					<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+						<span class="text-orange-500">10.</span> Haftung von BBN Music
+					</h2>
+				</div>
+				<div class="p-4 space-y-4 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+					<p>
+						<strong class="text-gray-900 dark:text-white">10.1 Unbeschränkte Haftung:</strong> Bei Vorsatz, grober Fahrlässigkeit, Personenschäden und gesetzlichen Garantien.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">10.2 Einfache Fahrlässigkeit:</strong> Nur bei Verletzung wesentlicher Vertragspflichten, begrenzt auf vorhersehbare Schäden.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">10.3-10.4:</strong> Kein Ersatz für entgangenen Gewinn, indirekte Schäden. Keine Haftung für Nutzerinhalte oder Store-Entscheidungen.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">10.5 Höhere Gewalt:</strong> Keine Haftung bei Naturkatastrophen, Pandemien, Serverausfällen etc.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">10.8 Für Unternehmer:</strong> Haftung begrenzt auf Zahlungen der letzten 12 Monate (max. 100 EUR bei Free).
+					</p>
+				</div>
+			</section>
+
+			<!-- Section 11 -->
+			<section id="section-11" class="bg-white dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+				<div class="p-4 border-b border-gray-100 dark:border-gray-700/50">
+					<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+						<span class="text-orange-500">11.</span> Rechte Dritter, Freistellung und Sanktionen
+					</h2>
+				</div>
+				<div class="p-4 space-y-4 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+					<p>
+						<strong class="text-gray-900 dark:text-white">11.1-11.2 Freistellung:</strong> Der Nutzer stellt BBN Music von Ansprüchen Dritter frei, die durch seine Inhalte entstehen (inkl. Anwaltskosten).
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">11.3 Streitbeilegung:</strong> Bei Urheberrechtskonflikten erst interne Klärung mit BBN Music anstoßen (30 Tage).
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">11.4 Vertragsstrafe (Unternehmer):</strong> Max. 500 € pro Verstoß bei schuldhaften Verstößen. Nicht für Verbraucher.
+					</p>
+				</div>
+			</section>
+
+			<!-- Section 12 -->
+			<section id="section-12" class="bg-white dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+				<div class="p-4 border-b border-gray-100 dark:border-gray-700/50">
+					<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+						<span class="text-orange-500">12.</span> Datenschutz und Datennutzung
+					</h2>
+				</div>
+				<div class="p-4 space-y-4 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+					<p>
+						Alle Details zum Datenschutz findest du in unserer <a href="/privacy" class="text-orange-500 hover:text-orange-400 font-medium">Datenschutzerklärung</a>.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">Zusammenfassung:</strong> Daten werden nur zur Vertragserfüllung verwendet (Art. 6 Abs. 1 b DSGVO). Aufbewahrung erfolgt gemäß gesetzlicher Fristen (bis 10 Jahre für Abrechnungsdaten). Dritte werden nur als Auftragsverarbeiter eingesetzt.
+					</p>
+				</div>
+			</section>
+
+			<!-- Section 13 -->
+			<section id="section-13" class="bg-white dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+				<div class="p-4 border-b border-gray-100 dark:border-gray-700/50">
+					<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+						<span class="text-orange-500">13.</span> Anbieterkennzeichnung, Kontakt und Streitbeilegung
+					</h2>
+				</div>
+				<div class="p-4 space-y-4 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+					<p>
+						Unsere vollständige Anbieterkennzeichnung findest du im <a href="/imprint" class="text-orange-500 hover:text-orange-400 font-medium">Impressum</a>.
+					</p>
+					<p>
+						<strong class="text-gray-900 dark:text-white">Streitbeilegung:</strong> Wir nehmen nicht an Verbraucherstreitbeilegungsverfahren teil. Die EU-Streitbeilegungsplattform wurde eingestellt.
+					</p>
+				</div>
+			</section>
+
+			<!-- Section 14 -->
+			<section id="section-14" class="bg-white dark:bg-gray-800/30 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+				<div class="p-4 border-b border-gray-100 dark:border-gray-700/50">
+					<h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+						<span class="text-orange-500">14.</span> Schlussbestimmungen
+					</h2>
+				</div>
+				<div class="p-4 space-y-4 text-gray-600 dark:text-gray-300 text-sm leading-relaxed">
+					<div class="grid md:grid-cols-2 gap-4">
+						<div>
+							<p class="font-medium text-gray-900 dark:text-white text-sm mb-1">Anwendbares Recht</p>
+							<p class="text-xs text-gray-500">Deutsches Recht (ohne UN-Kaufrecht)</p>
+						</div>
+						<div>
+							<p class="font-medium text-gray-900 dark:text-white text-sm mb-1">Gerichtsstand</p>
+							<p class="text-xs text-gray-500">Potsdam (für Unternehmer)</p>
+						</div>
+						<div>
+							<p class="font-medium text-gray-900 dark:text-white text-sm mb-1">Vertragssprache</p>
+							<p class="text-xs text-gray-500">Deutsch (englische Versionen dienen nur der Erleichterung)</p>
+						</div>
+						<div>
+							<p class="font-medium text-gray-900 dark:text-white text-sm mb-1">Verjährung (Unternehmer)</p>
+							<p class="text-xs text-gray-500">12 Monate ab Verjährungsbeginn</p>
+						</div>
+					</div>
+					<p class="text-xs text-gray-500">
+						Salvatorische Klausel: Unwirksame Bestimmungen berühren nicht die Wirksamkeit der übrigen Bestimmungen.
+						BBN Music kann den Vertrag auf verbundene Unternehmen übertragen (4 Wochen Ankündigung).
+						Mitteilungen an support@bbn.music sind ausreichend.
+					</p>
+				</div>
+			</section>
+
+			<!-- Footer -->
+			<div class="text-center py-6 text-sm text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700 mt-8">
+				<p>Diese AGB gelten ab dem 02.02.2024 für alle Neuverträge.</p>
+			</div>
+		</main>
 	</div>
 </div>

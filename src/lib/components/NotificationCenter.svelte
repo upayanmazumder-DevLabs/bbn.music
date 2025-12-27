@@ -16,6 +16,7 @@
 	} from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
 	import type { Notification, MessageEvent } from '$lib/api/types.gen';
+	import { extractErrorMessage } from '$lib/utils/extractError';
 
 	let showDropdown = $state(false);
 	let unreadCount = $state(0);
@@ -43,8 +44,8 @@
 				notifications = response.data as Notification[];
 				unreadCount = notifications.filter((n) => !n.read).length;
 			}
-		} catch (e: any) {
-			error = e?.message || 'Failed to load notifications';
+		} catch (e: unknown) {
+			error = extractErrorMessage(e, 'Failed to load notifications');
 		} finally {
 			loading = false;
 		}

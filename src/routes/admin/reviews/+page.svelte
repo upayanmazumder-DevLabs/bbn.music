@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { getDropsByAdmin } from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
+	import { extractErrorMessage } from '$lib/utils/extractError';
 	import type { AdminDrop } from '$lib/api/types.gen';
 	import AdminDropList from '$lib/components/admin/AdminDropList.svelte';
 
@@ -49,7 +50,7 @@
 				hasMore = newDrops.length === LIMIT;
 			}
 		} catch (e: any) {
-			error = e?.error?.message || e?.message || 'Failed to load drops';
+			error = extractErrorMessage(e, 'Failed to load drops');
 		} finally {
 			loading = false;
 			loadingMore = false;
@@ -80,7 +81,7 @@
 				editHasMore = newDrops.length === LIMIT;
 			}
 		} catch (e: any) {
-			editError = e?.error?.message || e?.message || 'Failed to load edit reviews';
+			editError = extractErrorMessage(e, 'Failed to load edit reviews');
 		} finally {
 			editLoading = false;
 			editLoadingMore = false;

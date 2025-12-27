@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
-	import { Modal } from '$lib/components/ui';
+	import { Modal, Input, Textarea } from '$lib/components/ui';
 	import {
 		getIdByDropsByAdmin,
 		getIdByDropsByMusic,
@@ -17,6 +17,8 @@
 	import { auth } from '$lib/stores/auth';
 	import { toast } from '$lib/stores/toast';
 	import { formatDate } from '$lib/utils/formatDate';
+	import { extractErrorMessage } from '$lib/utils/extractError';
+	import { getArtistDisplayName } from '$lib/utils/artist';
 	import type {
 		SingleAdminDrop,
 		AdminDrop,
@@ -223,7 +225,7 @@
 				}
 			}
 		} catch (e: any) {
-			error = e?.error?.message || e?.message || 'Failed to load drop';
+			error = extractErrorMessage(e, 'Failed to load drop');
 		} finally {
 			loading = false;
 		}
@@ -351,7 +353,7 @@
 			// Reload the page to reflect changes
 			await loadDrop(dropId);
 		} catch (e: any) {
-			toast.show(e?.error?.message || e?.message || 'Failed to submit response', 'error');
+			toast.show(extractErrorMessage(e, 'Failed to submit response'), 'error');
 		} finally {
 			submittingResponse = false;
 		}
@@ -367,7 +369,7 @@
 			showTypeDialog = false;
 			await loadDrop(dropId);
 		} catch (e: any) {
-			toast.show(e?.error?.message || e?.message || 'Failed to change drop type', 'error');
+			toast.show(extractErrorMessage(e, 'Failed to change drop type'), 'error');
 		}
 	}
 
@@ -405,11 +407,7 @@
 			toast.show('Drop published successfully: ' + JSON.stringify(response.data), 'success', 6000);
 			showPublishDialog = false;
 		} catch (e: any) {
-			toast.show(
-				'Publish failed: ' + (e?.error?.message || e?.message || 'Unknown error'),
-				'error',
-				6000,
-			);
+			toast.show('Publish failed: ' + extractErrorMessage(e, 'Unknown error'), 'error', 6000);
 		} finally {
 			publishing = false;
 		}
@@ -475,8 +473,8 @@
 		}
 	}
 
-	function resolveArtistName(artistId: string): string | undefined {
-		return drop?.artistList?.find((a) => a._id === artistId)?.name;
+	function displayArtistName(artist: ArtistRef): string {
+		return getArtistDisplayName(artist, drop?.artistList || []);
 	}
 
 	function getArtistProfile(artistId: string): Artist | undefined {
@@ -817,7 +815,7 @@
 									</div>
 									<div class="flex-1 min-w-0">
 										<p class="text-white font-medium truncate">
-											{'name' in artist ? artist.name : resolveArtistName(artist._id) || artist._id}
+											{displayArtistName(artist)}
 										</p>
 										<div class="flex items-center gap-2">
 											<Badge color={artist.type === 'PRIMARY' ? 'orange' : 'gray'} size="sm"
@@ -873,9 +871,8 @@
 												{/if}
 											</div>
 											<p class="text-gray-400 text-sm">
-												{song.artists
-													?.map((a) => ('name' in a ? a.name : resolveArtistName(a._id) || a._id))
-													.join(', ') || 'Unknown Artist'}
+												{song.artists?.map((a) => displayArtistName(a)).join(', ') ||
+													'Unknown Artist'}
 											</p>
 											{#if drop.filenames?.[i]}
 												<p
@@ -925,11 +922,7 @@
 														class="flex items-center gap-1 px-2 py-1 bg-gray-700/50 rounded text-xs"
 													>
 														<span class="text-gray-400">{artist.type}:</span>
-														<span class="text-white"
-															>{'name' in artist
-																? artist.name
-																: resolveArtistName(artist._id) || artist._id}</span
-														>
+														<span class="text-white">{displayArtistName(artist)}</span>
 														{#if artistProfile?.spotify}
 															<a
 																href={artistProfile.spotify}
@@ -1224,25 +1217,18 @@
 			</select>
 		</div>
 
-		<div>
-			<label for="title" class="block text-sm text-gray-400 mb-1">Email Title</label>
-			<input
-				id="title"
-				type="text"
-				bind:value={responseTitle}
-				class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white"
-			/>
-		</div>
+		<Input
+			label="Email Title"
+			id="title"
+			bind:value={responseTitle}
+		/>
 
-		<div>
-			<label for="body" class="block text-sm text-gray-400 mb-1">Email Body</label>
-			<textarea
-				id="body"
-				bind:value={responseBody}
-				rows="12"
-				class="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white resize-none"
-			></textarea>
-		</div>
+		<Textarea
+			label="Email Body"
+			id="body"
+			bind:value={responseBody}
+			rows={12}
+		/>
 
 		<div class="flex items-center gap-2">
 			<input

@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { getApplicationsByOauth, deleteIdByApplicationsByOauth } from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
+	import { extractErrorMessage } from '$lib/utils/extractError';
 	import type { OAuthApp } from '$lib/api/types.gen';
 	import { Modal, Button, Spinner } from '$lib/components/ui';
 	import { toast } from '$lib/stores/toast';
@@ -27,7 +28,7 @@
 				apps = response.data as OAuthApp[];
 			}
 		} catch (e: any) {
-			error = e?.error?.message || e?.message || 'Failed to load OAuth apps';
+			error = extractErrorMessage(e, 'Failed to load OAuth apps');
 		} finally {
 			loading = false;
 		}
@@ -51,7 +52,7 @@
 			await loadApps();
 			toast.show('OAuth application deleted successfully', 'success');
 		} catch (e: any) {
-			toast.show(e?.error?.message || e?.message || 'Failed to delete OAuth application', 'error');
+			toast.show(extractErrorMessage(e, 'Failed to delete OAuth application'), 'error');
 		} finally {
 			appToDelete = null;
 		}

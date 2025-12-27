@@ -7,6 +7,7 @@
 		UploadOutline,
 		UserSolid,
 	} from 'flowbite-svelte-icons';
+	import { extractErrorMessage } from '$lib/utils/extractError';
 
 	interface Props {
 		open: boolean;
@@ -145,8 +146,8 @@
 			await new Promise((resolve) => setTimeout(resolve, 500));
 
 			oncomplete();
-		} catch (e: any) {
-			error = e?.message || 'Failed to submit verification. Please try again.';
+		} catch (e: unknown) {
+			error = extractErrorMessage(e, 'Failed to submit verification. Please try again.');
 		} finally {
 			submitting = false;
 		}
@@ -202,14 +203,15 @@
 
 				<div class="space-y-4">
 					<div>
-						<label class="block text-sm font-medium text-white mb-2">
+						<span id="doc-type-label" class="block text-sm font-medium text-white mb-2">
 							Document Type <span class="text-orange-400">*</span>
-						</label>
-						<div class="grid grid-cols-3 gap-2">
+						</span>
+						<div class="grid grid-cols-3 gap-2" role="group" aria-labelledby="doc-type-label">
 							{#each idTypeOptions as option}
 								<button
 									type="button"
 									onclick={() => (idType = option.value as typeof idType)}
+									aria-pressed={idType === option.value}
 									class="p-3 rounded-lg border text-center transition-colors {idType ===
 									option.value
 										? 'bg-orange-500/20 border-orange-500 text-orange-400'
@@ -241,12 +243,13 @@
 
 				<!-- Front of ID -->
 				<div>
-					<label class="block text-sm font-medium text-white mb-2">
+					<span id="id-front-label" class="block text-sm font-medium text-white mb-2">
 						Front of Document <span class="text-orange-400">*</span>
-					</label>
+					</span>
 					<button
 						type="button"
 						onclick={() => idFrontInput?.click()}
+						aria-labelledby="id-front-label"
 						class="w-full p-6 rounded-lg border-2 border-dashed transition-colors {idFrontFile
 							? 'border-green-500 bg-green-500/10'
 							: 'border-gray-600 hover:border-gray-500 bg-gray-800/30'}"
@@ -275,12 +278,13 @@
 				<!-- Back of ID (not needed for passport) -->
 				{#if idType !== 'passport'}
 					<div>
-						<label class="block text-sm font-medium text-white mb-2">
+						<span id="id-back-label" class="block text-sm font-medium text-white mb-2">
 							Back of Document <span class="text-orange-400">*</span>
-						</label>
+						</span>
 						<button
 							type="button"
 							onclick={() => idBackInput?.click()}
+							aria-labelledby="id-back-label"
 							class="w-full p-6 rounded-lg border-2 border-dashed transition-colors {idBackFile
 								? 'border-green-500 bg-green-500/10'
 								: 'border-gray-600 hover:border-gray-500 bg-gray-800/30'}"

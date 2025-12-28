@@ -1,0 +1,28 @@
+name: PR Preview Cleanup
+
+on:
+  pull_request:
+    types: [closed]
+
+jobs:
+  cleanup-preview:
+    name: Remove PR Preview
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Cleanup PR Preview Container
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            # Stop and remove the PR preview container
+            docker stop bbnmusic-pr-${{ github.event.pull_request.number }} 2>/dev/null || true
+            docker rm bbnmusic-pr-${{ github.event.pull_request.number }} 2>/dev/null || true
+
+            # Optional: Remove the Docker image to save space
+            docker rmi ghcr.io/bbn-music/bbnmusic-svelte:pr-${{ github.event.pull_request.number }} 2>/dev/null || true
+
+            echo "✅ Cleaned up preview for PR #${{ github.event.pull_request.number }}"

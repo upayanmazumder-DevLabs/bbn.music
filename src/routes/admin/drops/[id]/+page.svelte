@@ -277,7 +277,7 @@
 
 		try {
 			const response = await getDropsByAdmin({
-				query: { user: userId, _limit: 10, _offset: offset },
+				query: { user: userId, _limit: 10, _offset: offset, sort: 'review' },
 				headers: getAuthHeaders(),
 			});
 

@@ -713,7 +713,7 @@
 		{/if}
 
 		<!-- Edit Diff View -->
-		{#if drop.publishedSnapshot}
+		{#if drop.type === 'EDIT_UNDER_REVIEW' && drop.publishedSnapshot}
 			<Card variant="default" padding="md">
 				<button
 					class="w-full flex items-center justify-between"

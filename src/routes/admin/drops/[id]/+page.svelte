@@ -120,6 +120,10 @@
 	let shazamResults = $state<ShazamResults | null>(null);
 	let loadingShazam = $state(false);
 
+	// Shazam popup modal
+	let showShazamPopup = $state(false);
+	let selectedShazamResults = $state<ShazamResults | null>(null);
+
 	// Expandable sections
 	let expandedLyrics = $state<Record<string, boolean>>({});
 	let showPublishedSnapshot = $state(false);
@@ -483,6 +487,11 @@
 
 	function toggleLyrics(songId: string) {
 		expandedLyrics[songId] = !expandedLyrics[songId];
+	}
+
+	function openShazamPopup(shazamData: ShazamResults) {
+		selectedShazamResults = shazamData;
+		showShazamPopup = true;
 	}
 
 	interface EventInfo {
@@ -1133,25 +1142,49 @@
 						<!-- TODO: reverse order in backend instead of frontend -->
 						<div class="space-y-2 max-h-80 overflow-y-auto">
 							{#each [...drop.events].reverse().slice(0, 15) as event}
-								{@const info = getEventInfo(
-									event as { type: string; meta?: Record<string, unknown>; userId?: string },
-								)}
-								<div class="text-sm p-3 bg-gray-800/50 rounded-lg">
-									<div class="flex items-center justify-between gap-2">
-										<div class="flex items-center gap-2 min-w-0">
-											<span class="text-white font-medium">{info.title}</span>
-											{#if info.badge}
-												<Badge color={info.badge.color} size="sm">{info.badge.text}</Badge>
-											{/if}
+								{@const eventTyped = event as { type: string; meta?: Record<string, unknown>; userId?: string; _id: string }}
+								{@const info = getEventInfo(eventTyped)}
+								{@const isShazamEvent = eventTyped.type === 'action' && eventTyped.meta?.action === 'shazam-results'}
+								{@const shazamData = isShazamEvent && eventTyped.meta && 'data' in eventTyped.meta ? (eventTyped.meta.data as ShazamResults) : null}
+								{#if isShazamEvent && shazamData}
+									<button
+										class="text-sm p-3 bg-gray-800/50 rounded-lg cursor-pointer hover:bg-gray-700/50 transition-colors w-full text-left"
+										onclick={() => openShazamPopup(shazamData)}
+									>
+										<div class="flex items-center justify-between gap-2">
+											<div class="flex items-center gap-2 min-w-0">
+												<span class="text-white font-medium">{info.title}</span>
+												{#if info.badge}
+													<Badge color={info.badge.color} size="sm">{info.badge.text}</Badge>
+												{/if}
+												<LinkOutline class="w-3 h-3 text-gray-400" />
+											</div>
+											<span class="text-gray-500 text-xs whitespace-nowrap"
+												>{formatEventTime(eventTyped._id)}</span
+											>
 										</div>
-										<span class="text-gray-500 text-xs whitespace-nowrap"
-											>{formatEventTime(event._id)}</span
-										>
+										{#if info.detail}
+											<p class="text-gray-400 text-xs mt-1">{info.detail}</p>
+										{/if}
+									</button>
+								{:else}
+									<div class="text-sm p-3 bg-gray-800/50 rounded-lg">
+										<div class="flex items-center justify-between gap-2">
+											<div class="flex items-center gap-2 min-w-0">
+												<span class="text-white font-medium">{info.title}</span>
+												{#if info.badge}
+													<Badge color={info.badge.color} size="sm">{info.badge.text}</Badge>
+												{/if}
+											</div>
+											<span class="text-gray-500 text-xs whitespace-nowrap"
+												>{formatEventTime(eventTyped._id)}</span
+											>
+										</div>
+										{#if info.detail}
+											<p class="text-gray-400 text-xs mt-1">{info.detail}</p>
+										{/if}
 									</div>
-									{#if info.detail}
-										<p class="text-gray-400 text-xs mt-1">{info.detail}</p>
-									{/if}
-								</div>
+								{/if}
 							{/each}
 						</div>
 					</Card>
@@ -1299,5 +1332,88 @@
 		<Button onclick={publishDrop} disabled={publishing}>
 			{publishing ? 'Publishing...' : 'Publish Now'}
 		</Button>
+	{/snippet}
+</Modal>
+
+<!-- Shazam Results Popup -->
+<Modal bind:open={showShazamPopup} title="Shazam Matches" size="lg">
+	{#if selectedShazamResults && selectedShazamResults.length > 0}
+		<div class="space-y-4">
+			{#each selectedShazamResults as result}
+				<div class="p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
+					<div class="mb-3">
+						<h4 class="text-white font-semibold text-lg">{result.title}</h4>
+						<p class="text-gray-400">{result.artist}</p>
+					</div>
+
+					<div class="space-y-2">
+						<p class="text-gray-500 text-sm font-medium">Streaming Links:</p>
+						<div class="flex flex-wrap gap-2">
+							{#if result.shazamUrl}
+								<a
+									href={result.shazamUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/20 hover:bg-blue-500/30 border border-blue-500/50 rounded-lg text-blue-400 hover:text-blue-300 transition-colors"
+								>
+									<LinkOutline class="w-4 h-4" />
+									Shazam
+								</a>
+							{/if}
+							{#if result.spotifyUrl}
+								<a
+									href={result.spotifyUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="inline-flex items-center gap-2 px-4 py-2 bg-green-500/20 hover:bg-green-500/30 border border-green-500/50 rounded-lg text-green-400 hover:text-green-300 transition-colors"
+								>
+									<LinkOutline class="w-4 h-4" />
+									Spotify
+								</a>
+							{/if}
+							{#if result.appleUrl}
+								<a
+									href={result.appleUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="inline-flex items-center gap-2 px-4 py-2 bg-pink-500/20 hover:bg-pink-500/30 border border-pink-500/50 rounded-lg text-pink-400 hover:text-pink-300 transition-colors"
+								>
+									<LinkOutline class="w-4 h-4" />
+									Apple Music
+								</a>
+							{/if}
+							{#if result.youtubeUrl}
+								<a
+									href={result.youtubeUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="inline-flex items-center gap-2 px-4 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 rounded-lg text-red-400 hover:text-red-300 transition-colors"
+								>
+									<LinkOutline class="w-4 h-4" />
+									YouTube
+								</a>
+							{/if}
+							{#if result.deezerUrl}
+								<a
+									href={result.deezerUrl}
+									target="_blank"
+									rel="noopener noreferrer"
+									class="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/50 rounded-lg text-purple-400 hover:text-purple-300 transition-colors"
+								>
+									<LinkOutline class="w-4 h-4" />
+									Deezer
+								</a>
+							{/if}
+						</div>
+					</div>
+				</div>
+			{/each}
+		</div>
+	{:else}
+		<p class="text-gray-400">No matches found</p>
+	{/if}
+
+	{#snippet footer()}
+		<Button variant="secondary" onclick={() => (showShazamPopup = false)}>Close</Button>
 	{/snippet}
 </Modal>

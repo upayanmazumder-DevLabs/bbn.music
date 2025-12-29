@@ -124,6 +124,10 @@
 	let showShazamPopup = $state(false);
 	let selectedShazamResults = $state<ShazamResults | null>(null);
 
+	// Review reason popup modal
+	let showReviewPopup = $state(false);
+	let selectedReviewReason = $state<string | null>(null);
+
 	// Expandable sections
 	let expandedLyrics = $state<Record<string, boolean>>({});
 	let showPublishedSnapshot = $state(false);
@@ -494,6 +498,11 @@
 		showShazamPopup = true;
 	}
 
+	function openReviewPopup(reason: string) {
+		selectedReviewReason = reason;
+		showReviewPopup = true;
+	}
+
 	interface EventInfo {
 		title: string;
 		detail?: string;
@@ -557,11 +566,14 @@
 					}
 					return { title: 'Status changed' };
 				}
-				case 'drop-review':
+				case 'drop-review': {
+					const reason = event.meta?.reason as string | undefined;
 					return {
 						title: 'Reviewed by admin',
+						detail: reason ? reason : undefined,
 						badge: { text: 'Reviewed', color: 'green' },
 					};
+				}
 				case 'shazam-results': {
 					const shazamData = event.meta.data as
 						| Array<{ title?: string; artist?: string }>
@@ -1142,10 +1154,33 @@
 								{@const info = getEventInfo(eventTyped)}
 								{@const isShazamEvent = eventTyped.type === 'action' && eventTyped.meta?.action === 'shazam-results'}
 								{@const shazamData = isShazamEvent && eventTyped.meta && 'data' in eventTyped.meta ? (eventTyped.meta.data as ShazamResults) : null}
+								{@const isReviewEvent = eventTyped.type === 'action' && eventTyped.meta?.action === 'drop-review'}
+								{@const reviewReason = isReviewEvent && eventTyped.meta && 'reason' in eventTyped.meta ? (eventTyped.meta.reason as string | undefined) : null}
 								{#if isShazamEvent && shazamData}
 									<button
 										class="text-sm p-3 bg-gray-800/50 rounded-lg cursor-pointer hover:bg-gray-700/50 transition-colors w-full text-left"
 										onclick={() => openShazamPopup(shazamData)}
+									>
+										<div class="flex items-center justify-between gap-2">
+											<div class="flex items-center gap-2 min-w-0">
+												<span class="text-white font-medium">{info.title}</span>
+												{#if info.badge}
+													<Badge color={info.badge.color} size="sm">{info.badge.text}</Badge>
+												{/if}
+												<LinkOutline class="w-3 h-3 text-gray-400" />
+											</div>
+											<span class="text-gray-500 text-xs whitespace-nowrap"
+												>{formatEventTime(eventTyped._id)}</span
+											>
+										</div>
+										{#if info.detail}
+											<p class="text-gray-400 text-xs mt-1">{info.detail}</p>
+										{/if}
+									</button>
+								{:else if isReviewEvent && reviewReason}
+									<button
+										class="text-sm p-3 bg-gray-800/50 rounded-lg cursor-pointer hover:bg-gray-700/50 transition-colors w-full text-left"
+										onclick={() => openReviewPopup(reviewReason)}
 									>
 										<div class="flex items-center justify-between gap-2">
 											<div class="flex items-center gap-2 min-w-0">
@@ -1411,5 +1446,24 @@
 
 	{#snippet footer()}
 		<Button variant="secondary" onclick={() => (showShazamPopup = false)}>Close</Button>
+	{/snippet}
+</Modal>
+
+<!-- Review Reason Popup -->
+<Modal bind:open={showReviewPopup} title="Review Reason" size="lg">
+	{#if selectedReviewReason}
+		<div class="space-y-4">
+			<div class="p-4 bg-gray-800/50 rounded-lg border border-gray-700/50">
+				<p class="text-gray-300 whitespace-pre-wrap leading-relaxed">
+					{selectedReviewReason}
+				</p>
+			</div>
+		</div>
+	{:else}
+		<p class="text-gray-400">No review reason available</p>
+	{/if}
+
+	{#snippet footer()}
+		<Button variant="secondary" onclick={() => (showReviewPopup = false)}>Close</Button>
 	{/snippet}
 </Modal>

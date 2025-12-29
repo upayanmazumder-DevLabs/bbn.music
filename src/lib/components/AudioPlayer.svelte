@@ -90,6 +90,7 @@
 		bind:this={audioElement}
 		src={streamUrl}
 		preload="none"
+		crossorigin="anonymous"
 		onloadstart={handleLoadStart}
 		oncanplay={handleCanPlay}
 		onplay={handlePlay}

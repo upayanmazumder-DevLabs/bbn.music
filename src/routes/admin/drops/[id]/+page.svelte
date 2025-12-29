@@ -879,10 +879,6 @@
 													<Badge color="blue" size="sm">Instrumental</Badge>
 												{/if}
 											</div>
-											<p class="text-gray-400 text-sm">
-												{song.artists?.map((a) => displayArtistName(a)).join(', ') ||
-													'Unknown Artist'}
-											</p>
 											{#if drop.filenames?.[i]}
 												<p
 													class="text-gray-500 text-xs font-mono truncate mt-0.5"

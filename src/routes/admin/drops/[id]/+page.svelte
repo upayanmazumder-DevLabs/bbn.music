@@ -81,9 +81,21 @@
 		| 'Copyright bad'
 		| 'Beat license needed'
 		| 'Full Songwriter Name'
+		| 'Full Producer Name'
+		| 'Mismatched Title'
 		| 'AI Generated'
 		| 'Wrong Language'
+		| 'Wrong Genre'
+		| 'Missing Songwriter'
+		| 'Not Instrumental'
+		| 'Ending with silence'
+		| 'Artwork mismatch'
+		| 'Artwork already used'
 		| 'Artwork low quality'
+		| 'Artwork single color'
+		| 'Artwork contains copyrighted material'
+		| 'Artwork contains parental advisory without being marked as Explicit'
+		| 'Quality Issue'
 		| 'Accepted'
 		| 'Takedown Accepted'
 		| 'Takedown Declined';
@@ -146,6 +158,14 @@
 			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
 			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed missing Metadata.\nYour Drop is missing the Songwriters Full Name.\nPlease correct the names in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
 		],
+		'Full Producer Name': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed missing Metadata.\nYour Drop is missing the Producers Full Name.\nPlease correct the names in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Mismatched Title': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed incorrect Metadata.\nYour Drop only has one Song but the Song and the Drop have different titles. When a Drop only has one Song the titles need to match.\nPlease update your metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
 		'AI Generated': [
 			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
 			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the Drop is AI generated.\nWe are currently not accepting AI generated music.\nPlease remove the AI generated music and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
@@ -154,9 +174,49 @@
 			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
 			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the language of the Drop and/or Songs is wrong.\nPlease update the language in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
 		],
+		'Wrong Genre': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the genre of the Drop and/or Songs is wrong.\nPlease update the genre in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Missing Songwriter': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the Songwriter is missing.\nPlease add the Songwriter in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Not Instrumental': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the Drop is not instrumental even though the type is set to instrumental.\nPlease update the type in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Ending with silence': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the Drop ends with silence that is too long.\nPlease remove the silence at the end of the Drop and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Artwork mismatch': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the Artwork is not matching the Metadata.\nPlease update the Artwork in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Artwork already used': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the Artwork is already used in another Drop.\nPlease update the Artwork in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
 		'Artwork low quality': [
 			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
 			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the Artwork is low quality.\nThe Artwork needs to be 3000x3000px and not blurry.\nPlease update the Artwork in the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Artwork single color': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the Artwork is a single color.\nApple Music does not accept single color Artworks.\nPlease update the Artwork in the Metadata or let us know if you want to refrain from publishing on Apple Music and resubmit your Drop for review with your choice in the comment field.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Artwork contains copyrighted material': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the Artwork contains copyrighted material.\nPlease remove the copyrighted material from the Artwork and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Artwork contains parental advisory without being marked as Explicit': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the Artwork contains a parental advisory label but the Drop is not marked as Explicit.\nPlease update the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Quality Issue': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed quality issues with the audio.\nPlease ensure that the audio is of high quality and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
 		],
 		Accepted: [
 			`${drop?.title} Accepted!`,

@@ -12,6 +12,7 @@
 		getIdByShazamByMusic,
 		getIdByProviderByPublishByMusic,
 		postTypeByTypeByDropByMusic,
+		getDownloadBySongBySongsByMusic,
 	} from '$lib/api/sdk.gen';
 	import { getAuthHeaders } from '$lib/apiClient';
 	import { auth } from '$lib/stores/auth';
@@ -71,6 +72,7 @@
 		ChevronUpOutline,
 		LinkOutline,
 		ClockOutline,
+		DownloadOutline,
 	} from 'flowbite-svelte-icons';
 
 	// Drop ID is reactive to handle navigation between drops
@@ -143,6 +145,7 @@
 	// Expandable sections
 	let expandedLyrics = $state<Record<string, boolean>>({});
 	let showPublishedSnapshot = $state(false);
+	let downloadingSongs = $state<Record<string, boolean>>({});
 
 	// Email templates
 	const getTemplates = (): Record<TemplateKey, [string, string]> => ({
@@ -478,6 +481,37 @@
 			toast.show('Publish failed: ' + extractErrorMessage(e, 'Unknown error'), 'error', 6000);
 		} finally {
 			publishing = false;
+		}
+	}
+
+	async function downloadSong(songId: string, songTitle: string) {
+		downloadingSongs[songId] = true;
+		try {
+			const response = await getDownloadBySongBySongsByMusic({
+				path: { songId },
+				headers: getAuthHeaders(),
+			});
+
+			if (response.data) {
+				// Create a blob URL and trigger download
+				const blob = response.data as Blob;
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+
+				// Use song title as filename, sanitize it for filesystem
+				const sanitizedTitle = songTitle.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+				a.download = `${sanitizedTitle}.wav`;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+				toast.show('Song downloaded successfully', 'success');
+			}
+		} catch (e: any) {
+			toast.show(extractErrorMessage(e, 'Failed to download song'), 'error');
+		} finally {
+			downloadingSongs[songId] = false;
 		}
 	}
 
@@ -961,6 +995,20 @@
 											{/if}
 										</div>
 										<code class="text-xs text-gray-500 font-mono">{song.isrc || 'No ISRC'}</code>
+										<IconButton
+											onclick={() => downloadSong(song._id, song.title)}
+											variant="ghost"
+											size="sm"
+											aria-label="Download song"
+											title="Download song file"
+											disabled={downloadingSongs[song._id]}
+										>
+											{#if downloadingSongs[song._id]}
+												<Spinner size="xs" />
+											{:else}
+												<DownloadOutline class="w-4 h-4" />
+											{/if}
+										</IconButton>
 									</div>
 
 									<!-- Song Details Grid -->

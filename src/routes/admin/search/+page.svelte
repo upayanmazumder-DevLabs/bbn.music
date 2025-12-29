@@ -98,7 +98,7 @@
 
 			// Refresh wallet data
 			const response = await getIdByWalletsByAdmin({
-				path: { id: wallet._id },
+				path: { id: wallet.user },
 				headers: getAuthHeaders(),
 			});
 			if (response.data) {
@@ -203,7 +203,7 @@
 
 			// Refresh wallet data
 			const response = await getIdByWalletsByAdmin({
-				path: { id: wallet._id },
+				path: { id: wallet.user },
 				headers: getAuthHeaders(),
 			});
 			if (response.data) {

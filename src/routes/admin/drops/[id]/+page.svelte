@@ -147,6 +147,27 @@
 	let showPublishedSnapshot = $state(false);
 	let downloadingSongs = $state<Record<string, boolean>>({});
 
+	// Check if drop has been reviewed before
+	const hasBeenReviewed = $derived(() => {
+		if (!drop?.events) return false;
+		return drop.events.some(
+			(event: any) => event.type === 'action' && event.meta?.action === 'drop-review'
+		);
+	});
+
+	// Determine if we should show the changes section
+	const shouldShowChanges = $derived(() => {
+		// Show for EDIT_UNDER_REVIEW with publishedSnapshot
+		if (drop?.type === 'EDIT_UNDER_REVIEW' && drop?.publishedSnapshot) {
+			return true;
+		}
+		// Show for drops that have been reviewed before
+		if (hasBeenReviewed()) {
+			return true;
+		}
+		return false;
+	});
+
 	// Email templates
 	const getTemplates = (): Record<TemplateKey, [string, string]> => ({
 		'Copyright bad': [
@@ -275,8 +296,9 @@
 					...(adminResponse.data as MergedAdminDrop),
 				};
 
-				// Auto-expand diff view for edit reviews
-				if (drop.type === 'EDIT_UNDER_REVIEW' && drop.publishedSnapshot) {
+				// Auto-expand changes view for reviewed drops
+				// This will be true for EDIT_UNDER_REVIEW or any drop that has been reviewed before
+				if (shouldShowChanges()) {
 					showPublishedSnapshot = true;
 				}
 
@@ -827,8 +849,8 @@
 			</Card>
 		{/if}
 
-		<!-- Edit Diff View -->
-		{#if drop.type === 'EDIT_UNDER_REVIEW' && drop.publishedSnapshot}
+		<!-- Changes View (for reviewed drops) -->
+		{#if shouldShowChanges()}
 			<Card variant="default" padding="md">
 				<button
 					class="w-full flex items-center justify-between"
@@ -836,7 +858,11 @@
 				>
 					<h3 class="text-lg font-semibold text-white flex items-center gap-2">
 						<ClockOutline class="w-5 h-5 text-blue-400" />
-						Changes from Published Version
+						{#if drop.type === 'EDIT_UNDER_REVIEW'}
+							Changes from Published Version
+						{:else}
+							Changes Since Last Review
+						{/if}
 					</h3>
 					{#if showPublishedSnapshot}
 						<ChevronUpOutline class="w-5 h-5 text-gray-400" />
@@ -846,11 +872,20 @@
 				</button>
 				{#if showPublishedSnapshot}
 					<div class="mt-4">
-						<DropDiffView
-							current={drop as unknown as FullDrop}
-							published={drop.publishedSnapshot}
-							artistList={drop.artistList}
-						/>
+						{#if drop.publishedSnapshot}
+							<DropDiffView
+								current={drop as unknown as FullDrop}
+								published={drop.publishedSnapshot}
+								artistList={drop.artistList}
+							/>
+						{:else}
+							<div class="text-center py-8 text-gray-400">
+								<p class="mb-2">This drop has been reviewed before, but no snapshot is available.</p>
+								<p class="text-sm">
+									Change tracking is only available for published drops that are being edited.
+								</p>
+							</div>
+						{/if}
 					</div>
 				{/if}
 			</Card>

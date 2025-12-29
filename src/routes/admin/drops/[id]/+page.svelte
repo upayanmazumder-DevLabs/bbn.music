@@ -97,6 +97,7 @@
 		| 'Artwork single color'
 		| 'Artwork contains copyrighted material'
 		| 'Artwork contains parental advisory without being marked as Explicit'
+		| 'Artwork contains Apple elements'
 		| 'Quality Issue'
 		| 'Accepted'
 		| 'Takedown Accepted'
@@ -237,6 +238,10 @@
 		'Artwork contains parental advisory without being marked as Explicit': [
 			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
 			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed that the Artwork contains a parental advisory label but the Drop is not marked as Explicit.\nPlease update the Metadata and resubmit your Drop for review.\n\nBest regards,\n${$auth.user?.profile.username}`,
+		],
+		'Artwork contains Apple elements': [
+			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,
+			`Hey ${drop?.userInfo?.profile.username},\n\nI just reviewed your Drop ${drop?.title} with ID (${dropId}) and noticed an issue with your cover.\nIf you want to have your Drop published on Apple Music, it is not allowed to include Apple Elements (e.g. Contact Form) in the Cover.\nIf you don't want to have your Drop published on Apple Music, add a note in the comment section so we know.\n\nPlease resubmit your Drop as soon as you resolved the issue.\n\nBest regards,\n${$auth.user?.profile.username}`,
 		],
 		'Quality Issue': [
 			`Issue with drop: ${drop?.title} [IMPORTANT - Your action required]`,

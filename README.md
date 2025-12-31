@@ -4,15 +4,35 @@
 
 The BBN Website.
 
-## External submissions
+## External Contributions
 
-We are happy for external submissions, so PRs are welcome!
+We welcome external contributions! Please feel free to open a pull request.
 
-### Setup
+## Setup
 
-1. Install Bun from <https://bun.com>
-2. deno task start
-3. Set overrides to prod server
+1. **Install [Bun](https://bun.com)**
+   - Follow the instructions on the Bun website to install Bun for your platform.
 
-   1. `localStorage.setItem("OVERRIDE_BASE_URL", "https://bbn.music/")`
-   2. `localStorage.setItem("OVERRIDE_WS_URL", "wss://bbn.music/ws")`
+2. **Install dependencies:**
+
+   ```sh
+   bun install
+   ```
+
+3. **Start the development server:**
+
+   ```sh
+   bun run dev
+   ```
+
+4. **Set API overrides to use the production server:**
+   Open your browser console and run:
+
+   ```js
+   localStorage.setItem('OVERRIDE_BASE_URL', 'https://bbn.music/');
+   localStorage.setItem('OVERRIDE_WS_URL', 'wss://bbn.music/ws');
+   ```
+
+---
+
+If you have any questions or issues, please open an issue or reach out via PR!

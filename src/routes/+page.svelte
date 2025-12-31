@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { Button } from '$lib/components/ui';
-	import { CheckCircleSolid, GlobeSolid, ChartPieSolid, InboxSolid } from 'flowbite-svelte-icons';
+	import { ChartPieSolid, CheckCircleSolid, GlobeSolid, InboxSolid } from 'flowbite-svelte-icons';
 
 	// Platform logos for the carousel
 	const platforms = [
@@ -211,7 +211,7 @@
 
 		<div class="space-y-8">
 			<!-- First carousel - scrolling right -->
-			<div class="carousel-container">
+			<div class="carousel-container unselectable">
 				<div class="flex gap-16 animate-scroll-reverse">
 					{#each [...platforms, ...platforms, ...platforms, ...platforms] as platform}
 						<div class="flex-shrink-0 w-24 h-24 flex items-center justify-center">
@@ -226,7 +226,7 @@
 			</div>
 
 			<!-- Second carousel - scrolling left -->
-			<div class="carousel-container">
+			<div class="carousel-container unselectable">
 				<div class="flex gap-16 animate-scroll">
 					{#each [...platforms, ...platforms, ...platforms, ...platforms] as platform}
 						<div class="flex-shrink-0 w-24 h-24 flex items-center justify-center">
@@ -409,5 +409,11 @@
 		.platform-logo {
 			filter: brightness(0) invert(1);
 		}
+	}
+	.unselectable {
+		user-select: none;
+		-webkit-user-select: none;
+		-ms-user-select: none;
+		-moz-user-select: none;
 	}
 </style>

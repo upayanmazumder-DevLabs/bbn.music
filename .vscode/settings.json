@@ -1,17 +1,19 @@
 {
-    "typescript.validate.enable": true,
-    "editor.formatOnPaste": false,
-    "editor.formatOnType": true,
-    "editor.formatOnSave": true,
-    "editor.defaultFormatter": null,
-    "editor.detectIndentation": false,
-    "editor.insertSpaces": true,
-    "editor.codeActionsOnSave": {
-        "source.organizeImports": "explicit"
-    },
-    "typescript.suggest.autoImports": true,
-    "explorer.fileNesting.enabled": true,
-    "explorer.fileNesting.patterns": {
-        "*.ts": "${capture}.css"
-    }
+	"typescript.validate.enable": true,
+	"editor.formatOnPaste": false,
+	"editor.formatOnType": true,
+	"editor.formatOnSave": true,
+	"editor.defaultFormatter": null,
+	"editor.detectIndentation": false,
+	"editor.insertSpaces": true,
+	"editor.codeActionsOnSave": {
+		"source.organizeImports": "explicit"
+	},
+	"typescript.suggest.autoImports": true,
+	"explorer.fileNesting.enabled": true,
+	"explorer.fileNesting.patterns": {
+		"*.ts": "${capture}.css"
+	},
+	"colorWheel.settings.workspaceColor": "hsl(108,55%,55%)",
+	"cSpell.words": ["contactability", "Criticz", "Deezer", "Redz"]
 }

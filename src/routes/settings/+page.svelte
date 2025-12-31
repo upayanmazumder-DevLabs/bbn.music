@@ -1,7 +1,11 @@
 <script lang="ts">
 	import { auth } from '$lib/stores/auth';
 	import { Badge, Toggle, Input } from '$lib/components/ui';
-	import { extractErrorMessage, extractFieldErrors, type FieldErrors } from '$lib/utils/extractError';
+	import {
+		extractErrorMessage,
+		extractFieldErrors,
+		type FieldErrors,
+	} from '$lib/utils/extractError';
 	import {
 		ExclamationCircleOutline,
 		CheckCircleSolid,
@@ -58,7 +62,9 @@
 		// Filter platforms to only include valid preference platforms
 		const validPlatforms: PreferencePlatform[] = ['email', 'whatsapp', 'rcs', 'sms'];
 		const filterPlatforms = (platforms: Platform[]): PreferencePlatform[] => {
-			return platforms.filter((p): p is PreferencePlatform => validPlatforms.includes(p as PreferencePlatform));
+			return platforms.filter((p): p is PreferencePlatform =>
+				validPlatforms.includes(p as PreferencePlatform),
+			);
 		};
 
 		try {
@@ -70,9 +76,18 @@
 			if (response.data) {
 				const prefs = response.data as MessagePreference;
 				notificationPrefs = {
-					drops: { enabled: prefs.preferences.drops!.enabled, platforms: filterPlatforms(prefs.preferences.drops!.platforms) },
-					royalties: { enabled: prefs.preferences.royalties!.enabled, platforms: filterPlatforms(prefs.preferences.royalties!.platforms) },
-					marketing: { enabled: prefs.preferences.marketing!.enabled, platforms: filterPlatforms(prefs.preferences.marketing!.platforms) },
+					drops: {
+						enabled: prefs.preferences.drops!.enabled,
+						platforms: filterPlatforms(prefs.preferences.drops!.platforms),
+					},
+					royalties: {
+						enabled: prefs.preferences.royalties!.enabled,
+						platforms: filterPlatforms(prefs.preferences.royalties!.platforms),
+					},
+					marketing: {
+						enabled: prefs.preferences.marketing!.enabled,
+						platforms: filterPlatforms(prefs.preferences.marketing!.platforms),
+					},
 				};
 			}
 		} catch {
@@ -82,7 +97,11 @@
 		}
 	}
 
-	async function updatePreference(category: NotificationCategory, enabled: boolean, platforms: PreferencePlatform[]) {
+	async function updatePreference(
+		category: NotificationCategory,
+		enabled: boolean,
+		platforms: PreferencePlatform[],
+	) {
 		if (!notificationPrefs) return;
 		savingPref = category;
 		try {
@@ -103,7 +122,10 @@
 		const current = notificationPrefs[category];
 		const newEnabled = !current.enabled;
 		// When enabling, default to email if no platforms selected
-		const platforms = newEnabled && current.platforms.length === 0 ? ['email'] as PreferencePlatform[] : current.platforms;
+		const platforms =
+			newEnabled && current.platforms.length === 0
+				? (['email'] as PreferencePlatform[])
+				: current.platforms;
 		updatePreference(category, newEnabled, platforms);
 	}
 
@@ -557,7 +579,9 @@
 
 		{#if loadingPrefs || !notificationPrefs}
 			<div class="flex items-center justify-center py-8">
-				<div class="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+				<div
+					class="w-6 h-6 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"
+				></div>
 			</div>
 		{:else}
 			<div class="space-y-6">
@@ -570,7 +594,9 @@
 						</div>
 						<div class="flex items-center gap-2">
 							{#if savingPref === 'drops'}
-								<div class="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+								<div
+									class="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"
+								></div>
 							{/if}
 							<button onclick={() => toggleCategory('drops')} class="focus:outline-none">
 								<Toggle checked={notificationPrefs.drops.enabled} />
@@ -583,7 +609,9 @@
 							{#each availablePlatforms as platform}
 								<button
 									onclick={() => togglePlatform('drops', platform.id)}
-									class="px-3 py-1 text-xs rounded-full border transition-colors {notificationPrefs.drops.platforms.includes(platform.id)
+									class="px-3 py-1 text-xs rounded-full border transition-colors {notificationPrefs.drops.platforms.includes(
+										platform.id,
+									)
 										? 'bg-orange-500/20 border-orange-500/50 text-orange-400'
 										: 'bg-gray-200 dark:bg-white/5 border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/20'}"
 								>
@@ -601,11 +629,15 @@
 					<div class="flex items-center justify-between">
 						<div>
 							<p class="text-gray-900 dark:text-white font-medium">Payout Alerts</p>
-							<p class="text-sm text-gray-500 dark:text-gray-400">Earnings and payout notifications</p>
+							<p class="text-sm text-gray-500 dark:text-gray-400">
+								Earnings and payout notifications
+							</p>
 						</div>
 						<div class="flex items-center gap-2">
 							{#if savingPref === 'royalties'}
-								<div class="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+								<div
+									class="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"
+								></div>
 							{/if}
 							<button onclick={() => toggleCategory('royalties')} class="focus:outline-none">
 								<Toggle checked={notificationPrefs.royalties.enabled} />
@@ -618,7 +650,9 @@
 							{#each availablePlatforms as platform}
 								<button
 									onclick={() => togglePlatform('royalties', platform.id)}
-									class="px-3 py-1 text-xs rounded-full border transition-colors {notificationPrefs.royalties.platforms.includes(platform.id)
+									class="px-3 py-1 text-xs rounded-full border transition-colors {notificationPrefs.royalties.platforms.includes(
+										platform.id,
+									)
 										? 'bg-orange-500/20 border-orange-500/50 text-orange-400'
 										: 'bg-gray-200 dark:bg-white/5 border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/20'}"
 								>
@@ -640,7 +674,9 @@
 						</div>
 						<div class="flex items-center gap-2">
 							{#if savingPref === 'marketing'}
-								<div class="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+								<div
+									class="w-4 h-4 border-2 border-orange-500 border-t-transparent rounded-full animate-spin"
+								></div>
 							{/if}
 							<button onclick={() => toggleCategory('marketing')} class="focus:outline-none">
 								<Toggle checked={notificationPrefs.marketing.enabled} />
@@ -653,7 +689,9 @@
 							{#each availablePlatforms as platform}
 								<button
 									onclick={() => togglePlatform('marketing', platform.id)}
-									class="px-3 py-1 text-xs rounded-full border transition-colors {notificationPrefs.marketing.platforms.includes(platform.id)
+									class="px-3 py-1 text-xs rounded-full border transition-colors {notificationPrefs.marketing.platforms.includes(
+										platform.id,
+									)
 										? 'bg-orange-500/20 border-orange-500/50 text-orange-400'
 										: 'bg-gray-200 dark:bg-white/5 border-gray-300 dark:border-white/10 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-white/20'}"
 								>

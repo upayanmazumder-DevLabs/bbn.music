@@ -11,12 +11,12 @@
 	import { initApiClient, getAuthHeaders } from '$lib/apiClient';
 	import { postResendVerifyEmailByMailByUser } from '$lib/api/sdk.gen';
 	import {
-	initPostHog,
-	trackPageView,
-	identifyUser,
-	acceptTracking,
-	declineTracking,
-} from '$lib/analytics/posthog';
+		initPostHog,
+		trackPageView,
+		identifyUser,
+		acceptTracking,
+		declineTracking,
+	} from '$lib/analytics/posthog';
 	import { cookieConsent } from '$lib/stores/cookieConsent.svelte';
 	import CookieConsent from '$lib/components/CookieConsent.svelte';
 	import { avatarStore } from '$lib/stores/avatar.svelte';
@@ -428,7 +428,7 @@
 								{@const active = isActive(item.href, item.exact)}
 								<a
 									href={item.href}
-									onclick={() => hidden = true}
+									onclick={() => (hidden = true)}
 									class="px-4 py-2 rounded-lg transition-all duration-200 {active
 										? currentApp === 'admin'
 											? 'bg-red-500/20 text-red-600 dark:text-red-400'
@@ -445,7 +445,7 @@
 							<hr class="my-2 border-gray-200 dark:border-gray-700" />
 							<a
 								href="/settings"
-								onclick={() => hidden = true}
+								onclick={() => (hidden = true)}
 								class="text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/10 px-4 py-2 rounded-lg transition-all duration-200"
 							>
 								Settings

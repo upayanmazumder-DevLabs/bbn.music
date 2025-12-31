@@ -53,7 +53,7 @@
 		const query = searchQuery.toLowerCase();
 		return options.filter(
 			(option) =>
-				option.label.toLowerCase().includes(query) || option.value.toLowerCase().includes(query)
+				option.label.toLowerCase().includes(query) || option.value.toLowerCase().includes(query),
 		);
 	});
 
@@ -205,7 +205,9 @@
 				onkeydown={handleKeydown}
 			>
 				<!-- Search -->
-				<div class="sticky top-0 p-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+				<div
+					class="sticky top-0 p-2 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700"
+				>
 					<input
 						bind:this={searchInputRef}
 						type="text"

@@ -71,7 +71,11 @@
 					const newNational = parsed.nationalNumber;
 
 					// Only update if different to avoid loops
-					if (!initialized || newCountry !== selectedCountry || newNational !== phoneNumber.replace(/\D/g, '')) {
+					if (
+						!initialized ||
+						newCountry !== selectedCountry ||
+						newNational !== phoneNumber.replace(/\D/g, '')
+					) {
 						selectedCountry = newCountry;
 						// Format the national number
 						const formatter = new AsYouType(newCountry);

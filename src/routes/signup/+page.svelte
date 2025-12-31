@@ -82,7 +82,10 @@
 				if (fieldErrors.password) validationErrors.password = fieldErrors.password;
 
 				// Show general error if there's one or if no field errors were mapped
-				if (fieldErrors._general || (!fieldErrors.name && !fieldErrors.email && !fieldErrors.password)) {
+				if (
+					fieldErrors._general ||
+					(!fieldErrors.name && !fieldErrors.email && !fieldErrors.password)
+				) {
 					error = fieldErrors._general || authState.error;
 				}
 			} else {
@@ -154,7 +157,9 @@
 					required
 					autocomplete="new-password"
 					error={validationErrors.password}
-					hint={validationErrors.password ? undefined : 'Use 8 or more characters with letters, numbers & symbols'}
+					hint={validationErrors.password
+						? undefined
+						: 'Use 8 or more characters with letters, numbers & symbols'}
 				>
 					{#snippet icon()}<LockSolid class="w-5 h-5" />{/snippet}
 				</Input>

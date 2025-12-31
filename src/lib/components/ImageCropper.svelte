@@ -252,11 +252,7 @@
 		</p>
 
 		<!-- Image container -->
-		<div
-			class="relative inline-block select-none"
-			role="application"
-			aria-label="Image cropper"
-		>
+		<div class="relative inline-block select-none" role="application" aria-label="Image cropper">
 			<!-- The image -->
 			<img
 				bind:this={imageEl}

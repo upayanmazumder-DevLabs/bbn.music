@@ -1,7 +1,12 @@
 <script lang="ts">
 	import { Modal, Button, Input, SearchableSelect } from '$lib/components/ui';
 	import { kyc, type LightKycData, type VerificationType } from '$lib/stores/kyc';
-	import { CheckCircleSolid, ExclamationCircleOutline, UserSolid, BuildingSolid } from 'flowbite-svelte-icons';
+	import {
+		CheckCircleSolid,
+		ExclamationCircleOutline,
+		UserSolid,
+		BuildingSolid,
+	} from 'flowbite-svelte-icons';
 	import { extractErrorMessage } from '$lib/utils/extractError';
 
 	interface Props {
@@ -82,19 +87,19 @@
 	const isStep1Valid = $derived(verificationType.length > 0);
 
 	const isStep2Valid = $derived(
-		firstName.trim().length > 0 && lastName.trim().length > 0 && dateOfBirth.length > 0
+		firstName.trim().length > 0 && lastName.trim().length > 0 && dateOfBirth.length > 0,
 	);
 
 	const isStep3Valid = $derived(
 		verificationType === 'individual' ||
-			(companyName.trim().length > 0 && registrationNumber.trim().length > 0)
+			(companyName.trim().length > 0 && registrationNumber.trim().length > 0),
 	);
 
 	const isAddressStepValid = $derived(
 		country.length > 0 &&
 			street.trim().length > 0 &&
 			city.trim().length > 0 &&
-			postalCode.trim().length > 0
+			postalCode.trim().length > 0,
 	);
 
 	// Age validation (must be 16+)
@@ -224,23 +229,41 @@
 					<button
 						type="button"
 						onclick={() => (verificationType = 'individual')}
-						class="p-6 rounded-lg border-2 text-center transition-all {verificationType === 'individual'
+						class="p-6 rounded-lg border-2 text-center transition-all {verificationType ===
+						'individual'
 							? 'bg-orange-500/20 border-orange-500'
 							: 'bg-gray-800/50 border-gray-700 hover:border-gray-600'}"
 					>
-						<UserSolid class="w-10 h-10 mx-auto mb-3 {verificationType === 'individual' ? 'text-orange-400' : 'text-gray-400'}" />
-						<span class="block font-medium {verificationType === 'individual' ? 'text-orange-400' : 'text-white'}">Individual</span>
+						<UserSolid
+							class="w-10 h-10 mx-auto mb-3 {verificationType === 'individual'
+								? 'text-orange-400'
+								: 'text-gray-400'}"
+						/>
+						<span
+							class="block font-medium {verificationType === 'individual'
+								? 'text-orange-400'
+								: 'text-white'}">Individual</span
+						>
 						<span class="text-xs text-gray-400 mt-1 block">Personal account</span>
 					</button>
 					<button
 						type="button"
 						onclick={() => (verificationType = 'business')}
-						class="p-6 rounded-lg border-2 text-center transition-all {verificationType === 'business'
+						class="p-6 rounded-lg border-2 text-center transition-all {verificationType ===
+						'business'
 							? 'bg-orange-500/20 border-orange-500'
 							: 'bg-gray-800/50 border-gray-700 hover:border-gray-600'}"
 					>
-						<BuildingSolid class="w-10 h-10 mx-auto mb-3 {verificationType === 'business' ? 'text-orange-400' : 'text-gray-400'}" />
-						<span class="block font-medium {verificationType === 'business' ? 'text-orange-400' : 'text-white'}">Business</span>
+						<BuildingSolid
+							class="w-10 h-10 mx-auto mb-3 {verificationType === 'business'
+								? 'text-orange-400'
+								: 'text-gray-400'}"
+						/>
+						<span
+							class="block font-medium {verificationType === 'business'
+								? 'text-orange-400'
+								: 'text-white'}">Business</span
+						>
 						<span class="text-xs text-gray-400 mt-1 block">Company or label</span>
 					</button>
 				</div>
@@ -252,7 +275,9 @@
 			<div class="space-y-4">
 				<div class="text-center mb-6">
 					<h3 class="text-lg font-semibold text-white">
-						{verificationType === 'business' ? 'Representative Information' : 'Personal Information'}
+						{verificationType === 'business'
+							? 'Representative Information'
+							: 'Personal Information'}
 					</h3>
 					<p class="text-sm text-gray-400 mt-1">
 						{verificationType === 'business'
@@ -262,18 +287,8 @@
 				</div>
 
 				<div class="grid grid-cols-2 gap-4">
-					<Input
-						bind:value={firstName}
-						label="First Name"
-						placeholder="John"
-						required
-					/>
-					<Input
-						bind:value={lastName}
-						label="Last Name"
-						placeholder="Doe"
-						required
-					/>
+					<Input bind:value={firstName} label="First Name" placeholder="John" required />
+					<Input bind:value={lastName} label="Last Name" placeholder="Doe" required />
 				</div>
 
 				<Input
@@ -402,7 +417,11 @@
 						<div class="flex justify-between">
 							<span class="text-gray-400">Date of Birth</span>
 							<span class="text-white"
-								>{new Date(dateOfBirth).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span
+								>{new Date(dateOfBirth).toLocaleDateString('en-US', {
+									year: 'numeric',
+									month: 'long',
+									day: 'numeric',
+								})}</span
 							>
 						</div>
 						<div class="flex justify-between">
@@ -466,7 +485,11 @@
 					<div class="flex justify-between">
 						<span class="text-gray-400">Date of Birth</span>
 						<span class="text-white"
-							>{new Date(dateOfBirth).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</span
+							>{new Date(dateOfBirth).toLocaleDateString('en-US', {
+								year: 'numeric',
+								month: 'long',
+								day: 'numeric',
+							})}</span
 						>
 					</div>
 					<div class="border-t border-gray-700 my-2"></div>

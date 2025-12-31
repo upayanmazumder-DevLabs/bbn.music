@@ -319,7 +319,8 @@ export const getDownloadByFileByFilesByAdmin = <ThrowOnError extends boolean = f
 	options: Options<GetDownloadByFileByFilesByAdminData, ThrowOnError>,
 ) =>
 	(options.client ?? client).get<GetDownloadByFileByFilesByAdminResponses, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zGetDownloadByFileByFilesByAdminData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zGetDownloadByFileByFilesByAdminData.parseAsync(data),
 		responseValidator: async (data: any) =>
 			await zGetDownloadByFileByFilesByAdminResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
@@ -450,7 +451,8 @@ export const postCodeByProviderByOauthByAuth = <ThrowOnError extends boolean = f
 	options: Options<PostCodeByProviderByOauthByAuthData, ThrowOnError>,
 ) =>
 	(options.client ?? client).post<unknown, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zPostCodeByProviderByOauthByAuthData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zPostCodeByProviderByOauthByAuthData.parseAsync(data),
 		url: '/api/@bbn/auth/oauth/{provider}/{code}',
 		...options,
 		headers: {
@@ -557,7 +559,8 @@ export const getConversationsByMessaging = <ThrowOnError extends boolean = false
 ) =>
 	(options?.client ?? client).get<GetConversationsByMessagingResponses, unknown, ThrowOnError>({
 		requestValidator: async (data: any) => await zGetConversationsByMessagingData.parseAsync(data),
-		responseValidator: async (data: any) => await zGetConversationsByMessagingResponse.parseAsync(data),
+		responseValidator: async (data: any) =>
+			await zGetConversationsByMessagingResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
 		url: '/api/@bbn/messaging/conversations',
 		...options,
@@ -568,7 +571,8 @@ export const postConversationsByMessaging = <ThrowOnError extends boolean = fals
 ) =>
 	(options?.client ?? client).post<PostConversationsByMessagingResponses, unknown, ThrowOnError>({
 		requestValidator: async (data: any) => await zPostConversationsByMessagingData.parseAsync(data),
-		responseValidator: async (data: any) => await zPostConversationsByMessagingResponse.parseAsync(data),
+		responseValidator: async (data: any) =>
+			await zPostConversationsByMessagingResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
 		url: '/api/@bbn/messaging/conversations',
 		...options,
@@ -582,7 +586,8 @@ export const getIdByConversationsByMessaging = <ThrowOnError extends boolean = f
 	options: Options<GetIdByConversationsByMessagingData, ThrowOnError>,
 ) =>
 	(options.client ?? client).get<GetIdByConversationsByMessagingResponses, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zGetIdByConversationsByMessagingData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zGetIdByConversationsByMessagingData.parseAsync(data),
 		responseValidator: async (data: any) =>
 			await zGetIdByConversationsByMessagingResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
@@ -598,7 +603,8 @@ export const putSendByConversationsByMessaging = <ThrowOnError extends boolean =
 		unknown,
 		ThrowOnError
 	>({
-		requestValidator: async (data: any) => await zPutSendByConversationsByMessagingData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zPutSendByConversationsByMessagingData.parseAsync(data),
 		responseValidator: async (data: any) =>
 			await zPutSendByConversationsByMessagingResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
@@ -614,7 +620,8 @@ export const getIdByUserByMessagesByMessaging = <ThrowOnError extends boolean = 
 	options: Options<GetIdByUserByMessagesByMessagingData, ThrowOnError>,
 ) =>
 	(options.client ?? client).get<GetIdByUserByMessagesByMessagingResponses, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zGetIdByUserByMessagesByMessagingData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zGetIdByUserByMessagesByMessagingData.parseAsync(data),
 		responseValidator: async (data: any) =>
 			await zGetIdByUserByMessagesByMessagingResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
@@ -652,7 +659,8 @@ export const getMyConversationsByMessaging = <ThrowOnError extends boolean = fal
 	options?: Options<GetMyConversationsByMessagingData, ThrowOnError>,
 ) =>
 	(options?.client ?? client).get<GetMyConversationsByMessagingResponses, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zGetMyConversationsByMessagingData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zGetMyConversationsByMessagingData.parseAsync(data),
 		responseValidator: async (data: any) =>
 			await zGetMyConversationsByMessagingResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
@@ -680,7 +688,8 @@ export const getNotificationsByMessaging = <ThrowOnError extends boolean = false
 ) =>
 	(options?.client ?? client).get<GetNotificationsByMessagingResponses, unknown, ThrowOnError>({
 		requestValidator: async (data: any) => await zGetNotificationsByMessagingData.parseAsync(data),
-		responseValidator: async (data: any) => await zGetNotificationsByMessagingResponse.parseAsync(data),
+		responseValidator: async (data: any) =>
+			await zGetNotificationsByMessagingResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
 		url: '/api/@bbn/messaging/notifications',
 		...options,
@@ -690,7 +699,8 @@ export const getIdByNotificationsByMessaging = <ThrowOnError extends boolean = f
 	options: Options<GetIdByNotificationsByMessagingData, ThrowOnError>,
 ) =>
 	(options.client ?? client).get<GetIdByNotificationsByMessagingResponses, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zGetIdByNotificationsByMessagingData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zGetIdByNotificationsByMessagingData.parseAsync(data),
 		responseValidator: async (data: any) =>
 			await zGetIdByNotificationsByMessagingResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
@@ -702,7 +712,8 @@ export const patchIdByNotificationsByMessaging = <ThrowOnError extends boolean =
 	options: Options<PatchIdByNotificationsByMessagingData, ThrowOnError>,
 ) =>
 	(options.client ?? client).patch<unknown, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zPatchIdByNotificationsByMessagingData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zPatchIdByNotificationsByMessagingData.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
 		url: '/api/@bbn/messaging/notifications/{id}',
 		...options,
@@ -738,7 +749,8 @@ export const putPreferencesByMessaging = <ThrowOnError extends boolean = false>(
 ) =>
 	(options?.client ?? client).put<PutPreferencesByMessagingResponses, unknown, ThrowOnError>({
 		requestValidator: async (data: any) => await zPutPreferencesByMessagingData.parseAsync(data),
-		responseValidator: async (data: any) => await zPutPreferencesByMessagingResponse.parseAsync(data),
+		responseValidator: async (data: any) =>
+			await zPutPreferencesByMessagingResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
 		url: '/api/@bbn/messaging/preferences',
 		...options,
@@ -752,7 +764,8 @@ export const getIdByPreferencesByMessaging = <ThrowOnError extends boolean = fal
 	options: Options<GetIdByPreferencesByMessagingData, ThrowOnError>,
 ) =>
 	(options.client ?? client).get<GetIdByPreferencesByMessagingResponses, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zGetIdByPreferencesByMessagingData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zGetIdByPreferencesByMessagingData.parseAsync(data),
 		responseValidator: async (data: any) =>
 			await zGetIdByPreferencesByMessagingResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
@@ -764,7 +777,8 @@ export const getChatsByWhatsappByMessaging = <ThrowOnError extends boolean = fal
 	options?: Options<GetChatsByWhatsappByMessagingData, ThrowOnError>,
 ) =>
 	(options?.client ?? client).get<GetChatsByWhatsappByMessagingResponses, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zGetChatsByWhatsappByMessagingData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zGetChatsByWhatsappByMessagingData.parseAsync(data),
 		responseValidator: async (data: any) =>
 			await zGetChatsByWhatsappByMessagingResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
@@ -927,7 +941,8 @@ export const getDownloadByDropByDropsByMusic = <ThrowOnError extends boolean = f
 	options: Options<GetDownloadByDropByDropsByMusicData, ThrowOnError>,
 ) =>
 	(options.client ?? client).get<GetDownloadByDropByDropsByMusicResponses, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zGetDownloadByDropByDropsByMusicData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zGetDownloadByDropByDropsByMusicData.parseAsync(data),
 		responseValidator: async (data: any) =>
 			await zGetDownloadByDropByDropsByMusicResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
@@ -939,7 +954,8 @@ export const getUploadByDropByDropsByMusic = <ThrowOnError extends boolean = fal
 	options: Options<GetUploadByDropByDropsByMusicData, ThrowOnError>,
 ) =>
 	(options.client ?? client).get<unknown, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zGetUploadByDropByDropsByMusicData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zGetUploadByDropByDropsByMusicData.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
 		url: '/api/@bbn/music/drops/{dropId}/upload',
 		...options,
@@ -989,7 +1005,8 @@ export const deleteIdByShareByDropsByMusic = <ThrowOnError extends boolean = fal
 	options: Options<DeleteIdByShareByDropsByMusicData, ThrowOnError>,
 ) =>
 	(options.client ?? client).delete<unknown, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zDeleteIdByShareByDropsByMusicData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zDeleteIdByShareByDropsByMusicData.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
 		url: '/api/@bbn/music/drops/share/{id}',
 		...options,
@@ -1000,7 +1017,8 @@ export const getIdByShareByDropsByMusic = <ThrowOnError extends boolean = false>
 ) =>
 	(options.client ?? client).get<GetIdByShareByDropsByMusicResponses, unknown, ThrowOnError>({
 		requestValidator: async (data: any) => await zGetIdByShareByDropsByMusicData.parseAsync(data),
-		responseValidator: async (data: any) => await zGetIdByShareByDropsByMusicResponse.parseAsync(data),
+		responseValidator: async (data: any) =>
+			await zGetIdByShareByDropsByMusicResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
 		url: '/api/@bbn/music/drops/share/{id}',
 		...options,
@@ -1021,7 +1039,8 @@ export const getIdByProviderByPublishByMusic = <ThrowOnError extends boolean = f
 	options: Options<GetIdByProviderByPublishByMusicData, ThrowOnError>,
 ) =>
 	(options.client ?? client).get<GetIdByProviderByPublishByMusicResponses, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zGetIdByProviderByPublishByMusicData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zGetIdByProviderByPublishByMusicData.parseAsync(data),
 		responseValidator: async (data: any) =>
 			await zGetIdByProviderByPublishByMusicResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
@@ -1046,7 +1065,8 @@ export const getArtworkBySlugByShareByMusic = <ThrowOnError extends boolean = fa
 	options: Options<GetArtworkBySlugByShareByMusicData, ThrowOnError>,
 ) =>
 	(options.client ?? client).get<unknown, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zGetArtworkBySlugByShareByMusicData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zGetArtworkBySlugByShareByMusicData.parseAsync(data),
 		url: '/api/@bbn/music/share/{slug}/artwork',
 		...options,
 		headers: {
@@ -1107,7 +1127,8 @@ export const getDownloadBySongBySongsByMusic = <ThrowOnError extends boolean = f
 	options: Options<GetDownloadBySongBySongsByMusicData, ThrowOnError>,
 ) =>
 	(options.client ?? client).get<GetDownloadBySongBySongsByMusicResponses, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zGetDownloadBySongBySongsByMusicData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zGetDownloadBySongBySongsByMusicData.parseAsync(data),
 		responseValidator: async (data: any) =>
 			await zGetDownloadBySongBySongsByMusicResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
@@ -1130,7 +1151,8 @@ export const getIdByYearInReviewByMusic = <ThrowOnError extends boolean = false>
 ) =>
 	(options.client ?? client).get<GetIdByYearInReviewByMusicResponses, unknown, ThrowOnError>({
 		requestValidator: async (data: any) => await zGetIdByYearInReviewByMusicData.parseAsync(data),
-		responseValidator: async (data: any) => await zGetIdByYearInReviewByMusicResponse.parseAsync(data),
+		responseValidator: async (data: any) =>
+			await zGetIdByYearInReviewByMusicResponse.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
 		url: '/api/@bbn/music/year-in-review/{id}',
 		...options,
@@ -1182,7 +1204,8 @@ export const deleteIdByApplicationsByOauth = <ThrowOnError extends boolean = fal
 	options: Options<DeleteIdByApplicationsByOauthData, ThrowOnError>,
 ) =>
 	(options.client ?? client).delete<unknown, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zDeleteIdByApplicationsByOauthData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zDeleteIdByApplicationsByOauthData.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
 		url: '/api/@bbn/oauth/applications/{id}',
 		...options,
@@ -1206,7 +1229,8 @@ export const getUploadByApplicationsByOauth = <ThrowOnError extends boolean = fa
 	options?: Options<GetUploadByApplicationsByOauthData, ThrowOnError>,
 ) =>
 	(options?.client ?? client).get<unknown, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zGetUploadByApplicationsByOauthData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zGetUploadByApplicationsByOauthData.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
 		url: '/api/@bbn/oauth/applications/upload',
 		...options,
@@ -1318,7 +1342,8 @@ export const postResendVerifyEmailByMailByUser = <ThrowOnError extends boolean =
 	options?: Options<PostResendVerifyEmailByMailByUserData, ThrowOnError>,
 ) =>
 	(options?.client ?? client).post<unknown, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zPostResendVerifyEmailByMailByUserData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zPostResendVerifyEmailByMailByUserData.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
 		url: '/api/@bbn/user/mail/resend-verify-email',
 		...options,
@@ -1332,7 +1357,8 @@ export const postTokenByValidateByMailByUser = <ThrowOnError extends boolean = f
 	options: Options<PostTokenByValidateByMailByUserData, ThrowOnError>,
 ) =>
 	(options.client ?? client).post<unknown, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zPostTokenByValidateByMailByUserData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zPostTokenByValidateByMailByUserData.parseAsync(data),
 		url: '/api/@bbn/user/mail/validate/{token}',
 		...options,
 		headers: {
@@ -1345,7 +1371,8 @@ export const postTokenByValidateByPhoneByUser = <ThrowOnError extends boolean = 
 	options: Options<PostTokenByValidateByPhoneByUserData, ThrowOnError>,
 ) =>
 	(options.client ?? client).post<unknown, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zPostTokenByValidateByPhoneByUserData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zPostTokenByValidateByPhoneByUserData.parseAsync(data),
 		url: '/api/@bbn/user/phone/validate/{token}',
 		...options,
 		headers: {
@@ -1358,7 +1385,8 @@ export const getUploadByAvatarBySetMeByUser = <ThrowOnError extends boolean = fa
 	options?: Options<GetUploadByAvatarBySetMeByUserData, ThrowOnError>,
 ) =>
 	(options?.client ?? client).get<unknown, unknown, ThrowOnError>({
-		requestValidator: async (data: any) => await zGetUploadByAvatarBySetMeByUserData.parseAsync(data),
+		requestValidator: async (data: any) =>
+			await zGetUploadByAvatarBySetMeByUserData.parseAsync(data),
 		security: [{ scheme: 'bearer', type: 'http' }],
 		url: '/api/@bbn/user/set-me/avatar/upload',
 		...options,

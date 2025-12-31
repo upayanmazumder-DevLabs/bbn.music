@@ -268,9 +268,7 @@
 							>
 								<ChevronLeftOutline class="w-5 h-5 text-gray-400" />
 							</button>
-							<div
-								class="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center"
-							>
+							<div class="w-10 h-10 rounded-full bg-orange-500/20 flex items-center justify-center">
 								<UserOutline class="w-5 h-5 text-orange-400" />
 							</div>
 							<div>
@@ -297,9 +295,7 @@
 						{:else}
 							{#each selectedConversation.messages as message}
 								<div
-									class="flex {message.direction === 'outbound'
-										? 'justify-end'
-										: 'justify-start'}"
+									class="flex {message.direction === 'outbound' ? 'justify-end' : 'justify-start'}"
 								>
 									<div
 										class="max-w-[70%] rounded-2xl px-4 py-2 {message.direction === 'outbound'

@@ -15,7 +15,7 @@ export interface FormatDateOptions {
  */
 export function formatDate(
 	input: string | number | Date | undefined | null,
-	options: FormatDateOptions = {}
+	options: FormatDateOptions = {},
 ): string {
 	if (!input) return 'N/A';
 

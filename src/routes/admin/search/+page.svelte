@@ -414,7 +414,9 @@
 							</div>
 
 							<div>
-								<label for="user-account-type" class="block text-sm font-medium text-gray-900 dark:text-white mb-2"
+								<label
+									for="user-account-type"
+									class="block text-sm font-medium text-gray-900 dark:text-white mb-2"
 									>Account Type</label
 								>
 								<select
@@ -474,7 +476,11 @@
 								<div class="space-y-3">
 									<div class="grid grid-cols-2 gap-3">
 										<div>
-											<label for="tx-amount" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">Amount</label>
+											<label
+												for="tx-amount"
+												class="block text-sm font-medium text-gray-900 dark:text-white mb-2"
+												>Amount</label
+											>
 											<input
 												id="tx-amount"
 												type="number"
@@ -485,7 +491,11 @@
 											/>
 										</div>
 										<div>
-											<label for="tx-type" class="block text-sm font-medium text-gray-900 dark:text-white mb-2">Type</label>
+											<label
+												for="tx-type"
+												class="block text-sm font-medium text-gray-900 dark:text-white mb-2"
+												>Type</label
+											>
 											<select
 												id="tx-type"
 												bind:value={txType}
@@ -599,7 +609,8 @@
 												{drop.title}
 											</p>
 											<p class="text-gray-500 text-xs">
-												{drop.type} • {drop.artists?.map((a: any) => a.name).join(', ') || 'Unknown'}
+												{drop.type} • {drop.artists?.map((a: any) => a.name).join(', ') ||
+													'Unknown'}
 											</p>
 										</div>
 										<ArrowRightOutline class="w-4 h-4 text-gray-400" />

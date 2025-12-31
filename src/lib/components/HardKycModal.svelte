@@ -78,7 +78,7 @@
 	// Validation per step
 	const isStep1Valid = $derived(idType.length > 0 && idNumber.trim().length > 0);
 	const isStep2Valid = $derived(
-		idFrontFile !== null && (idType === 'passport' || idBackFile !== null)
+		idFrontFile !== null && (idType === 'passport' || idBackFile !== null),
 	);
 	const isStep3Valid = $derived(selfieFile !== null);
 	const isStep4Valid = $derived(proofOfAddressFile !== null);
@@ -99,7 +99,7 @@
 	function handleFileChange(
 		event: Event,
 		setter: (file: File | null) => void,
-		maxSizeMB: number = 10
+		maxSizeMB: number = 10,
 	) {
 		const target = event.target as HTMLInputElement;
 		const file = target.files?.[0];
@@ -424,9 +424,7 @@
 			<div class="space-y-4">
 				<div class="text-center mb-6">
 					<h3 class="text-lg font-semibold text-white">Tax Information</h3>
-					<p class="text-sm text-gray-400 mt-1">
-						Required for tax reporting and payout processing
-					</p>
+					<p class="text-sm text-gray-400 mt-1">Required for tax reporting and payout processing</p>
 				</div>
 
 				<SearchableSelect

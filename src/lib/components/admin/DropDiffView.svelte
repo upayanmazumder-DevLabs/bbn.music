@@ -27,19 +27,58 @@
 	// Compare drop-level fields
 	const metadataFields = $derived([
 		{ key: 'title', label: 'Title', current: current.title, published: published.title },
-		{ key: 'release', label: 'Release Date', current: current.release, published: published.release },
+		{
+			key: 'release',
+			label: 'Release Date',
+			current: current.release,
+			published: published.release,
+		},
 		{ key: 'artwork', label: 'Artwork', current: current.artwork, published: published.artwork },
-		{ key: 'language', label: 'Language', current: current.language, published: published.language },
-		{ key: 'primaryGenre', label: 'Primary Genre', current: current.primaryGenre, published: published.primaryGenre },
-		{ key: 'secondaryGenre', label: 'Secondary Genre', current: current.secondaryGenre, published: published.secondaryGenre },
-		{ key: 'compositionCopyright', label: 'Composition (C)', current: current.compositionCopyright, published: published.compositionCopyright },
-		{ key: 'soundRecordingCopyright', label: 'Sound Recording (P)', current: current.soundRecordingCopyright, published: published.soundRecordingCopyright },
+		{
+			key: 'language',
+			label: 'Language',
+			current: current.language,
+			published: published.language,
+		},
+		{
+			key: 'primaryGenre',
+			label: 'Primary Genre',
+			current: current.primaryGenre,
+			published: published.primaryGenre,
+		},
+		{
+			key: 'secondaryGenre',
+			label: 'Secondary Genre',
+			current: current.secondaryGenre,
+			published: published.secondaryGenre,
+		},
+		{
+			key: 'compositionCopyright',
+			label: 'Composition (C)',
+			current: current.compositionCopyright,
+			published: published.compositionCopyright,
+		},
+		{
+			key: 'soundRecordingCopyright',
+			label: 'Sound Recording (P)',
+			current: current.soundRecordingCopyright,
+			published: published.soundRecordingCopyright,
+		},
 		{ key: 'gtin', label: 'GTIN', current: current.gtin, published: published.gtin },
-		{ key: 'comments', label: 'Comments', current: current.comments, published: published.comments },
+		{
+			key: 'comments',
+			label: 'Comments',
+			current: current.comments,
+			published: published.comments,
+		},
 	]);
 
-	const changedMetadata = $derived(metadataFields.filter((f) => isDifferent(f.current, f.published)));
-	const unchangedMetadata = $derived(metadataFields.filter((f) => !isDifferent(f.current, f.published)));
+	const changedMetadata = $derived(
+		metadataFields.filter((f) => isDifferent(f.current, f.published)),
+	);
+	const unchangedMetadata = $derived(
+		metadataFields.filter((f) => !isDifferent(f.current, f.published)),
+	);
 
 	// Compare artists
 	function artistsMatch(a: ArtistRef, b: ArtistRef): boolean {
@@ -127,7 +166,8 @@
 		if (isDifferent(current.explicit, published.explicit)) changes.push('explicit');
 		if (isDifferent(current.instrumental, published.instrumental)) changes.push('instrumental');
 		if (isDifferent(current.primaryGenre, published.primaryGenre)) changes.push('primaryGenre');
-		if (isDifferent(current.secondaryGenre, published.secondaryGenre)) changes.push('secondaryGenre');
+		if (isDifferent(current.secondaryGenre, published.secondaryGenre))
+			changes.push('secondaryGenre');
 		if (isDifferent(current.year, published.year)) changes.push('year');
 		if (isDifferent(current.language, published.language)) changes.push('language');
 		if (isDifferent(current.country, published.country)) changes.push('country');
@@ -139,11 +179,11 @@
 
 	const hasAnyChanges = $derived(
 		changedMetadata.length > 0 ||
-		artistChanges.added.length > 0 ||
-		artistChanges.removed.length > 0 ||
-		songChanges.added.length > 0 ||
-		songChanges.removed.length > 0 ||
-		songChanges.modified.length > 0
+			artistChanges.added.length > 0 ||
+			artistChanges.removed.length > 0 ||
+			songChanges.added.length > 0 ||
+			songChanges.removed.length > 0 ||
+			songChanges.modified.length > 0,
 	);
 
 	function toggleSong(songId: string) {
@@ -240,14 +280,18 @@
 			<h4 class="text-sm font-medium text-gray-400">Artist Changes</h4>
 			<div class="space-y-1">
 				{#each artistChanges.removed as artist}
-					<div class="flex items-center gap-2 px-3 py-2 bg-red-900/20 rounded-lg border border-red-700/30">
+					<div
+						class="flex items-center gap-2 px-3 py-2 bg-red-900/20 rounded-lg border border-red-700/30"
+					>
 						<span class="text-red-400 font-mono">-</span>
 						<Badge color="gray" size="sm">{artist.type}</Badge>
 						<span class="text-red-300">{getArtistDisplayName(artist)}</span>
 					</div>
 				{/each}
 				{#each artistChanges.added as artist}
-					<div class="flex items-center gap-2 px-3 py-2 bg-green-900/20 rounded-lg border border-green-700/30">
+					<div
+						class="flex items-center gap-2 px-3 py-2 bg-green-900/20 rounded-lg border border-green-700/30"
+					>
 						<span class="text-green-400 font-mono">+</span>
 						<Badge color="gray" size="sm">{artist.type}</Badge>
 						<span class="text-green-300">{getArtistDisplayName(artist)}</span>
@@ -324,9 +368,13 @@
 										</div>
 										<div class="text-red-400">
 											{#if change === 'artists'}
-												{(pubValue as ArtistRef[])?.map((a) => getArtistDisplayName(a)).join(', ') || '(none)'}
+												{(pubValue as ArtistRef[])
+													?.map((a) => getArtistDisplayName(a))
+													.join(', ') || '(none)'}
 											{:else if change === 'lyrics' || change === 'timedLyrics'}
-												<span class="text-xs">{pubValue ? `${String(pubValue).length} chars` : '(empty)'}</span>
+												<span class="text-xs"
+													>{pubValue ? `${String(pubValue).length} chars` : '(empty)'}</span
+												>
 											{:else if typeof pubValue === 'boolean'}
 												{pubValue ? 'Yes' : 'No'}
 											{:else}
@@ -335,9 +383,13 @@
 										</div>
 										<div class="text-green-400">
 											{#if change === 'artists'}
-												{(curValue as ArtistRef[])?.map((a) => getArtistDisplayName(a)).join(', ') || '(none)'}
+												{(curValue as ArtistRef[])
+													?.map((a) => getArtistDisplayName(a))
+													.join(', ') || '(none)'}
 											{:else if change === 'lyrics' || change === 'timedLyrics'}
-												<span class="text-xs">{curValue ? `${String(curValue).length} chars` : '(empty)'}</span>
+												<span class="text-xs"
+													>{curValue ? `${String(curValue).length} chars` : '(empty)'}</span
+												>
 											{:else if typeof curValue === 'boolean'}
 												{curValue ? 'Yes' : 'No'}
 											{:else}

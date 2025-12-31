@@ -226,9 +226,7 @@ function formatZodIssue(issue: ZodIssue): string {
 			if (issue.received === 'undefined') {
 				return path ? `${path} is required` : 'This field is required';
 			}
-			return path
-				? `${path} has an invalid value`
-				: `Invalid value`;
+			return path ? `${path} has an invalid value` : `Invalid value`;
 
 		case 'invalid_union':
 			// For union errors, try to find the most helpful nested error
@@ -373,7 +371,10 @@ export function prettifyZodMessage(message: string, fieldName?: string): string 
 		],
 		[
 			/^String must contain at most (\d+) character\(s\)$/,
-			(m) => (field ? `${field} is too long (max ${m[1]} characters)` : `Too long (max ${m[1]} characters)`),
+			(m) =>
+				field
+					? `${field} is too long (max ${m[1]} characters)`
+					: `Too long (max ${m[1]} characters)`,
 		],
 		[
 			/^Number must be greater than or equal to (\d+)$/,

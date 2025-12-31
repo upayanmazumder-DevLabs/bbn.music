@@ -152,7 +152,7 @@
 	const hasBeenReviewed = $derived(() => {
 		if (!drop?.events) return false;
 		return drop.events.some(
-			(event: any) => event.type === 'action' && event.meta?.action === 'drop-review'
+			(event: any) => event.type === 'action' && event.meta?.action === 'drop-review',
 		);
 	});
 
@@ -561,7 +561,6 @@
 		}
 	}
 
-	
 	function getAccountTypeColor(
 		type: AccountType | undefined,
 	): 'green' | 'orange' | 'purple' | 'gray' {
@@ -885,7 +884,9 @@
 							/>
 						{:else}
 							<div class="text-center py-8 text-gray-400">
-								<p class="mb-2">This drop has been reviewed before, but no snapshot is available.</p>
+								<p class="mb-2">
+									This drop has been reviewed before, but no snapshot is available.
+								</p>
 								<p class="text-sm">
 									Change tracking is only available for published drops that are being edited.
 								</p>
@@ -1298,12 +1299,25 @@
 						<!-- TODO: reverse order in backend instead of frontend -->
 						<div class="space-y-2 max-h-80 overflow-y-auto">
 							{#each [...drop.events].reverse().slice(0, 15) as event}
-								{@const eventTyped = event as { type: string; meta?: Record<string, unknown>; userId?: string; _id: string }}
+								{@const eventTyped = event as {
+									type: string;
+									meta?: Record<string, unknown>;
+									userId?: string;
+									_id: string;
+								}}
 								{@const info = getEventInfo(eventTyped)}
-								{@const isShazamEvent = eventTyped.type === 'action' && eventTyped.meta?.action === 'shazam-results'}
-								{@const shazamData = isShazamEvent && eventTyped.meta && 'data' in eventTyped.meta ? (eventTyped.meta.data as ShazamResults) : null}
-								{@const isReviewEvent = eventTyped.type === 'action' && eventTyped.meta?.action === 'drop-review'}
-								{@const reviewReason = isReviewEvent && eventTyped.meta && 'reason' in eventTyped.meta ? (eventTyped.meta.reason as string | undefined) : null}
+								{@const isShazamEvent =
+									eventTyped.type === 'action' && eventTyped.meta?.action === 'shazam-results'}
+								{@const shazamData =
+									isShazamEvent && eventTyped.meta && 'data' in eventTyped.meta
+										? (eventTyped.meta.data as ShazamResults)
+										: null}
+								{@const isReviewEvent =
+									eventTyped.type === 'action' && eventTyped.meta?.action === 'drop-review'}
+								{@const reviewReason =
+									isReviewEvent && eventTyped.meta && 'reason' in eventTyped.meta
+										? (eventTyped.meta.reason as string | undefined)
+										: null}
 								{#if isShazamEvent && shazamData}
 									<button
 										class="text-sm p-3 bg-gray-800/50 rounded-lg cursor-pointer hover:bg-gray-700/50 transition-colors w-full text-left"
@@ -1429,18 +1443,9 @@
 			</select>
 		</div>
 
-		<Input
-			label="Email Title"
-			id="title"
-			bind:value={responseTitle}
-		/>
+		<Input label="Email Title" id="title" bind:value={responseTitle} />
 
-		<Textarea
-			label="Email Body"
-			id="body"
-			bind:value={responseBody}
-			rows={12}
-		/>
+		<Textarea label="Email Body" id="body" bind:value={responseBody} rows={12} />
 
 		<div class="flex items-center gap-2">
 			<input

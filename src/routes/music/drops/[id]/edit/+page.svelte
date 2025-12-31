@@ -31,7 +31,11 @@
 	import SongModal from '$lib/components/SongModal.svelte';
 	import ImageCropper from '$lib/components/ImageCropper.svelte';
 	import { getSecondaryGenres } from '$lib/data/genres';
-	import { primaryGenreOptions, languageOptions, getSecondaryGenreOptions } from '$lib/data/options';
+	import {
+		primaryGenreOptions,
+		languageOptions,
+		getSecondaryGenreOptions,
+	} from '$lib/data/options';
 	import {
 		getIdByDropsByMusic,
 		getIdByDropsByAdmin,
@@ -50,7 +54,14 @@
 	import { uploadViaWebSocket as wsUpload } from '$lib/utils/wsUpload';
 	import { auth } from '$lib/stores/auth';
 	import { toast } from '$lib/stores/toast';
-	import type { FullDrop, DropType, Song, Share, Artist, ArtistRef as ApiArtistRef } from '$lib/api/types.gen';
+	import type {
+		FullDrop,
+		DropType,
+		Song,
+		Share,
+		Artist,
+		ArtistRef as ApiArtistRef,
+	} from '$lib/api/types.gen';
 	import type { ArtistRef } from '$lib/types/drop';
 
 	// Transform local ArtistRef (with nullable _id) to API format
@@ -61,7 +72,11 @@
 				return { type: artist.type, name: artist.name };
 			}
 			// For PRIMARY/FEATURING, if _id is null, backend will handle creation
-			const primaryArtist = artist as { type: 'PRIMARY' | 'FEATURING'; _id: string | null; name?: string };
+			const primaryArtist = artist as {
+				type: 'PRIMARY' | 'FEATURING';
+				_id: string | null;
+				name?: string;
+			};
 			return {
 				type: primaryArtist.type,
 				_id: primaryArtist._id ?? '',
@@ -1137,7 +1152,11 @@
 					<div class="space-y-2">
 						{#each songs as song, index}
 							<div
-								class="group flex items-center gap-4 p-3 bg-gray-900/50 rounded-xl border border-gray-700/50 {songFileUpdates[index] ? 'border-green-500/50' : ''}"
+								class="group flex items-center gap-4 p-3 bg-gray-900/50 rounded-xl border border-gray-700/50 {songFileUpdates[
+									index
+								]
+									? 'border-green-500/50'
+									: ''}"
 							>
 								<div class="flex items-center gap-3">
 									<span class="w-6 text-center text-sm text-gray-500 font-medium">{index + 1}</span>
@@ -1165,7 +1184,8 @@
 										<Badge color="blue" size="sm">Inst</Badge>
 									{/if}
 									{#if song.isrc}
-										<span class="text-xs text-gray-500 font-mono hidden sm:inline">{song.isrc}</span>
+										<span class="text-xs text-gray-500 font-mono hidden sm:inline">{song.isrc}</span
+										>
 									{/if}
 									{#if isEditable}
 										<IconButton
@@ -1272,7 +1292,11 @@
 									Discard Changes
 								</Button>
 							{/if}
-							<Button onclick={saveDrop} disabled={saving || !hasChanges || songs.length === 0} loading={saving}>
+							<Button
+								onclick={saveDrop}
+								disabled={saving || !hasChanges || songs.length === 0}
+								loading={saving}
+							>
 								{saving ? 'Saving...' : 'Save Changes'}
 							</Button>
 						</div>
@@ -1331,8 +1355,8 @@
 	fileUploaded={currentSongFileUploaded}
 	uploadedFilename={currentSongFilename}
 	requiresFile={false}
-	isEditable={isEditable}
-	isIsrcEditable={isIsrcEditable}
+	{isEditable}
+	{isIsrcEditable}
 	resolveName={getArtistNameById}
 	onclose={() => (showSongModal = false)}
 	onsave={saveSong}
@@ -1373,7 +1397,7 @@
 					<p class="text-sm text-gray-400 mt-1">
 						{duplicateSongDetails.artists
 							.filter((a) => a.type === 'PRIMARY' || a.type === 'FEATURING')
-							.map((a) => ('name' in a ? a.name : getArtistNameById(a._id ?? '') ?? 'Unknown'))
+							.map((a) => ('name' in a ? a.name : (getArtistNameById(a._id ?? '') ?? 'Unknown')))
 							.join(', ')}
 					</p>
 				{/if}
@@ -1383,6 +1407,8 @@
 
 	{#snippet footer()}
 		<Button variant="secondary" onclick={handleDuplicateSongCancel}>Cancel</Button>
-		<Button onclick={handleDuplicateSongConfirm} disabled={loadingDuplicateSong}>Use Existing File</Button>
+		<Button onclick={handleDuplicateSongConfirm} disabled={loadingDuplicateSong}
+			>Use Existing File</Button
+		>
 	{/snippet}
 </Modal>

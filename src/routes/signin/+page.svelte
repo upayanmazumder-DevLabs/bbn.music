@@ -78,7 +78,10 @@
 					throw new Error('Failed to authenticate');
 				}
 			} catch (err: unknown) {
-				error = extractErrorMessage(err, 'Invalid or expired reset link. Please request a new one.');
+				error = extractErrorMessage(
+					err,
+					'Invalid or expired reset link. Please request a new one.',
+				);
 				viewState = 'login';
 			}
 			isLoading = false;

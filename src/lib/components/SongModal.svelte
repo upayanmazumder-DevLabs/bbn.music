@@ -10,7 +10,11 @@
 		UserSolid,
 		ChevronDownOutline,
 	} from 'flowbite-svelte-icons';
-	import { primaryGenreOptions, languageOptions, getSecondaryGenreOptions } from '$lib/data/options';
+	import {
+		primaryGenreOptions,
+		languageOptions,
+		getSecondaryGenreOptions,
+	} from '$lib/data/options';
 	import type { ArtistRef } from '$lib/types/drop';
 
 	interface Props {
@@ -117,9 +121,7 @@
 
 	// Validation
 	const isValid = $derived(
-		song.title.trim().length > 0 &&
-			song.artists.length > 0 &&
-			(!requiresFile || fileUploaded),
+		song.title.trim().length > 0 && song.artists.length > 0 && (!requiresFile || fileUploaded),
 	);
 </script>
 
@@ -248,8 +250,18 @@
 				<div>
 					<span class="block text-sm font-medium text-white mb-3">Content Flags</span>
 					<div class="flex gap-6">
-						<Toggle bind:checked={song.explicit} label="Explicit Content" color="red" disabled={!isEditable} />
-						<Toggle bind:checked={song.instrumental} label="Instrumental" color="blue" disabled={!isEditable} />
+						<Toggle
+							bind:checked={song.explicit}
+							label="Explicit Content"
+							color="red"
+							disabled={!isEditable}
+						/>
+						<Toggle
+							bind:checked={song.instrumental}
+							label="Instrumental"
+							color="blue"
+							disabled={!isEditable}
+						/>
 					</div>
 					<p class="text-xs text-gray-500 mt-2">
 						Mark if this song contains explicit lyrics or is purely instrumental (mutually
@@ -347,9 +359,7 @@
 			</p>
 			<div class="flex gap-3">
 				<Button variant="secondary" onclick={onclose}>Cancel</Button>
-				<Button onclick={onsave} disabled={!isValid || !isEditable}>
-					Save Song
-				</Button>
+				<Button onclick={onsave} disabled={!isValid || !isEditable}>Save Song</Button>
 			</div>
 		</div>
 	{/snippet}

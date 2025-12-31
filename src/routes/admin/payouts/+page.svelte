@@ -73,8 +73,7 @@
 			uploading = false;
 		}
 	}
-
-	</script>
+</script>
 
 <div>
 	<div class="flex items-center justify-between mb-6">

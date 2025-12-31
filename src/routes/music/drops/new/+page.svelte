@@ -21,7 +21,15 @@
 	} from 'flowbite-svelte-icons';
 
 	// Shared UI components
-	import { Button, Input, SearchableSelect, Textarea, Card, Badge, Alert } from '$lib/components/ui';
+	import {
+		Button,
+		Input,
+		SearchableSelect,
+		Textarea,
+		Card,
+		Badge,
+		Alert,
+	} from '$lib/components/ui';
 	import ArtistModal from '$lib/components/ArtistModal.svelte';
 	import ArtistList from '$lib/components/ArtistList.svelte';
 	import SongModal from '$lib/components/SongModal.svelte';
@@ -29,7 +37,11 @@
 
 	import { getSecondaryGenres } from '$lib/data/genres';
 	import { getLanguageName } from '$lib/data/languages';
-	import { primaryGenreOptions, languageOptions, getSecondaryGenreOptions } from '$lib/data/options';
+	import {
+		primaryGenreOptions,
+		languageOptions,
+		getSecondaryGenreOptions,
+	} from '$lib/data/options';
 	import {
 		createInitialDropState,
 		stepOneSchema,
@@ -1773,7 +1785,7 @@
 					<p class="text-sm text-gray-400 mt-1">
 						{duplicateSongDetails.artists
 							.filter((a) => a.type === 'PRIMARY' || a.type === 'FEATURING')
-							.map((a) => ('name' in a ? a.name : getArtistNameById(a._id ?? '') ?? 'Unknown'))
+							.map((a) => ('name' in a ? a.name : (getArtistNameById(a._id ?? '') ?? 'Unknown')))
 							.join(', ')}
 					</p>
 				{/if}
@@ -1783,6 +1795,8 @@
 
 	{#snippet footer()}
 		<Button variant="secondary" onclick={handleDuplicateSongCancel}>Cancel</Button>
-		<Button onclick={handleDuplicateSongConfirm} disabled={loadingDuplicateSong}>Add Existing Song</Button>
+		<Button onclick={handleDuplicateSongConfirm} disabled={loadingDuplicateSong}
+			>Add Existing Song</Button
+		>
 	{/snippet}
 </Modal>
